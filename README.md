@@ -14,6 +14,7 @@ Clone this repository and install its dependencies:
 git clone $repo/$project
 cd $project
 npm install
+# set git-ignored patterns 
 ```
 
 `npm run build` builds the library to `dist`, generating three files:
