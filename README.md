@@ -1,13 +1,9 @@
 # ParJSON
 
-Partition rows of data into a well-defined
-tree structure of aggregated values and
-collections, using a JSON-based processing
-directive syntax.
+Partition rows of streaming data into a well-defined
+tree structure of aggregated values and collections,
+using a JSON-based template.
 
-```js
-test()
-```
 
 ## Getting started
 
