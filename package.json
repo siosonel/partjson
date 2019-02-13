@@ -1,9 +1,9 @@
 {
-  "name": "rollup-starter-lib",
-  "version": "1.0.0",
-  "main": "dist/$project.cjs.js",
-  "module": "dist/$project.esm.js",
-  "browser": "dist/$project.umd.js",
+  "name": "Parjson",
+  "version": "0.5.0",
+  "main": "dist/parjson.cjs.js",
+  "module": "dist/parjson.esm.js",
+  "browser": "dist/parjson.umd.js",
   "dependencies": {},
   "devDependencies": {
     "rollup": "^0.66.0",
