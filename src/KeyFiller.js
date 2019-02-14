@@ -124,11 +124,6 @@ KeyFiller.prototype["=[]"] = function(subterm, input) {
   }
 }
 
-KeyFiller.prototype["@()"] = function(subterm, input) {
-	console.log(subterm)
-  return () => []
-}
-
 KeyFiller.prototype["#"] = function(subterm, input) {
 	if (!this.Tree.commentedTerms.has(input)) {
 		this.Tree.commentedTerms.set(input, {
@@ -137,20 +132,4 @@ KeyFiller.prototype["#"] = function(subterm, input) {
 		})
 	}
   this.Tree.commentedTerms.get(input).keys.add(subterm)
-}
-
-KeyFiller.prototype["@"] = function(subterm, input) {
-	return ()=>[]
-}
-
-KeyFiller.prototype["@before"] = function(subterm, input) {
-	return ()=>[]
-}
-
-KeyFiller.prototype["@after"] = function(subterm, input) {
-	return ()=>[]
-}
-
-KeyFiller.prototype["@dist"] = function(subterm, input) {
-	return ()=>[]
 }

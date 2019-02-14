@@ -4,8 +4,11 @@ class ValueFiller {
     this.ignoredVals = this.Tree.opts.ignoredVals
   }
 
-  getFxn(templateVal, input) {
-    if (typeof templateVal=='string') {
+  getFxn(templateVal, input) { 
+  	if (this.Tree.reservedFxns.includes(input.subterm + "()")) {
+  		return this.Tree.opts.fxns[input.subterm.slice(1)]
+  	}
+    else if (typeof templateVal=='string') {
       return this.getStringFiller(templateVal, input)
     }
     else if (Array.isArray(templateVal)) {
@@ -439,42 +442,4 @@ ValueFiller.prototype["@root"] = function(subterm, input) {
     	result[key] = nestedKeys.reduce(reducer, this.Tree.tree)
     }
 	}
-}
-
-ValueFiller.prototype["[@root]"] = function (subterm, input) {
-	if (!subterm.includes(this.Tree.treeDelimit)) {
-  	this.Tree.errors.add(["template", "context-root-undelimited", input.lineage])
-  }
-  else {
-  	const nestedProps = subterm.split(this.Tree.treeDelimit).slice(1)
-  	for(const term of nestedProps) {
-  		if (term[0] != "$") {
-  			this.Tree.errors.add(["template", "root-unsupported-context", input.lineage])
-  			return
-  		}
-  	}
-  	const nestedKeys = nestedProps.map(k => k.slice(1));  	
-    const reducer = (d, k) => d[k]
-    
-    if (input.subterm == "@dist") { 
-	    return (row, key, result) => {
-		    const context =  this.Tree.contexts.get(result)
-		    if (context && context["@dist"]) return
-		    if (!context) {
-		  		this.Tree.errors.add(["internal", "missing-context", input.lineage])
-		  		return
-		  	}
-		  	else {
-			  	context['@dist'] = (result) => {
-			  		const target = nestedKeys.reduce(reducer, this.Tree.tree)
-			    	if (!Array.isArray(target)) {
-			    		this.Tree.errors.add(["val", "@dist()-target-not-array", input.lineage])
-			    		return
-			    	}
-			    	target.push(result)
-			  	}
-			  }
-		  }
-	  }
-  }
 }

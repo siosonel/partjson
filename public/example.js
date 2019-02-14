@@ -32,7 +32,7 @@ const template0 = {
       	hunter: "$catname",
   			parentTotal: "@parent.$total",
   			"nestedAgain": {
-  				"@dist()": [
+  				"#@dist()": [
   					"@root.$results.$nestedExamples"
   				], 
   				grandParentTotal: "@parent.parent.$total",
