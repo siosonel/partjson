@@ -1,4 +1,5 @@
 
+
 const template0 = {
   rootStuff: {
   	dataSrc: "https://test.ttt/"
@@ -8,14 +9,14 @@ const template0 = {
   	nestedExamples: []
   },
 	":__logNumB4": [
-		"=numMammalsBefore()",
+		"=nummalsBefore()",
 	],
 	"__:logNumAf": [
 		"=numMammalsAfter()",
 	],
 	//"@before()": "=logFishCount()",
 	//"@after()": "=logFishCount()",
-  byPreyType: {
+  "#byPreyType": {
     "$preytype": {
       total: "+1",
       mass: "+$preymass",
@@ -41,7 +42,7 @@ const template0 = {
       }]
     }
   },
-  "byCat": {
+  "#byCat": {
     "$catname": {
       preyTypes: [
       	"$preytype"
@@ -72,6 +73,9 @@ const template0 = {
   ],
   repeatOwners: [
   	"$owners[]"
+  ],
+  "=splitOwners[]": [
+  	"test"
   ],
   unsplitOwners: [
   	"$owners"

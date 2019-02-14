@@ -176,14 +176,12 @@ See parjson.readme.txt for more information
   	const context = this.contexts.get(result);
   	const filler = this.fillers.get(template);
   	if (!filler["@before"](row)) return
-  	if (filler["@join"]) {
-  		if (!filler["@join"](row)) return
-  	}
+  	if (filler["@join"] && !filler["@join"](row)) return
   	for(const step of filler.steps) {
 	    for(const term of step) { 
 	      const input = filler.terms[term]; 
 	      if (input.keyFxn && input.valFxn) {
-	        const keys = input.keyFxn(row); 
+	        const keys = input.keyFxn(row)
 	        for(const key of keys) {
 	          if (input.valFxn) {
 	          	input.valFxn(row, key, result, context)

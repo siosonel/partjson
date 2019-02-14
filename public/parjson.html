@@ -127,6 +127,9 @@ function run() {
 					return row.ownerblock[0] == 'C' 
 						? {name: "Friendly Neighborhood"}
 						: null //{name: "Sesame Street"}
+				},
+				splitO_wners(row) {
+					return typeof row.owners == 'string' ? row.owners.split(",") : row.owners
 				}
 			}, 
 			ignoredVals: [
@@ -164,7 +167,7 @@ function parseTsv(tsv) {
 		c['line #'] = i 
 		header.map((key, j) => c[key]=d[j]);
 		c.nested = {random: {id: Math.random().toFixed(3)}}
-		c.owners = c.owners.split(',')
+		//c.owners = c.owners.split(',')
 		data.push(c)
 	}); 
 	if (tsvParseErrors.length) {

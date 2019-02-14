@@ -1,20 +1,23 @@
 class Err {
 	constructor() {
     this.errors = new Set()
-    this.errorMessages = Object.create(null)
-    
-    this.errorMessages["template"] = {
+    this.quiet = false
+    this.messages = Object.create(null)
+
+    this.messages[""] = {}
+
+    this.messages["template"] = {
       "key": "Invalid template key.",
       "value": "Invalid template value.",
       "array-value": "Unsupported template array value."
     }
 
-    this.errorMessages["key"] = {
+    this.messages["key"] = {
       "subs": 
       	"Substituted key values must be a string, number, or undefined."
     }
 
-    this.errorMessages["val"] = {
+    this.messages["val"] = {
     	"non-numeric-incr": 
       	"A numeric value is required for increment.",
       "non-numeric-than": 
@@ -32,12 +35,40 @@ class Err {
   	this.errors.add(info)
   }
 
+  getKeys(title, subterm, input) {
+  	this.errors.add(["", title, input.lineage])
+  	return this.quiet ? [] : ["{{ " + title + " }} " + subterm]
+  }
+
+  setStdVal(title, subterm, input) {
+  	this.errors.add(["", title, input.lineage])
+  	return this.quiet ? null : (row, key, result) => {
+  		if (!(key in result)) result[key] = "{{ " + title + " }} " + subterm
+  	}
+  }
+
+  setArrVal(row, key, result, title, subterm, input) {
+  	this.errors.add(["", title, [...input.lineage, subterm], row])
+  	if (this.quiet) return
+		if (!(key in result)) result[key] = []
+		result[key].push("{{ " + title + " }} " + subterm)
+	}
+
+  getArrValFxn(title, subterm, input) {
+  	this.errors.add(["", title, input.lineage])
+  	return this.quiet ? null : (row, key, result) => {
+  		if (!(key in result)) result[key] = [
+  			"{{ " + title + " }} " + subterm
+  		]
+  	}
+  }
+
   log() {
     const log = Object.create(null)
     for(const e of this.errors) {
       const [type, subtype, lineage, row] = e
-      let  message = this.errorMessages[type][subtype]
-      if (!message) message = 'Error '+ type + ":" + subtype 
+      let  message = this.messages[type][subtype]
+      if (!message) message = 'Error '+ type + ": " + subtype 
       if (!(message in log)) {
         log[message] = Object.create(null)
       }

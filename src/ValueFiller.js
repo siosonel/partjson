@@ -49,7 +49,7 @@ class ValueFiller {
       return this["[{}]"](templateVal[0], input)
     }
     else {
-    	return this["[]"](templateVal, input)
+    	return this["[]"](templateVal[0], input)
     }
   }
 
@@ -116,6 +116,7 @@ ValueFiller.prototype["#"] = function(subterm, input) {
 ValueFiller.prototype["[]"] = function(subterm) {
   return (row, key, result) => {
   	if (!(key in result)) result[key] = []
+  	if (subterm) result[key].push(subterm)
   }
 }
 
@@ -161,7 +162,7 @@ ValueFiller.prototype["[$[]]"] = function(subterm, input) {
 		return (row, key, result) => {
 	    const values = row[prop]
 	    if (!Array.isArray(values)) {
-	      this.Tree.errors.add(["val", "non-array", input.lineage, row])
+	      this.Tree.errors.setArrVal(row, key, result, "ERR-NON-ARRAY-VALS", subterm + "[]", input)
 	    }
 	    else {
 	    	if (!(key in result)) result[key] = []
@@ -173,7 +174,7 @@ ValueFiller.prototype["[$[]]"] = function(subterm, input) {
 		return (row, key, result) => {
 	    const values = row[prop]
 	    if (!Array.isArray(values)) {
-	      this.Tree.errors.add(["val", "non-array", input.lineage, row])
+	      this.Tree.errors.setArrVal(row, key, result, "ERR-NON-ARRAY-VALS", subterm + "[]", input)
 	    }
 	    else {
 	    	if (!(key in result)) result[key] = new Set()
@@ -318,8 +319,8 @@ ValueFiller.prototype["=()"] = function(subterm, input) {
 ValueFiller.prototype["[=()]"] = function(subterm, input) {
   const fxn = this.Tree.opts.fxns[subterm.slice(1)]
   if (!fxn) {
-    this.Tree.errors.add(['template', 'val-missing-function', input.lineage])
-  	return () => {}
+    //this.Tree.errors.add(['template', 'val-missing-function', input.lineage])
+  	return this.Tree.errors.getArrValFxn("ERR-MISSING-FXN", subterm, input)
   }
   else if (!input.valOptions) {
 	  return (row, key, result, context) => {
