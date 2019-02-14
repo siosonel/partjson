@@ -121,6 +121,11 @@ function run() {
 						'logFishCount', bp && bp.fish && bp.fish.total ? bp.fish.total : 0
 					])
 					return true
+				},
+				blockNames(row) {
+					return row.ownerblock[0] == 'C' 
+						? {name: "Friendly Neighborhood"}
+						: null //{name: "Sesame Street"}
 				}
 			}, 
 			ignoredVals: [

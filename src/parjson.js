@@ -29,21 +29,14 @@ See parjson.readme.txt for more information
 
     this.userDelimit = "."
     this.treeDelimit = "."
-    this.subsSymbols = ["$", "=", "@"]
+    this.subsSymbols = ["$", "=", "@", "&"]
     this.convSymbols = ["()", "[]"] //, "{}"]
     this.aggrSymbols = ["+", "-", "<", ">"]
     this.timeSymbols = [":__", "_:_", "__:"]
     this.skipSymbols = ["#"]
-    this.reservedFxns = ["@before()", "@after()", "@dist()"]
-    this.reservedTerms = ["@branch", "@parent", "@root"]
-    	.concat(this.reservedTerms)
-    this.steps = [
-    	":__", 
-    	"", 
-    	"_:_",
-    	"__:"
-    ]
-
+    this.reservedFxns = ["@before()", "@after()", "@dist()", "@join()"]
+    this.reservedTerms = ["@branch", "@parent", "@root"].concat(this.reservedTerms)
+    this.steps = [":__", "", "_:_", "__:"]
     this.setErrorTracking()
     this.keyFiller = new KeyFiller(this)
     this.valueFiller = new ValueFiller(this)
@@ -63,6 +56,9 @@ See parjson.readme.txt for more information
   	//console.clear()
   	delete this.commentedTerms
   	this.commentedTerms = new WeakMap()
+
+  	delete this.joins
+  	this.joins = new Map()
   	
   	// fillers will track template parsing metadata
   	delete this.fillers
@@ -162,8 +158,10 @@ See parjson.readme.txt for more information
 
   add(rows, refreshErrors = true) {
   	if (refreshErrors) error.clear()
+  	this.joins.clear()
     for(const row of rows) {
       this.processRow(row, this.opts.template, this.tree)
+      this.joins.clear()
     }
     this.processResult(this.tree)
     if (refreshErrors) this.logErrors()
@@ -173,21 +171,19 @@ See parjson.readme.txt for more information
   	const context = this.contexts.get(result);
   	const filler = this.fillers.get(template);
   	if (!filler["@before"](row)) return
+  	if (filler["@join"]) {
+  		if (!filler["@join"](row)) return
+  	}
   	for(const step of filler.steps) {
 	    for(const term of step) { 
 	      const input = filler.terms[term]; 
 	      if (input.keyFxn && input.valFxn) {
-	      	//if (term == "@before()" || term == "@after()") {
-	      		//input.valFxn(row, "", result, context)
-	      	//} 
-	      	//else {
-		        const keys = input.keyFxn(row); 
-		        for(const key of keys) {
-		          if (input.valFxn) {
-		          	input.valFxn(row, key, result, context)
-		          }
-		        }
-		      //}
+	        const keys = input.keyFxn(row); 
+	        for(const key of keys) {
+	          if (input.valFxn) {
+	          	input.valFxn(row, key, result, context)
+	          }
+	        }
 	      }
 	    }
 	  }
@@ -292,6 +288,24 @@ Parjson.prototype["@after"] = function (subterm, input) {
 		return this.trueFxn
 	}
 	else return fxn
+}
+
+Parjson.prototype["@join"] = function (joins, input) {
+	return (row) => {
+		let ok = true
+		for(const alias in joins) {
+			const fxn = this.opts.fxns[joins[alias].slice(1,-2)]
+			if (!fxn) {
+				this.errors.add(["template", "undefined-@join-fxn", input.lineage])
+			}
+			else {
+				const keyVals = fxn(row)
+				if (keyVals) this.joins.set(alias, keyVals)
+				else ok = false
+			}
+		}
+		return ok
+	}
 }
 
 Parjson.prototype["@dist"] = function (_subterm, input) {

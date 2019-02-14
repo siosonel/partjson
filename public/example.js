@@ -7,10 +7,10 @@ const template0 = {
   results: {
   	nestedExamples: []
   },
-	":__time0": [
+	":__logNumMammalsB4": [
 		"=numMammalsBefore()",
 	],
-	"__:time1": [
+	"__:logNumMammalsAf": [
 		"=numMammalsAfter()",
 	],
 	"#@join()": {
@@ -60,9 +60,13 @@ const template0 = {
     }
   },
   byOwner: {
+  	"@join()": {
+  		"loc": "=blockNames()"
+  	},
   	"$owners[]": {
   		total: "+1",
   		loss: "-0.5",
+  		blockName: "&loc.name"
   	}
   },
   uniqueOwners: [

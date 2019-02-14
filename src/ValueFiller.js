@@ -95,6 +95,14 @@ ValueFiller.prototype["$"] = function(subterm, input) {
 	}
 }
 
+ValueFiller.prototype["&"] = function(subterm, input) {
+	const [alias, prop] = subterm.slice(1).split(this.Tree.userDelimit)
+  return (row, key, result) => {
+  	const join = this.Tree.joins.get(alias)
+  	result[key] = join ? join[prop] : null
+  }
+}
+
 ValueFiller.prototype["#"] = function(subterm, input) {
 	if (!this.Tree.commentedTerms.has(input)) {
 		this.Tree.commentedTerms.set(input, {
