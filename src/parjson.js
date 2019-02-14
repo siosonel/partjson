@@ -4,10 +4,15 @@
 -------
 Parjson
 -------
-Partition rows of data into a well-defined
-tree structure of aggregated values and
-collections, using a JSON-based processing
-directive syntax.
+This is a ParJSON template filler. It processes
+rows of data into a well-defined tree of 
+data collections and aggregated results
+that matches the shape of the input template.
+
+This implementation passes once over all data 
+rows. It is thus suitable for partitioning and 
+aggregating streaming data. It may also be used
+to parallelize data processing. 
 
 See parjson.html for an example template.
 
@@ -37,7 +42,7 @@ See parjson.readme.txt for more information
     this.reservedFxns = ["@before()", "@after()", "@dist()", "@join()"]
     this.reservedTerms = ["@branch", "@parent", "@root"].concat(this.reservedTerms)
     this.steps = [":__", "", "_:_", "__:"]
-    this.setErrorTracking()
+    this.errors = new Err(this)
     this.keyFiller = new KeyFiller(this)
     this.valueFiller = new ValueFiller(this)
     this.refresh()
@@ -77,7 +82,7 @@ See parjson.readme.txt for more information
     if (this.opts.data) {
     	this.add(this.opts.data, false)
     }
-    this.logErrors()
+    this.errors.log()
   }
 
   parseTemplate(template, lineage=[]) {
@@ -164,7 +169,7 @@ See parjson.readme.txt for more information
       this.joins.clear()
     }
     this.processResult(this.tree)
-    if (refreshErrors) this.logErrors()
+    if (refreshErrors) this.errors.log()
   }
 
   processRow(row, template, result) {
@@ -219,52 +224,6 @@ See parjson.readme.txt for more information
 
   trueFxn() {
   	return true
-  }
-
-  setErrorTracking() {
-    this.errors = new Set()
-    this.errorMessages = Object.create(null)
-    
-    this.errorMessages["template"] = {
-      "key": "Invalid template key.",
-      "value": "Invalid template value.",
-      "array-value": "Unsupported template array value."
-    }
-
-    this.errorMessages["key"] = {
-      "subs": 
-      	"Substituted key values must be a string, number, or undefined."
-    }
-
-    this.errorMessages["val"] = {
-    	"non-numeric-incr": 
-      	"A numeric value is required for increment.",
-      "non-numeric-than": 
-      	"A numeric value is required for minimum or maximum aggregation.",
-      "non-array": 
-      	"Converted array-split value must be an array."
-    }
-  }
-
-  logErrors() {
-    const log = Object.create(null)
-    for(const e of this.errors) {
-      const [type, subtype, lineage, row] = e
-      let  message = this.errorMessages[type][subtype]
-      if (!message) message = 'Error '+ type + ":" + subtype 
-      if (!(message in log)) {
-        log[message] = Object.create(null)
-      }
-      const key = JSON.stringify(lineage)
-      if (!(key in log[message])) {
-        log[message][key] = row ? [] : 0
-      }
-      if (row) log[message][key].push(row)
-      else log[message][key] += 1
-    }
-    if (Object.keys(log).length) {
-      console.log(log)
-    }
   }
 
   isNumeric(d) {

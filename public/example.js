@@ -7,15 +7,12 @@ const template0 = {
   results: {
   	nestedExamples: []
   },
-	":__logNumMammalsB4": [
+	":__logNumB4": [
 		"=numMammalsBefore()",
 	],
-	"__:logNumMammalsAf": [
+	"__:logNumAf": [
 		"=numMammalsAfter()",
 	],
-	"#@join()": {
-		locs: "=locMetadata()"
-	},
 	//"@before()": "=logFishCount()",
 	//"@after()": "=logFishCount()",
   byPreyType: {
@@ -53,7 +50,7 @@ const template0 = {
       	"$preytype", 
       	"distinct"
       ],
-      "#rows": ["$"],
+      "rows": ["$"],
       nestedRandomId: [
       	"$.nested.random.id"
       ]
