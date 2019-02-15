@@ -73,6 +73,7 @@ See parjson.readme.txt for more information
     delete this.context
     this.contexts = new WeakMap() 
     
+    delete this.tree
     this.tree = this.getEmptyResult()
     this.parseTemplate(this.opts.template)
 
@@ -150,12 +151,13 @@ See parjson.readme.txt for more information
     const step = this.reservedFxns.includes(reservedTerm) // == "@after()"
     	? reservedTerm
     	: time
+    //console.log([term, skip, time, aggr, subs, subterm, conv])
     return [subterm, symbols, this.steps.indexOf(step)]
   }
 
   detectReservedTerm(subterm) {
   	for(const term of this.reservedTerms) { //
-  		if (subterm.startsWith(term) || subterm + "()" == term) { 
+  		if (/*subterm.startsWith(term) ||*/ subterm + "()" == term) { 
   			return term
   		} 
   	}
@@ -165,10 +167,11 @@ See parjson.readme.txt for more information
   	const result = isArray ? [] : Object.create(null)
   	const context = {
   		branch, // string name where this result will be mounted to the tree
-  		parent, //
+  		parent, 
+  		self: result,
+  		root: this.tree ? this.tree : result,
   		errors: []
   	}
-  	context.root = this.tree ? this.tree : result
   	this.contexts.set(result, context)
     return result
   }
@@ -280,32 +283,17 @@ Parjson.prototype["@join"] = function (joins, input) {
 }
 
 Parjson.prototype["@dist"] = function (_subterm, input) {
-	const subterm = _subterm[0]
-	if (!subterm.startsWith('@root')) {
-		input.errors.push(["val", "CONTEXT-@root-UNEXPECTED"])
-  }
-  else if (!subterm.includes(this.treeDelimit)) {
-		input.errors.push(["val", "CONTEXT-@root-UNDELIMITED"])
-  }
-  else {
-  	const nestedProps = subterm.split(this.treeDelimit).slice(1)
-  	for(const term of nestedProps) {
-  		if (term[0] != "$") {
-				input.errors.push(["val", "CONTEXT-@root-UNEXPECTED"])
-  			return
-  		}
-  	}
-  	const nestedKeys = nestedProps.map(k => k.slice(1));  	
-    const reducer = (d, k) => d[k]
-    return (context) => {
-		  context["@dist"] = (result) => {
-		  	const target = nestedKeys.reduce(reducer, this.tree)
-		    if (!Array.isArray(target)) {
-					input.errors.push(["val", "@dist-TARGET-NOT-ARRAY"])
-		    	return
-		    }
-		    target.push(result)
-		  }
+	const subterm = Array.isArray(_subterm) ? _subterm[0] : _subterm
+	const subsFxn = this.valueFiller["@"](subterm)
+	return (context) => {
+	  context["@dist"] = (result) => {
+	  	const target = subsFxn(null, null, result, context)
+	  	if (Array.isArray(target)) {
+	  		target.push(result)
+	  	}
+	    else {
+	    	target[subterm] = result
+	    }
 	  }
   }
 }

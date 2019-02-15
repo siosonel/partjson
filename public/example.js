@@ -5,16 +5,13 @@
          _:_         -              =                         []
          __:         >              &                         {}
                      <              @                         
-
-"@parent.@parent.@parent.@.treebranch.treebranch"
-
 */
 
 
 
 const template0 = {
-	"$": "test",
-	"$testObj": "test",
+	/*"$": "test",
+	"$testObj": "test",*/
   rootStuff: {
   	dataSrc: "https://test.ttt/"
   },
@@ -30,28 +27,28 @@ const template0 = {
 	],
 	"@before()": "=logFishCount()",
 	"@after()": "=logFishCount()",
-  "#byPreyType": {
+  "byPreyType": {
     "$preytype": {
       total: "+1",
-      mass: "+$preymass",
+      /*mass: "+$preymass",
       lostMass: "#-$preymass",
       massMin: "<$preymass",
       massMax: ">$preymass",
       addedb4: "$rowBefore",
-      addedAfter: "$rowAfter",
+      addedAfter: "$rowAfter",*/
       "rekeyedNested": [{
       	index: "@branch",
       	hunter: "$catname",
-  			parentTotal: "@parent.$total",
+  			parentTotal: "@parent.total",
   			"nestedAgain": {
-  				"#@dist()": [
-  					"@root.$results.$nestedExamples"
+  				"@dist()": [
+  					"@root.results.nestedExamples"
   				], 
-  				grandParentTotal: "@parent.parent.$total",
-  				parentBranch: "@parent.branch",
-  				grandParentBranch: "@parent.parent.branch",
-  				version: "@root.$reminder",
-  				src: "@root.$rootStuff.$dataSrc"
+  				grandParentTotal: "@parent.@parent.total",
+  				parentBranch: "@parent.@branch",
+  				grandParentBranch: "@parent.@parent.@branch",
+  				version: "@root.reminder",
+  				src: "@root.rootStuff.dataSrc"
   			}
       }]
     }

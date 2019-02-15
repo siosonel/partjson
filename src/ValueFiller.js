@@ -97,6 +97,44 @@ ValueFiller.prototype["$"] = function(subterm, input=null) {
 	}
 }
 
+ValueFiller.prototype["@"] = function(subterm, input=null) {
+  const nestedSymbol = "@" + this.Tree.treeDelimit
+  if (subterm == "@" || subterm == nestedSymbol) {
+  	return !input ? (row, key, result) => result 
+  		: (row, key, result) => {
+  			result[key] = result
+  		}
+  }
+  else if (subterm.includes(this.Tree.treeDelimit)) {
+  	const nestedProps = subterm.split(this.Tree.treeDelimit)
+    const reducer = (rc, d) => {
+    	if (!d || !rc) return null
+    	if (d[0] == "@") {
+    		const contextProp = rc[1][d.slice(1)];
+    		const result = typeof contextProp != "string" ? contextProp.self : null
+    		return [contextProp, this.Tree.contexts.get(contextProp)]
+    	}
+    	else {
+    		const resultProp = rc[0][d];
+    		return [resultProp, this.Tree.contexts.get(resultProp)]
+    	}
+    }
+    return !input 
+    	? (row, key, result, context) => nestedProps.reduce(reducer, [result, context])[0]
+    	: (row, key, result, context) => {
+    		result[key] = nestedProps.reduce(reducer, [result, context])[0]
+    	}
+  }
+  else {
+	  const prop = subterm.slice(1)
+	  return !input 
+	  	? (row, key, result, context) => context[prop]
+	  	: (row, key, result, context) => { 
+	  		result[key] = context[prop]
+	  	}
+	}
+}
+
 ValueFiller.prototype["&"] = function(subterm, input) {
 	const [alias, prop] = subterm.slice(1).split(this.Tree.userDelimit)
   return (row, key, result) => {
@@ -362,58 +400,5 @@ ValueFiller.prototype["[=[]]"] = function(subterm, input) {
 	}
 	else {
 		input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
-	}
-}
-
-ValueFiller.prototype["@branch"] = function(subterm, input) {
-  return (row, key, result, context) => {
-  	result[key] = context.branch
-  }
-}
-
-ValueFiller.prototype["@parent"] = function(subterm, input) {
-  if (subterm == "@parent" || subterm == "@parent" + this.Tree.treeDelimit) {
-  	input.errors.push(["val", "CONTEXT-PARENT-LOOP"])
-  }
-  else if (!subterm.includes(this.Tree.treeDelimit)) {
-  	input.errors.push(["val", "CONTEXT-PARENT-UNDELIMITED"])
-  }
-  else {
-  	const nestedProps = subterm.split(this.Tree.treeDelimit).slice(1);
-  	for(const term of nestedProps) {
-  		if (term[0] != "$" && !this.Tree.reservedTerms.includes('@' + term)) {
-  			input.errors.push(["val", "CONTEXT-UNRESERVED-TERM"])
-  			return
-  		}
-  	}
-    const reducer = (d,k) => {
-    	if (!d) return null
-    	if (k[0] == "$") return d[k.slice(1)]
-    	const context = this.Tree.contexts.get(d)
-    	return context[k]
-    }
-    return (row, key, result, context) => {
-    	result[key] = nestedProps.reduce(reducer, context.parent)
-    }
-	}
-}
-
-ValueFiller.prototype["@root"] = function(subterm, input) {
-  if (!subterm.includes(this.Tree.treeDelimit)) {
-  	input.errors.push(["val", "CONTEXT-ROOT-UNDELIMITED"])
-  }
-  else {
-  	const nestedProps = subterm.split(this.Tree.treeDelimit).slice(1)
-  	for(const term of nestedProps) {
-  		if (term[0] != "$") {
-  			input.errors.push(["val", "ROOT-UNSUPPORTED-CONTEXT"])
-  			return
-  		}
-  	}
-  	const nestedKeys = nestedProps.map(k => k.slice(1));  	
-    const reducer = (d, k) => d[k]
-    return (row, key, result) => {
-    	result[key] = nestedKeys.reduce(reducer, this.Tree.tree)
-    }
 	}
 }
