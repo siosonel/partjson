@@ -34,7 +34,7 @@ class ValueFiller {
   }
 
   getArrayFiller(templateVal, input) { 
-    input.valOptions = templateVal.length > 1 ? templateVal.slice(1) : null
+    input.valOptions = templateVal.length > 1 ? templateVal.slice(1) : []
     if (typeof templateVal[0] == 'string') {
       const [subterm, symbols] = this.Tree.parseTerm(templateVal[0]);
       const bracketedSymbols = '[' + symbols + ']'
@@ -72,23 +72,28 @@ ValueFiller.prototype[""] = function(subterm) {
   return (row, key, result) => result[key] = subterm
 }
 
-ValueFiller.prototype["$"] = function(subterm, input) {
+ValueFiller.prototype["$"] = function(subterm, input=null) {
   const nestedSymbol = "$" + this.Tree.userDelimit
   if (subterm == "$" || subterm == nestedSymbol) {
-  	return (row, key, result) => {
-    	result[key] = row
-    }
+  	return !input ? (row) => row 
+  		: (row, key, result) => {
+  			result[key] = row
+  		}
   }
   else if (subterm.startsWith(nestedSymbol)) {
   	const nestedProps = subterm.split(this.Tree.userDelimit).slice(1);
     const reducer = (d,k) => d ? d[k] : null
-    return (row, key, result) => {
-    	result[key] = nestedProps.reduce(reducer, row)
-    }
+    return !input ? (row) => nestedProps.reduce(reducer, row)
+    	: (row, key, result) => {
+    		result[key] = nestedProps.reduce(reducer, row)
+    	}
   }
   else {
 	  const prop = subterm.slice(1)
-	  return (row, key, result) => result[key] = row[prop]
+	  return !input ? (row) => row[prop]
+	  	: (row, key, result) => {
+	  		result[key] = row[prop]
+	  	}
 	}
 }
 
@@ -118,46 +123,29 @@ ValueFiller.prototype["[]"] = function(subterm) {
 }
 
 ValueFiller.prototype["[$]"] = function(subterm, input) {
-  const nestedSymbol = "$" + this.Tree.userDelimit
-  if (subterm == "$" || subterm == nestedSymbol) {
-  	return (row, key, result) => {
-    	if (!(key in result)) result[key] = []
-    	result[key].push(row)
-    }
-  }
-  else if (subterm.startsWith(nestedSymbol)) {
-  	const nestedProps = subterm.split(this.Tree.userDelimit).slice(1);
-    const reducer = (d,k) => d ? d[k] : null
-    return (row, key, result) => {
-    	if (!(key in result)) result[key] = []
-    	result[key] = nestedProps.reduce(reducer, row)
-    }
-  } 
-  else {
-	  const prop = subterm.slice(1)
-	  if (!input.valOptions) {
-		  return (row, key, result) => {
-		  	if (!(key in result)) result[key] = []
-		    result[key].push(row[prop])
-		  }
-		}
-		else if (input.valOptions[0] == "distinct") {
-			return (row, key, result) => {
-		  	if (!(key in result)) result[key] = new Set()
-		    result[key].add(row[prop])
-		  }
-		}
-		else {
-			input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
-		}
+  const subsFxn = this["$"](subterm)
+  if (!input.valOptions.length)  {
+		return (row, key, result) => {
+	  	if (!(key in result)) result[key] = []
+	  	result[key].push(subsFxn(row))
+	  }
+	}
+  else if (input.valOptions[0] == 'distinct') {
+	  return (row, key, result) => {
+	  	if (!(key in result)) result[key] = new Set()
+	  	result[key].add(subsFxn(row))
+	  }
+	}
+	else {
+		input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
 	}
 }
 
 ValueFiller.prototype["[$[]]"] = function(subterm, input) {
-  const prop = subterm.slice(1)
-	if (!input.valOptions) {
+  const subsFxn = this["$"](subterm)
+	if (!input.valOptions.length) {
 		return (row, key, result, context) => {
-	    const values = row[prop]
+	    const values = subsFxn(row)
 	    if (!Array.isArray(values)) {
       	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
 	    }
@@ -169,7 +157,7 @@ ValueFiller.prototype["[$[]]"] = function(subterm, input) {
 	}
 	else if (input.valOptions[0] == "distinct") {
 		return (row, key, result, context) => {
-	    const values = row[prop]
+	    const values = subsFxn(row)
 	    if (!Array.isArray(values)) {
       	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
 	    }
@@ -229,10 +217,10 @@ ValueFiller.prototype["-"] = function(subterm, input) {
 }
 
 ValueFiller.prototype["+$"] = function(subterm, input) {
-  const prop = subterm.slice(1)
+  const subsFxn = this["$"](subterm)
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
-    const value = +row[prop]
+    const value = +subsFxn(row)
     if (this.ignoredVals.includes(value)) return
     if (!this.isNumeric(value)) {
       context.errors.push([input, "NON-NUMERIC-INCREMENT", row])
@@ -243,10 +231,10 @@ ValueFiller.prototype["+$"] = function(subterm, input) {
 }
 
 ValueFiller.prototype["-$"] = function(subterm, input) {
-  const prop = subterm.slice(1)
+  const subsFxn = this["$"](subterm)
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
-    const value = row[prop]
+    const value = +subsFxn(row)
     if (this.ignoredVals.includes(value)) return
     if (!this.isNumeric(value)) {
       context.errors.push([input, "NON-NUMERIC-DECREMENT", row])
@@ -257,9 +245,9 @@ ValueFiller.prototype["-$"] = function(subterm, input) {
 }
 
 ValueFiller.prototype["<$"] = function(subterm, input) {
-  const prop = subterm.slice(1)
+  const subsFxn = this["$"](subterm)
   return (row, key, result, context) => {
-    const value = +row[prop]
+    const value = +subsFxn(row)
     if (this.ignoredVals.includes(value)) return
     if (!this.isNumeric(value)) {
       context.errors.push([input, "NON-NUMERIC-THAN", row])
@@ -269,15 +257,15 @@ ValueFiller.prototype["<$"] = function(subterm, input) {
       result[key] = value
     }
     else if (value < result[key]) {
-      result[key] = row[prop]
+      result[key] = value
     }
   }
 }
 
 ValueFiller.prototype[">$"] = function(subterm, input) {
-  const prop = subterm.slice(1)
+  const subsFxn = this["$"](subterm)
   return (row, key, result, context) => {
-    const value = +row[prop]
+    const value = +subsFxn(row)
     if (this.ignoredVals.includes(value)) return
     if (!this.isNumeric(value)) {
       context.errors.push([input, "NON-NUMERIC-THAN", row])
@@ -287,7 +275,7 @@ ValueFiller.prototype[">$"] = function(subterm, input) {
       result[key] = value
     }
     else if (value > result[key]) {
-      result[key] = row[prop]
+      result[key] = value
     }
   }
 }
@@ -312,7 +300,7 @@ ValueFiller.prototype["[=()]"] = function(subterm, input) {
   if (!fxn) {
   	input.errors.push(["val", "ERR-MISSING-FXN"])
   }
-  else if (!input.valOptions) {
+  else if (!input.valOptions.length) {
 	  return (row, key, result, context) => {
 	  	const value = fxn(row, key, result, context)
     	if (this.ignoredVals.includes(value)) return
@@ -338,7 +326,7 @@ ValueFiller.prototype["[=[]]"] = function(subterm, input) {
   if (!fxn) {
   	input.errors.push(["val", "ERR-MISSING-FXN"])
   }
-  else if (!input.valOptions) {
+  else if (!input.valOptions.length) {
 	  return (row, key, result, context) => {
 	  	const values = fxn(row)
 	  	if (!Array.isArray(values)) {

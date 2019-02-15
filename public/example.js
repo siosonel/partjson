@@ -1,3 +1,17 @@
+/*
+
+[skip] [timing] [aggregation] [substitution]    stem     [conversion]
+  #      :__       	 +              $         [delimit]       ()
+         _:_         -              =                         []
+         __:         >              &                         {}
+                     <              @                         
+
+"@parent.@parent.@parent.@.treebranch.treebranch"
+
+*/
+
+
+
 const template0 = {
 	"$": "test",
 	"$testObj": "test",
@@ -16,7 +30,7 @@ const template0 = {
 	],
 	"@before()": "=logFishCount()",
 	"@after()": "=logFishCount()",
-  "byPreyType": {
+  "#byPreyType": {
     "$preytype": {
       total: "+1",
       mass: "+$preymass",
@@ -48,8 +62,7 @@ const template0 = {
       	"$preytype"
       ],
       distinctPreyType: [
-      	"$preytype", 
-      	"distinct"
+      	"$preytype"
       ],
       "rows": ["$"],
       nestedRandomId: [
@@ -65,11 +78,16 @@ const template0 = {
   		total: "+1",
   		loss: "-0.5",
   		blockName: "&loc.name"
-  	}
+  	},
+  	"$owners": {
+  		total: "+1",
+  		loss: "-0.5",
+  		blockName: "&loc.name"
+  	},
   },
   uniqueOwners: [
-  	"$owners[]", 
-  	"distinct---"
+  	"$owners{}", 
+  	//"distinct---"
   ],
   repeatOwners: [
   	"$owners[]"
