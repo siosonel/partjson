@@ -16,21 +16,6 @@ SQL RDBMS, ParJSON may be supported as an alternative
 window partitioning and aggregation syntax. 
 
 
----------------
-Disambiguration
----------------
-
-ParJSON: 
-- the specifications
-
-a "parjsoner": 
-- any spec-compliant partitioner
-- could be in any programming language 
-
-Parjson or parjson: 
-- this particular javascript parjsoner
-- has tool specific usage not covered by specs 
-
 -----
 USAGE
 -----
@@ -142,15 +127,15 @@ Symbols
 * Timing Symbols:
 	Specify when to perform a substitution
 
-	_::		perform before a data row is processed via the schema.
+	:__		perform before a data row is processed via the schema.
 				Useful for applying a general cleaning function.
 
-	:_:		perform right after a data row is processed via the 
+	_:_		perform right after a data row is processed via the 
 				schema, but before all data rows have been processed. 
 				For example, this may be useful for storing a running 
 				parent aggregated total as a child property. 
 
-	::_		perform after all data rows have been processed. 
+	__:		perform after all data rows have been processed. 
 
 
 ------------------

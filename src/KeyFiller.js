@@ -17,15 +17,24 @@ class KeyFiller {
     } 
   }
 
-  invalidKey(input, key, row, context) {
-  	if (this.ignoredVals.includes(key)) {
-  		return false
-  	}
-  	if (!this.allowedKeyTypes.has(typeof key)) {
-      context.errors.push([input, "INVALID-RESULT-KEY", row])
-      return true
+  getAllowedKeys(keys, row, input, context) {
+  	if (!Array.isArray(keys)) {
+  		context.errors.push(["key", "ERR-NON-ARRAY-KEYS", row])
+  		return []
     }
-  }
+  	const allowed = []
+		for(const key of keys) {
+  		if (!this.ignoredVals.includes(key)) {
+  			if (!this.allowedKeyTypes.has(typeof key)) {
+	      	context.errors.push([input, "INVALID-RESULT-KEY", row])
+	    	}
+	    	else {
+	   			allowed.push(key)
+	   		}
+	   	}
+	  }
+		return allowed
+	}
 }
 
 KeyFiller.prototype[""] = function(subterm) {
@@ -42,24 +51,13 @@ KeyFiller.prototype["$"] = function(subterm, input) {
 	  const reducer = (d,k) => d ? d[k] : null
 	  return (row, context) => {
 	  	const key = nestedProps.reduce(reducer, row)
-			if (this.invalidKey(input, key, row)) {
-	      return []
-	    }
-	    else {
-	      return [key]
-	    }
+			return this.getAllowedKeys([key], row, input, context)
 	  }
   }
   else {
 	  const prop = subterm.slice(1);
 	  return (row, context) => {
-	    const key = row[prop]; //console.log([subterm, prop, row, value])
-	    if (this.invalidKey(input, key, row, context)) {
-	      return []
-	    }
-	    else {
-	      return [key]
-	    }
+			return this.getAllowedKeys([row[prop]], row, input, context)
 	  }
 	}
 }
@@ -67,20 +65,7 @@ KeyFiller.prototype["$"] = function(subterm, input) {
 KeyFiller.prototype["$[]"] = function(subterm, input) {
   const prop = subterm.slice(1);
   return (row, context) => {
-    const keys = row[prop]
-    if (!Array.isArray(keys)) {
-      //return this.Tree.errors.getKeys("ERR-NON-ARRAY-KEYS", subterm + "[]", input, row)
-  		input.errors.push(["key", "ERR-NON-ARRAY-KEYS", row])
-  		return []
-    }
-    else {
-      for(const key of keys) {
-        if (this.invalidKey(input, key, row, context)) {
-		      return []
-		    }
-        return keys
-      }
-    }
+		return this.getAllowedKeys(row[prop], row, input, context)
   }
 }
 
@@ -91,13 +76,7 @@ KeyFiller.prototype["=()"] = function(subterm, input) {
   }
   else {
   	return (row, context) => {
-  		const key = fxn(row)
-  		if (this.invalidKey(input, key, row, context)) {
-	      return []
-	    }
-	    else {
-	      return [key]
-	    }
+  		return this.getAllowedKeys([fxn(row)], row, input, context)
   	}
   }
 }
@@ -109,15 +88,7 @@ KeyFiller.prototype["=[]"] = function(subterm, input) {
   }
   else {
   	return (row, context) => {
-  		const keys = fxn(row)
-  		const allowed = []
-  		for(const key of keys) {
-	  		if (this.invalidKey(input, key, row, context)) {
-		      return []
-		    }
-		    allowed.push(key)
-		  }
-		  return allowed
+  		return this.getAllowedKeys(fxn(row), row, input, context)
   	}
   }
 }
