@@ -16,7 +16,7 @@ const template0 = {
 	],
 	//"@before()": "=logFishCount()",
 	//"@after()": "=logFishCount()",
-  "#byPreyType": {
+  "byPreyType": {
     "$preytype": {
       total: "+1",
       mass: "+$preymass",

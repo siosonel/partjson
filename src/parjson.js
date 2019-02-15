@@ -246,7 +246,7 @@ See parjson.readme.txt for more information
 Parjson.prototype["@before"] = function (subterm, input) {
 	const fxn = this.opts.fxns[subterm.slice(1,-2)]
 	if (!fxn) {
-		this.errors.add(["template", "undefined-@before-fxn", input.lineage])
+		input.errors.push(["val", "MISSING-@before-FXN"])
 		return this.trueFxn
 	}
 	else return fxn
@@ -255,7 +255,7 @@ Parjson.prototype["@before"] = function (subterm, input) {
 Parjson.prototype["@after"] = function (subterm, input) {
 	const fxn = this.opts.fxns[subterm.slice(1,-2)]
 	if (!fxn) {
-		this.errors.add(["template", "undefined-@after-fxn", input.lineage])
+		input.errors.push(["val", "MISSING-@after-FXN"])
 		return this.trueFxn
 	}
 	else return fxn
@@ -267,7 +267,7 @@ Parjson.prototype["@join"] = function (joins, input) {
 		for(const alias in joins) {
 			const fxn = this.opts.fxns[joins[alias].slice(1,-2)]
 			if (!fxn) {
-				this.errors.add(["template", "undefined-@join-fxn", input.lineage])
+				input.errors.push(["val", "MISSING-@join-FXN"])
 			}
 			else {
 				const keyVals = fxn(row)
@@ -282,16 +282,16 @@ Parjson.prototype["@join"] = function (joins, input) {
 Parjson.prototype["@dist"] = function (_subterm, input) {
 	const subterm = _subterm[0]
 	if (!subterm.startsWith('@root')) {
-  	this.errors.add(["template", "context-root-expected", input.lineage])
+		input.errors.push(["val", "CONTEXT-@root-UNEXPECTED"])
   }
   else if (!subterm.includes(this.treeDelimit)) {
-  	this.errors.add(["template", "context-root-undelimited", input.lineage])
+		input.errors.push(["val", "CONTEXT-@root-UNDELIMITED"])
   }
   else {
   	const nestedProps = subterm.split(this.treeDelimit).slice(1)
   	for(const term of nestedProps) {
   		if (term[0] != "$") {
-  			this.errors.add(["template", "root-unsupported-context", input.lineage])
+				input.errors.push(["val", "CONTEXT-@root-UNEXPECTED"])
   			return
   		}
   	}
@@ -301,7 +301,7 @@ Parjson.prototype["@dist"] = function (_subterm, input) {
 		  context["@dist"] = (result) => {
 		  	const target = nestedKeys.reduce(reducer, this.tree)
 		    if (!Array.isArray(target)) {
-		    	this.errors.add(["val", "@dist()-target-not-array", input.lineage])
+					input.errors.push(["val", "@dist-TARGET-NOT-ARRAY"])
 		    	return
 		    }
 		    target.push(result)

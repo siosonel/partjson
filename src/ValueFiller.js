@@ -18,7 +18,7 @@ class ValueFiller {
       return this.getObjectFiller(templateVal, input)
     }
     else {
-      this.errors.add(['template', 'value', input])
+      input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE'])
     }
   }
 
@@ -29,7 +29,7 @@ class ValueFiller {
       return this[symbols](subterm, input)
     }
     else {
-      this.Tree.errors.add(['template', 'value', input.lineage])
+      input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE-SYMBOL'])
     }
   }
 
@@ -42,7 +42,7 @@ class ValueFiller {
       	return this[bracketedSymbols](subterm, input)
       }
       else {
-      	this.Tree.errors.add(['template', 'array-value', input.lineage])
+      	input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-ARRAY-VALUE'])
       }
     }
     else if (templateVal[0] && typeof templateVal[0] == 'object') {
@@ -58,7 +58,8 @@ class ValueFiller {
       if (!(key in result)) {
         result[key] = this.Tree.getEmptyResult(key, result)
       }
-      this.Tree.processRow(row, templateVal, result[key])
+      const context = this.Tree.contexts.get(result[key])
+      this.Tree.processRow(row, templateVal, result[key], context)
     }
   }
 
@@ -147,7 +148,6 @@ ValueFiller.prototype["[$]"] = function(subterm, input) {
 		  }
 		}
 		else {
-			//this.Tree.errors.add(["template", "val-unsupported-option", input.lineage])
 			input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
 		}
 	}
@@ -156,10 +156,10 @@ ValueFiller.prototype["[$]"] = function(subterm, input) {
 ValueFiller.prototype["[$[]]"] = function(subterm, input) {
   const prop = subterm.slice(1)
 	if (!input.valOptions) {
-		return (row, key, result) => {
+		return (row, key, result, context) => {
 	    const values = row[prop]
 	    if (!Array.isArray(values)) {
-	      this.Tree.errors.setArrVal(row, key, result, "ERR-NON-ARRAY-VALS", subterm + "[]", input)
+      	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
 	    }
 	    else {
 	    	if (!(key in result)) result[key] = []
@@ -168,10 +168,10 @@ ValueFiller.prototype["[$[]]"] = function(subterm, input) {
 	  }
 	}
 	else if (input.valOptions[0] == "distinct") {
-		return (row, key, result) => {
+		return (row, key, result, context) => {
 	    const values = row[prop]
 	    if (!Array.isArray(values)) {
-	      this.Tree.errors.setArrVal(row, key, result, "ERR-NON-ARRAY-VALS", subterm + "[]", input)
+      	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
 	    }
 	    else {
 	    	if (!(key in result)) result[key] = new Set()
@@ -194,12 +194,7 @@ ValueFiller.prototype["[{}]"] = function (template, input) {
     	result[key] = this.Tree.getEmptyResult(key, result, true)
     }
     const item = this.Tree.getEmptyResult(result[key].length, result)
-    // this.Tree.processRow(row, template, item)
-    for(const term in filler.inputs) {
-      if (filler.inputs[term].valFxn) {
-      	filler.inputs[term].valFxn(row, term, item)
-      }
-    }
+    this.Tree.processRow(row, template, item)
     result[key].push(item)
   }
 }
@@ -229,18 +224,18 @@ ValueFiller.prototype["-"] = function(subterm, input) {
     }
   }
   else { 
-    this.Tree.errors.add(['template', 'value-non-variable-decr', input.lineage])
+    input.errors.push(["val", "NON-NUMERIC-DECREMENT"])
   }
 }
 
 ValueFiller.prototype["+$"] = function(subterm, input) {
   const prop = subterm.slice(1)
-  return (row, key, result) => {
+  return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
     const value = +row[prop]
     if (this.ignoredVals.includes(value)) return
     if (!this.isNumeric(value)) {
-      this.Tree.errors.add(['val', 'non-numeric-incr', input.lineage, row])
+      context.errors.push([input, "NON-NUMERIC-INCREMENT", row])
       return
     }
     result[key] += value
@@ -249,12 +244,12 @@ ValueFiller.prototype["+$"] = function(subterm, input) {
 
 ValueFiller.prototype["-$"] = function(subterm, input) {
   const prop = subterm.slice(1)
-  return (row, key, result) => {
+  return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
     const value = row[prop]
     if (this.ignoredVals.includes(value)) return
     if (!this.isNumeric(value)) {
-      this.Tree.errors.add(['val', 'non-numeric-decr', input.lineage, row])
+      context.errors.push([input, "NON-NUMERIC-DECREMENT", row])
       return
     }
     result[key] += -value
@@ -263,11 +258,11 @@ ValueFiller.prototype["-$"] = function(subterm, input) {
 
 ValueFiller.prototype["<$"] = function(subterm, input) {
   const prop = subterm.slice(1)
-  return (row, key, result) => {
+  return (row, key, result, context) => {
     const value = +row[prop]
     if (this.ignoredVals.includes(value)) return
     if (!this.isNumeric(value)) {
-      this.Tree.errors.add(['val', 'non-numeric-than', input.lineage, row])
+      context.errors.push([input, "NON-NUMERIC-THAN", row])
       return
     }
     if (!(key in result)) {
@@ -281,11 +276,11 @@ ValueFiller.prototype["<$"] = function(subterm, input) {
 
 ValueFiller.prototype[">$"] = function(subterm, input) {
   const prop = subterm.slice(1)
-  return (row, key, result) => {
+  return (row, key, result, context) => {
     const value = +row[prop]
     if (this.ignoredVals.includes(value)) return
     if (!this.isNumeric(value)) {
-      this.Tree.errors.add(['val', 'non-numeric-than', input.lineage, row])
+      context.errors.push([input, "NON-NUMERIC-THAN", row])
       return
     }
     if (!(key in result)) {
@@ -300,8 +295,7 @@ ValueFiller.prototype[">$"] = function(subterm, input) {
 ValueFiller.prototype["=()"] = function(subterm, input) {
   const fxn = this.Tree.opts.fxns[subterm.slice(1)]
   if (!fxn) {
-    this.Tree.errors.add(['template', 'val-missing-function', input.lineage])
-  	return () => {}
+  	input.errors.push(["val", "ERR-MISSING-FXN"])
   }
   else if (input.subterm == "@before" || input.subterm == "@after") { 
   	return (row, key, result, context) => {
@@ -316,8 +310,6 @@ ValueFiller.prototype["=()"] = function(subterm, input) {
 ValueFiller.prototype["[=()]"] = function(subterm, input) {
   const fxn = this.Tree.opts.fxns[subterm.slice(1)]
   if (!fxn) {
-    //this.Tree.errors.add(['template', 'val-missing-function', input.lineage])
-  	//return this.Tree.errors.getArrValFxn("ERR-MISSING-FXN", subterm, input)
   	input.errors.push(["val", "ERR-MISSING-FXN"])
   }
   else if (!input.valOptions) {
@@ -337,21 +329,20 @@ ValueFiller.prototype["[=()]"] = function(subterm, input) {
 	  }
 	}
 	else {
-		this.Tree.errors.add(["template", "val-unsupported-option", input.lineage])
+		input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
 	}
 }
 
 ValueFiller.prototype["[=[]]"] = function(subterm, input) {
   const fxn = this.Tree.opts.fxns[subterm.slice(1)]
   if (!fxn) {
-    this.Tree.errors.add(['template', 'val-missing-function', input.lineage])
-  	return () => {}
+  	input.errors.push(["val", "ERR-MISSING-FXN"])
   }
   else if (!input.valOptions) {
-	  return (row, key, result) => {
+	  return (row, key, result, context) => {
 	  	const values = fxn(row)
 	  	if (!Array.isArray(values)) {
-	  		this.Tree.errors.add(['val', 'non-array-fxn-returned-value', input.lineage, row])
+	  		context.errors.push([input, "NON-ARRAY-RESULT", row])
 	  		return
 	  	}
 	  	else {
@@ -365,10 +356,10 @@ ValueFiller.prototype["[=[]]"] = function(subterm, input) {
 	  }
 	}
 	else if (input.valOptions[0] == "distinct") {
-		return (row, key, result) => {
+		return (row, key, result, context) => {
 	  	const values = fxn(row)
 	  	if (!Array.isArray(values)) {
-	  		this.Tree.errors.add(['val', 'non-array-fxn-returned-value', input.lineage, row])
+	  		context.errors.push([input, "NON-ARRAY-RESULT", row])
 	  		return
 	  	}
 	  	else {
@@ -382,32 +373,28 @@ ValueFiller.prototype["[=[]]"] = function(subterm, input) {
 	  }
 	}
 	else {
-		this.Tree.errors.add(["template", "val-unsupported-option", input.lineage])
+		input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
 	}
 }
 
 ValueFiller.prototype["@branch"] = function(subterm, input) {
-  return (row, key, result) => {
-  	const context = this.Tree.contexts.get(result)
-  	if (!context) {
-  		this.Tree.errors.add(["internal", "missing-context", input.lineage])
-  	}
+  return (row, key, result, context) => {
   	result[key] = context.branch
   }
 }
 
 ValueFiller.prototype["@parent"] = function(subterm, input) {
   if (subterm == "@parent" || subterm == "@parent" + this.Tree.treeDelimit) {
-  	this.Tree.errors.add(["template", "context-parent-loop", input.lineage])
+  	input.errors.push(["val", "CONTEXT-PARENT-LOOP"])
   }
   else if (!subterm.includes(this.Tree.treeDelimit)) {
-  	this.Tree.errors.add(["template", "context-parent-undelimited", input.lineage])
+  	input.errors.push(["val", "CONTEXT-PARENT-UNDELIMITED"])
   }
   else {
   	const nestedProps = subterm.split(this.Tree.treeDelimit).slice(1);
   	for(const term of nestedProps) {
   		if (term[0] != "$" && !this.Tree.reservedTerms.includes('@' + term)) {
-  			this.Tree.errors.add(["template", "context-unreserved-term", input.lineage])
+  			input.errors.push(["val", "CONTEXT-UNRESERVED-TERM"])
   			return
   		}
   	}
@@ -415,17 +402,9 @@ ValueFiller.prototype["@parent"] = function(subterm, input) {
     	if (!d) return null
     	if (k[0] == "$") return d[k.slice(1)]
     	const context = this.Tree.contexts.get(d)
-    	if (!context) {
-    		this.Tree.errors.add(["value", "missing-parent-context", input.lineage])
-    	}
     	return context[k]
     }
-    return (row, key, result) => {
-    	const context = this.Tree.contexts.get(result)
-	  	if (!context) {
-	  		this.Tree.errors.add(["internal", "missing-context", input.lineage])
-	  		return
-	  	}
+    return (row, key, result, context) => {
     	result[key] = nestedProps.reduce(reducer, context.parent)
     }
 	}
@@ -433,13 +412,13 @@ ValueFiller.prototype["@parent"] = function(subterm, input) {
 
 ValueFiller.prototype["@root"] = function(subterm, input) {
   if (!subterm.includes(this.Tree.treeDelimit)) {
-  	this.Tree.errors.add(["template", "context-root-undelimited", input.lineage])
+  	input.errors.push(["val", "CONTEXT-ROOT-UNDELIMITED"])
   }
   else {
   	const nestedProps = subterm.split(this.Tree.treeDelimit).slice(1)
   	for(const term of nestedProps) {
   		if (term[0] != "$") {
-  			this.Tree.errors.add(["template", "root-unsupported-context", input.lineage])
+  			input.errors.push(["val", "ROOT-UNSUPPORTED-CONTEXT"])
   			return
   		}
   	}
