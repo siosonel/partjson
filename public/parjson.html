@@ -168,6 +168,7 @@ function parseTsv(tsv) {
 		header.map((key, j) => c[key]=d[j]);
 		c.nested = {random: {id: Math.random().toFixed(3)}}
 		//c.owners = c.owners.split(',')
+		c.testObj = {}
 		data.push(c)
 	}); 
 	if (tsvParseErrors.length) {

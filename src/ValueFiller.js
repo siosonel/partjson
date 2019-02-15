@@ -56,16 +56,10 @@ class ValueFiller {
   getObjectFiller(templateVal, input) {
     return (row, key, result) => {
       if (!(key in result)) {
-        result[key] = this.getChildObj(key, result)
+        result[key] = this.Tree.getEmptyResult(key, result)
       }
       this.Tree.processRow(row, templateVal, result[key])
     }
-  }
-
-  getChildObj(branch, parent, isArray = false) {
-  	const child = isArray ? [] : Object.create(null)
-  	this.Tree.contexts.set(child, {branch, parent, root: this.Tree.tree})
-    return child
   }
 
   isNumeric(d) {
@@ -80,7 +74,9 @@ ValueFiller.prototype[""] = function(subterm) {
 ValueFiller.prototype["$"] = function(subterm, input) {
   const nestedSymbol = "$" + this.Tree.userDelimit
   if (subterm == "$" || subterm == nestedSymbol) {
-  	this.Tree.errors.add(["template", "value-identity-loop", input.lineage])
+  	return (row, key, result) => {
+    	result[key] = row
+    }
   }
   else if (subterm.startsWith(nestedSymbol)) {
   	const nestedProps = subterm.split(this.Tree.userDelimit).slice(1);
@@ -151,7 +147,8 @@ ValueFiller.prototype["[$]"] = function(subterm, input) {
 		  }
 		}
 		else {
-			this.Tree.errors.add(["template", "val-unsupported-option", input.lineage])
+			//this.Tree.errors.add(["template", "val-unsupported-option", input.lineage])
+			input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
 		}
 	}
 }
@@ -185,7 +182,7 @@ ValueFiller.prototype["[$[]]"] = function(subterm, input) {
 	  }
 	}
 	else { 
-		this.Tree.errors.add(["template", "val-unsupported-option", input.lineage])
+		input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
 	}
 }
 
@@ -194,13 +191,13 @@ ValueFiller.prototype["[{}]"] = function (template, input) {
   const filler = this.Tree.fillers.get(template);
   return (row, key, result) => {
     if (!(key in result)) {
-    	result[key] = this.getChildObj(key, result, true)
+    	result[key] = this.Tree.getEmptyResult(key, result, true)
     }
-    const item = this.getChildObj(result[key].length, result)
+    const item = this.Tree.getEmptyResult(result[key].length, result)
     // this.Tree.processRow(row, template, item)
-    for(const k in filler.terms) {
-      if (filler.terms[k].valFxn) {
-      	filler.terms[k].valFxn(row, k, item)
+    for(const term in filler.inputs) {
+      if (filler.inputs[term].valFxn) {
+      	filler.inputs[term].valFxn(row, term, item)
       }
     }
     result[key].push(item)
@@ -320,7 +317,8 @@ ValueFiller.prototype["[=()]"] = function(subterm, input) {
   const fxn = this.Tree.opts.fxns[subterm.slice(1)]
   if (!fxn) {
     //this.Tree.errors.add(['template', 'val-missing-function', input.lineage])
-  	return this.Tree.errors.getArrValFxn("ERR-MISSING-FXN", subterm, input)
+  	//return this.Tree.errors.getArrValFxn("ERR-MISSING-FXN", subterm, input)
+  	input.errors.push(["val", "ERR-MISSING-FXN"])
   }
   else if (!input.valOptions) {
 	  return (row, key, result, context) => {

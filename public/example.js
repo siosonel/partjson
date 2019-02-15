@@ -1,6 +1,6 @@
-
-
 const template0 = {
+	"$": "test",
+	"$testObj": "test",
   rootStuff: {
   	dataSrc: "https://test.ttt/"
   },
@@ -69,7 +69,7 @@ const template0 = {
   },
   uniqueOwners: [
   	"$owners[]", 
-  	"distinct"
+  	"distinct---"
   ],
   repeatOwners: [
   	"$owners[]"

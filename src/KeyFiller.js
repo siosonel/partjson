@@ -25,15 +25,15 @@ KeyFiller.prototype[""] = function(subterm) {
 KeyFiller.prototype["$"] = function(subterm, input) {
 	const nestedSymbol = "$" + this.Tree.userDelimit
   if (subterm == "$" || subterm == nestedSymbol) {
-  	this.Tree.errors.add(["template", "row-as-key", input.lineage]) 
+  	input.errors.push(["key", "ERR-ROW-AS-KEY"])
   }
   else if (subterm.startsWith(nestedSymbol)) {
   	const nestedProps = subterm.split(this.Tree.userDelimit).slice(1);
 	  const reducer = (d,k) => d ? d[k] : null
-	  return (row) => {
+	  return (row, context) => {
 	  	const key = nestedProps.reduce(reducer, row)
 			if (!this.allowedKeyTypes.has(typeof key)) {
-	      this.Tree.errors.add(["key", "subs", input.lineage])
+	      context.errors.push(["key", "FORBIDDEN-KEY-TYPE", row])
 	      return []
 	    }
 	    else {
@@ -43,10 +43,10 @@ KeyFiller.prototype["$"] = function(subterm, input) {
   }
   else {
 	  const prop = subterm.slice(1);
-	  return (row) => {
+	  return (row, context) => {
 	    const key = row[prop]; //console.log([subterm, prop, row, value])
 	    if (!this.allowedKeyTypes.has(typeof key)) {
-	      this.Tree.errors.add(["key", "subs", lineage, row])
+	      context.errors.push(["key", "FORBIDDEN-KEY-TYPE", row])
 	      return []
 	    }
 	    else {
@@ -61,7 +61,9 @@ KeyFiller.prototype["$[]"] = function(subterm, input) {
   return (row) => {
     const keys = row[prop]
     if (!Array.isArray(keys)) {
-      return this.Tree.errors.getKeys("ERR-NON-ARRAY-KEYS", subterm + "[]", input, row)
+      //return this.Tree.errors.getKeys("ERR-NON-ARRAY-KEYS", subterm + "[]", input, row)
+  		input.errors.push(["key", "ERR-NON-ARRAY-KEYS", row])
+  		return []
     }
     else {
       for(const key of keys) {
@@ -78,10 +80,7 @@ KeyFiller.prototype["$[]"] = function(subterm, input) {
 KeyFiller.prototype["=()"] = function(subterm, input) {
   const fxn = this.Tree.opts.fxns[subterm.slice(1)]
   if (!fxn) {
-    this.Tree.errors.add(['template', 'key-missing-function', input.lineage])
-  	return ()=>{
-  		this.Tree.errors.getKeys("ERR-MISSING-FXN", subterm + "()", input)
-  	}
+  	input.errors.push(["key", "ERR-MISSING-FXN"])
   }
   else {
   	return (row) => {
@@ -103,9 +102,7 @@ KeyFiller.prototype["=()"] = function(subterm, input) {
 KeyFiller.prototype["=[]"] = function(subterm, input) {
   const fxn = this.Tree.opts.fxns[subterm.slice(1)]
   if (!fxn) {
-  	return ()=>{
-  		return this.Tree.errors.getKeys("ERR-MISSING-FXN", subterm + "[]", input)
-  	}
+  	input.errors.push(["key", "ERR-MISSING-FXN"])
   }
   else {
   	return (row) => {

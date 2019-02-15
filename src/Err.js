@@ -1,6 +1,7 @@
 class Err {
 	constructor() {
     this.errors = new Set()
+    this.resultLog = Object.create(null)
     this.quiet = false
     this.messages = Object.create(null)
 
@@ -29,6 +30,7 @@ class Err {
 
   clear() {
   	this.errors.clear()
+    this.resultLog = Object.create(null)
   }
 
   add(info) {
@@ -63,12 +65,13 @@ class Err {
   	}
   }
 
-  log() {
+  log(fillers) {
     const log = Object.create(null)
+    /*
     for(const e of this.errors) {
       const [type, subtype, lineage, row] = e
       let  message = this.messages[type][subtype]
-      if (!message) message = 'Error '+ type + ": " + subtype 
+      if (!message) message = (type ? "Error "+ type + ": " : "") + subtype 
       if (!(message in log)) {
         log[message] = Object.create(null)
       }
@@ -79,8 +82,62 @@ class Err {
       if (row) log[message][key].push(row)
       else log[message][key] += 1
     }
-    if (Object.keys(log).length) {
-      console.log(log)
+  	*/
+  	
+    for(const templateFiller of fillers) { //console.log(filler)
+    	const [template, filler] = templateFiller
+    	for(const term in filler.inputs) {
+    		const input = filler.inputs[term]
+  			for(const e of input.errors) {
+  				const [type, message, row] = e
+  				if (!(message in log)) {
+		        log[message] = Object.create(null)
+		      }
+		      const key = JSON.stringify(input.lineage)
+		      if (!(key in log[message])) {
+		        log[message][key] = row ? [] : 0
+		      }
+		      if (row) log[message][key].push(row)
+		      else log[message][key] += 1
+  			}
+    	}
     }
+
+    if (Object.keys(log).length) {
+      //console.log(log)
+    }
+
+
+  	if (Object.keys(this.resultLog).length) {
+      console.log(this.resultLog)
+    }
+  }
+
+  markErrors(result, context) {
+  	const log = this.resultLog
+  	for(const term in context.filler.inputs) {
+  		const input = context.filler.inputs[term]
+			for(const e of input.errors) {
+				const [type, message, row] = e
+				if (!(message in log)) {
+	        log[message] = Object.create(null)
+	      }
+	      const key = JSON.stringify(input.lineage)
+	      if (!(key in log[message])) {
+	        log[message][key] = row ? [] : 0
+	      }
+	      if (row) log[message][key].push(row)
+	      else log[message][key] += 1
+
+	      if (type == "key") {
+	      	result["{{ " + message + " }} " + input.term] = input.templateVal
+	      }
+	      else if (type == "val") {
+	      	if (Array.isArray(input.templateVal)) {
+	      		result[input.term] = ["{{ " + message + " }} ", ...input.templateVal]
+	      	}
+	      }
+			}
+  	}
   }
 }

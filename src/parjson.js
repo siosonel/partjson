@@ -67,27 +67,24 @@ See parjson.readme.txt for more information
   	
   	// fillers will track template parsing metadata
   	delete this.fillers
-    this.fillers = new WeakMap()
+    this.fillers = new Map()
     
     // contexts will track results object metadata
     delete this.context
     this.contexts = new WeakMap() 
     
+    this.tree = this.getEmptyResult()
     this.parseTemplate(this.opts.template)
-    this.tree = Object.create(null)
-    this.contexts.set(this.tree, {
-    	"root": this.tree
-    })
-    //return
+
     if (this.opts.data) {
     	this.add(this.opts.data, false)
     }
-    this.errors.log()
+    this.errors.log(this.fillers)
   }
 
   parseTemplate(template, lineage=[]) {
     const filler = Object.create(null)
-    filler.terms = Object.create(null)
+    filler.inputs = Object.create(null)
     filler["@before"] = this.trueFxn
     filler["@after"] = this.trueFxn
     this.fillers.set(template, filler)
@@ -95,10 +92,14 @@ See parjson.readme.txt for more information
     const steps = this.steps.map(d => [])
     for(const term in template) {
       const [subterm, symbols, step] = this.parseTerm(term)
-      const input = filler.terms[term] = {
+      const templateVal = template[term]
+      const input = filler.inputs[term] = {
+        term,
         subterm,
         symbols,
-        lineage: [...lineage, term]
+        templateVal,
+        lineage: [...lineage, term],
+        errors: []
       }
       if (symbols != "#" && this.reservedFxns.includes(subterm + "()")) {
       	filler[subterm] = this[subterm](template[term], input)
@@ -106,11 +107,10 @@ See parjson.readme.txt for more information
       else {
 	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input)
 	      if (input.keyFxn) {
-	        input.valFxn = this.valueFiller.getFxn(template[term], input)
+	        input.valFxn = this.valueFiller.getFxn(templateVal, input)
 	      	steps[step].push(term)
 	      }
 	    }
-      const templateVal = template[term]
       if (templateVal) {
         if (!Array.isArray(templateVal) 
         	&& typeof templateVal == 'object') {
@@ -161,6 +161,18 @@ See parjson.readme.txt for more information
   	}
   }
 
+  getEmptyResult(branch=null, parent=null, isArray = false) {
+  	const result = isArray ? [] : Object.create(null)
+  	const context = {
+  		branch, // string name where this result will be mounted to the tree
+  		parent, //
+  		errors: []
+  	}
+  	context.root = this.tree ? this.tree : result
+  	this.contexts.set(result, context)
+    return result
+  }
+
   add(rows, refreshErrors = true) {
   	if (refreshErrors) error.clear()
   	this.joins.clear()
@@ -173,15 +185,16 @@ See parjson.readme.txt for more information
   }
 
   processRow(row, template, result) {
-  	const context = this.contexts.get(result);
-  	const filler = this.fillers.get(template);
+  	const context = this.contexts.get(result)
+  	const filler = this.fillers.get(template)
+  	context.filler = filler
   	if (!filler["@before"](row)) return
   	if (filler["@join"] && !filler["@join"](row)) return
   	for(const step of filler.steps) {
 	    for(const term of step) { 
-	      const input = filler.terms[term]; 
+	      const input = filler.inputs[term]; 
 	      if (input.keyFxn && input.valFxn) {
-	        const keys = input.keyFxn(row)
+	        const keys = input.keyFxn(row, context)
 	        for(const key of keys) {
 	          if (input.valFxn) {
 	          	input.valFxn(row, key, result, context)
@@ -218,6 +231,7 @@ See parjson.readme.txt for more information
   			}
   		}
   	}
+  	this.errors.markErrors(result, this.contexts.get(result))
   }
 
   trueFxn() {
