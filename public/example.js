@@ -9,13 +9,13 @@ const template0 = {
   	nestedExamples: []
   },
 	":__logNumB4": [
-		"=nummalsBefore()",
+		"=numMammalsBefore()",
 	],
 	"__:logNumAf": [
 		"=numMammalsAfter()",
 	],
-	//"@before()": "=logFishCount()",
-	//"@after()": "=logFishCount()",
+	"@before()": "=logFishCount()",
+	"@after()": "=logFishCount()",
   "byPreyType": {
     "$preytype": {
       total: "+1",

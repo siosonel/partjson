@@ -188,7 +188,7 @@ See parjson.readme.txt for more information
   	const context = this.contexts.get(result)
   	const filler = this.fillers.get(template)
   	context.filler = filler
-  	if (!filler["@before"](row)) return
+  	if (!filler["@before"](row, result, context)) return
   	if (filler["@join"] && !filler["@join"](row)) return
   	for(const step of filler.steps) {
 	    for(const term of step) { 
@@ -203,7 +203,7 @@ See parjson.readme.txt for more information
 	      }
 	    }
 	  }
-	  filler["@after"](row)
+	  filler["@after"](row, result, context)
 	  if (filler["@dist"]) filler["@dist"](context)
   }
 

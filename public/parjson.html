@@ -116,7 +116,7 @@ function run() {
 				},
 				after: d => d.rowAfter = "after process",
 				locMetadata: ()=>{},
-				logFishCount: (row, key, result, context)=>{
+				logFishCount: (row, result, context)=>{
 					const bp = context ? context.root.byPreyType : null
 					console.log([
 						'logFishCount', bp && bp.fish && bp.fish.total ? bp.fish.total : 0
@@ -167,7 +167,7 @@ function parseTsv(tsv) {
 		c['line #'] = i 
 		header.map((key, j) => c[key]=d[j]);
 		c.nested = {random: {id: Math.random().toFixed(3)}}
-		//c.owners = c.owners.split(',')
+		c.owners = c.owners.split(',')
 		c.testObj = {}
 		data.push(c)
 	}); 
