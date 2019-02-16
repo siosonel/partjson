@@ -102,13 +102,13 @@ See parjson.readme.txt for more information
         lineage: [...lineage, term],
         errors: []
       }
-      if (symbols != "#" && this.reservedFxns.includes(subterm + "()")) {
+      if (symbols=="@()") {
       	filler[subterm] = this[subterm](template[term], input)
       }
       else {
 	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input)
 	      if (input.keyFxn) {
-	        input.valFxn = this.valueFiller.getFxn(templateVal, input)
+	        input.valFxn = this.valueFiller.getFxn(input)
 	      	steps[step].push(term)
 	      }
 	    }
@@ -142,25 +142,9 @@ See parjson.readme.txt for more information
           	? term.slice(start)
           	: term;
     const subs = this.subsSymbols.includes(subterm[0]) ? subterm[0] : ""
-    const reservedTerm = this.detectReservedTerm(subterm)
-    const symbols = skip 
-    	? skip
-    	: reservedTerm 
-    		? reservedTerm 
-    		: aggr + subs + conv
-    const step = this.reservedFxns.includes(reservedTerm) // == "@after()"
-    	? reservedTerm
-    	: time
+    const symbols = skip ? skip : aggr + subs + conv
     //console.log([term, skip, time, aggr, subs, subterm, conv])
-    return [subterm, symbols, this.steps.indexOf(step)]
-  }
-
-  detectReservedTerm(subterm) {
-  	for(const term of this.reservedTerms) { //
-  		if (/*subterm.startsWith(term) ||*/ subterm + "()" == term) { 
-  			return term
-  		} 
-  	}
+    return [subterm, symbols, this.steps.indexOf(time)]
   }
 
   getEmptyResult(branch=null, parent=null, isArray = false) {

@@ -4,26 +4,23 @@ class ValueFiller {
     this.ignoredVals = this.Tree.opts.ignoredVals
   }
 
-  getFxn(templateVal, input) { 
-  	if (this.Tree.reservedFxns.includes(input.subterm + "()")) {
-  		return this.Tree.opts.fxns[input.subterm.slice(1)]
-  	}
-    else if (typeof templateVal=='string') {
-      return this.getStringFiller(templateVal, input)
+  getFxn(input) { 
+  	if (typeof input.templateVal=='string') {
+      return this.getStringFiller(input)
     }
-    else if (Array.isArray(templateVal)) {
-      return this.getArrayFiller(templateVal, input)
+    else if (Array.isArray(input.templateVal)) {
+      return this.getArrayFiller(input)
     }
-    else if (templateVal && typeof templateVal == 'object') {
-      return this.getObjectFiller(templateVal, input)
+    else if (input.templateVal && typeof input.templateVal == 'object') {
+      return this.getObjectFiller(input)
     }
     else {
       input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE'])
     }
   }
 
-  getStringFiller(templateVal, input) {
-    const term = templateVal
+  getStringFiller(input) {
+    const term = input.templateVal
     const [subterm, symbols] = this.Tree.parseTerm(term);
     if (symbols in this) {
       return this[symbols](subterm, input)
@@ -33,10 +30,10 @@ class ValueFiller {
     }
   }
 
-  getArrayFiller(templateVal, input) { 
-    input.valOptions = templateVal.length > 1 ? templateVal.slice(1) : []
-    if (typeof templateVal[0] == 'string') {
-      const [subterm, symbols] = this.Tree.parseTerm(templateVal[0]);
+  getArrayFiller(input) { 
+    input.valOptions = input.templateVal.length > 1 ? input.templateVal.slice(1) : []
+    if (typeof input.templateVal[0] == 'string') {
+      const [subterm, symbols] = this.Tree.parseTerm(input.templateVal[0]);
       const bracketedSymbols = '[' + symbols + ']'
       if (bracketedSymbols in this) {
       	return this[bracketedSymbols](subterm, input)
@@ -45,21 +42,21 @@ class ValueFiller {
       	input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-ARRAY-VALUE'])
       }
     }
-    else if (templateVal[0] && typeof templateVal[0] == 'object') {
-      return this["[{}]"](templateVal[0], input)
+    else if (input.templateVal[0] && typeof input.templateVal[0] == 'object') {
+      return this["[{}]"](input.templateVal[0], input)
     }
     else {
-    	return this["[]"](templateVal[0], input)
+    	return this["[]"](input.templateVal[0], input)
     }
   }
 
-  getObjectFiller(templateVal, input) {
+  getObjectFiller(input) {
     return (row, key, result) => {
       if (!(key in result)) {
         result[key] = this.Tree.getEmptyResult(key, result)
       }
       const context = this.Tree.contexts.get(result[key])
-      this.Tree.processRow(row, templateVal, result[key], context)
+      this.Tree.processRow(row, input.templateVal, result[key])
     }
   }
 
