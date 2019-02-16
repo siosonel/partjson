@@ -11,8 +11,8 @@
 
 
 const template0 = {
-	/*"$": "test",
-	"$testObj": "test",*/
+	":__myIncrement": 0.5,
+	"myTotal": "+@root.myIncrement", 
   rootStuff: {
   	dataSrc: "https://test.ttt/"
   },
@@ -26,9 +26,9 @@ const template0 = {
 	"__:logNumAf": [
 		"=numMammalsAfter()",
 	],
-	"@before()": "=logFishCount()",
-	"@after()": "=logFishCount()",
-  "byPreyType": {
+	//"@before()": "=logFishCount()",
+	//"@after()": "=logFishCount()",
+  "#byPreyType": {
     "$preytype": {
       total: "+1",
       mass: "+$preymass",
@@ -40,7 +40,7 @@ const template0 = {
       	hunter: "$catname",
   			parentTotal: "@parent.total",
   			"nestedAgain": {
-  				"@dist()": [
+  				"#@dist()": [
   					"@root.results.nestedExamples"
   				], 
   				grandParentTotal: "@parent.@parent.total",
@@ -52,7 +52,7 @@ const template0 = {
       }]
     }
   },
-  "byCat": {
+  "#byCat": {
     "$catname": {
       preyTypes: [
       	"$preytype"
@@ -73,12 +73,8 @@ const template0 = {
   	"$owners[]": {
   		total: "+1",
   		loss: "-0.5",
-  		blockName: "&loc.name"
-  	},
-  	"$owners": {
-  		total: "+1",
-  		loss: "-0.5",
-  		blockName: "&loc.name"
+  		blockName: "&loc.name",
+  		populationReadded: "+&loc.population"
   	},
   },
   blockNames: [

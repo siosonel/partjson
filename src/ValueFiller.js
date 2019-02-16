@@ -15,14 +15,18 @@ class ValueFiller {
       return this.getObjectFiller(input)
     }
     else {
-      input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE'])
+      return (row, key, result) => {
+      	result[key] = input.templateVal
+      }
     }
   }
 
   getStringFiller(input) {
-    const [subterm, symbols, valTokens] = this.Tree.parseTerm(input.templateVal)
-    if (symbols in this) {
-      return this[symbols](subterm, input)
+    const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal)
+    const subsFxn = this[tokens.subs](subterm, input)
+    if (subsFxn) {
+      const conv = tokens.conv ? tokens.conv : "''"
+      return this[tokens.aggr + conv] ? this[tokens.aggr + conv](subsFxn, input) : null
     }
     else {
       input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE-SYMBOL'])
@@ -37,8 +41,11 @@ class ValueFiller {
     }
     else if (typeof input.templateVal[0] == 'string') {
       const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal[0])
-      const subsFxn = this[tokens.subs](subterm)
-      if (subsFxn) return this["["+tokens.conv+"]"](subsFxn, input)
+      const subsFxn = this[tokens.subs](subterm, input)
+      if (subsFxn) {
+      	const conv = tokens.conv ? tokens.conv : "''"
+      	return this["["+ conv +"]"](subsFxn, input)
+      }
     }
     else if (input.templateVal[0] && typeof input.templateVal[0] == 'object') {
       return this["[{}]"](input.templateVal[0], input)
@@ -63,67 +70,53 @@ class ValueFiller {
   }
 }
 
-ValueFiller.prototype[""] = function(subterm, input=null) {
-  return !input ? () => subterm
-  	: (row, key, result) => result[key] = subterm
+ValueFiller.prototype["#"] = function(subterm, input) {
+	if (!this.Tree.commentedTerms.has(input)) {
+		this.Tree.commentedTerms.set(input, {
+			keys: new Set(),
+			values: new Set()
+		})
+	}
+  this.Tree.commentedTerms.get(input).values.add(subterm)
 }
 
-ValueFiller.prototype["$"] = function(subterm, input=null) {
+/* Substitution Functions */
+ValueFiller.prototype[""] = function(subterm, input) {
+  return this.isNumeric(subterm) 
+    ? () => +subterm
+    : () => subterm
+}
+
+ValueFiller.prototype["$"] = function(subterm, input) {
   const nestedSymbol = "$" + this.Tree.userDelimit
   if (subterm == "$" || subterm == nestedSymbol) {
-  	return !input ? (row) => row 
-  		: (row, key, result) => {
-  			result[key] = row
-  		}
+  	return (row) => row
   }
   else if (subterm.startsWith(nestedSymbol)) {
   	const nestedProps = subterm.split(this.Tree.userDelimit).slice(1);
     const reducer = (d,k) => d ? d[k] : null
-    return !input ? (row) => nestedProps.reduce(reducer, row)
-    	: (row, key, result) => {
-    		result[key] = nestedProps.reduce(reducer, row)
-    	}
+    return (row) => nestedProps.reduce(reducer, row)
   }
   else {
 	  const prop = subterm.slice(1)
-	  return !input ? (row) => row[prop]
-	  	: (row, key, result) => {
-	  		result[key] = row[prop]
-	  	}
+	  return (row) => row[prop]
 	}
 }
 
-ValueFiller.prototype["="] = function(subterm, input=null) {
+ValueFiller.prototype["="] = function(subterm, input) {
   const fxn = this.Tree.opts.fxns[subterm.slice(1)]
   if (!fxn) {
   	input.errors.push(["val", "ERR-MISSING-FXN"])
   }
   else {
-  	return !input 
-  		? (row, key, result, context) => fxn(row, key, result, context)
-  		: (row, key, result, context) => result[key] = fxn(row, key, result, context)
+  	return fxn //() => fxn(row, key, result, context)
   }
 }
 
-ValueFiller.prototype["=()"] = function(subterm, input=null) {
-  const fxn = this.Tree.opts.fxns[subterm.slice(1)]
-  if (!fxn) {
-  	input.errors.push(["val", "ERR-MISSING-FXN"])
-  }
-  else {
-  	return !input
-  		? (row, key, result, context) => fxn(row, key, result, context)
-  		: (row, key, result, context) => result[key] = fxn(row, key, result, context)
-  }
-}
-
-ValueFiller.prototype["@"] = function(subterm, input=null) {
+ValueFiller.prototype["@"] = function(subterm, input) {
   const nestedSymbol = "@" + this.Tree.treeDelimit
   if (subterm == "@" || subterm == nestedSymbol) {
-  	return !input ? (row, key, result) => result 
-  		: (row, key, result) => {
-  			result[key] = result
-  		}
+  	return (row, key, result) => result
   }
   else if (subterm.includes(this.Tree.treeDelimit)) {
   	const nestedProps = subterm.split(this.Tree.treeDelimit)
@@ -139,49 +132,57 @@ ValueFiller.prototype["@"] = function(subterm, input=null) {
     		return [resultProp, this.Tree.contexts.get(resultProp)]
     	}
     }
-    return !input 
-    	? (row, key, result, context) => nestedProps.reduce(reducer, [result, context])[0]
-    	: (row, key, result, context) => {
-    		result[key] = nestedProps.reduce(reducer, [result, context])[0]
-    	}
+    return (row, key, result, context) => {
+    	return nestedProps.reduce(reducer, [result, context])[0]
+    }
   }
   else {
 	  const prop = subterm.slice(1)
-	  return !input 
-	  	? (row, key, result, context) => context[prop]
-	  	: (row, key, result, context) => { 
-	  		result[key] = context[prop]
-	  	}
+	  return (row, key, result, context) => context[prop]
 	}
 }
 
 ValueFiller.prototype["&"] = function(subterm, input) {
-	const [alias, prop] = subterm.slice(1).split(this.Tree.userDelimit)
-  if (input) {
-  	return (row, key, result) => {
-	  	const join = this.Tree.joins.get(alias)
-	  	result[key] = join ? join[prop] : null
-	  }
-	}
-	else {
-		return () => {
+  const nestedProps = subterm.slice(1).split(this.Tree.userDelimit)
+  const alias = nestedProps.shift()
+  if (!nestedProps.length) {
+  	return () => this.Tree.joins.get(alias)
+  }
+  else if (nestedProps.length == 1) {
+  	const prop = nestedProps[0]
+	  return () => {
 	  	const join = this.Tree.joins.get(alias)
 	  	return join ? join[prop] : null
 	  }
-	}
+  }
+  else {
+  	const reducer = (d,k) => d ? d[k] : null
+  	const join = this.Tree.joins.get(alias)
+    return (row) => nestedProps.reduce(reducer, this.Tree.joins.get(alias))	 
+  }
 }
 
-ValueFiller.prototype["#"] = function(subterm, input) {
-	if (!this.Tree.commentedTerms.has(input)) {
-		this.Tree.commentedTerms.set(input, {
-			keys: new Set(),
-			values: new Set()
-		})
-	}
-  this.Tree.commentedTerms.get(input).values.add(subterm)
+/* No aggregation */
+ValueFiller.prototype["''"] = function(subsFxn, input) {
+ 	return (row, key, result, context) => {
+ 		result[key] = subsFxn(row, key, result, context)
+ 	}
+}
+
+ValueFiller.prototype["()"] = function(subsFxn, input) {
+ 	return (row, key, result, context) => {
+ 		result[key] = subsFxn(row, key, result, context)(row)
+ 	}
 }
 
 ValueFiller.prototype["[]"] = function(subsFxn, input) {
+ 	return (row, key, result, context) => {
+ 		result[key] = subsFxn(row, key, result, context)(row)
+ 	}
+}
+
+/* Aggregation into an array or set collection */
+ValueFiller.prototype["['']"] = function(subsFxn, input) {
   const option = input.templateVal[1] ? input.templateVal[1] : ""
   if (!option || option != "distinct") {
 		return (row, key, result, context) => {
@@ -256,65 +257,37 @@ ValueFiller.prototype["[{}]"] = function (template, input) {
   }
 }
 
-ValueFiller.prototype["+"] = function(subterm) {
-  if (this.isNumeric(subterm)) {
-    const incr = +subterm
-    return (row, key, result) => {
-      if (!(key in result)) result[key] = 0
-      result[key] += incr
-    }
-  }
-  else { 
-    return (row, key, result) => {
-      if (!(key in result)) result[key] = ""
-      result[key] += subterm
-    }
-  }
-}
 
-ValueFiller.prototype["-"] = function(subterm, input) {
-  if (this.isNumeric(subterm)) {
-    const incr = -subterm
-    return (row, key, result) => {
-      if (!(key in result)) result[key] = 0
-      result[key] += incr
-    }
-  }
-  else { 
-    input.errors.push(["val", "NON-NUMERIC-DECREMENT"])
-  }
-}
-
-ValueFiller.prototype["+$"] = function(subterm, input) {
-  const subsFxn = this["$"](subterm)
+/* Operator aggregation */
+ValueFiller.prototype["+''"] = function(subsFxn, input) { 
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
-    const value = +subsFxn(row)
-    if (this.ignoredVals.includes(value)) return
-    if (!this.isNumeric(value)) {
-      context.errors.push([input, "NON-NUMERIC-INCREMENT", row])
-      return
-    }
-    result[key] += value
+    result[key] += subsFxn(row, key, result, context)
   }
 }
 
-ValueFiller.prototype["-$"] = function(subterm, input) {
-  const subsFxn = this["$"](subterm)
+ValueFiller.prototype["+()"] = function(subsFxn) {
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
-    const value = +subsFxn(row)
-    if (this.ignoredVals.includes(value)) return
-    if (!this.isNumeric(value)) {
-      context.errors.push([input, "NON-NUMERIC-DECREMENT", row])
-      return
-    }
-    result[key] += -value
+    result[key] += -subsFxn(row, key, result, context)
   }
 }
 
-ValueFiller.prototype["<$"] = function(subterm, input) {
-  const subsFxn = this["$"](subterm)
+ValueFiller.prototype["-''"] = function(subsFxn) {
+  return (row, key, result, context) => {
+    if (!(key in result)) result[key] = 0
+    result[key] -= subsFxn(row, key, result, context)
+  }
+}
+
+ValueFiller.prototype["-()"] = function(subsFxn) {
+  return (row, key, result, context) => {
+    if (!(key in result)) result[key] = 0
+    result[key] -= subsFxn(row, key, result, context)(row)
+  }
+}
+
+ValueFiller.prototype["<''"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     const value = +subsFxn(row)
     if (this.ignoredVals.includes(value)) return
@@ -331,10 +304,26 @@ ValueFiller.prototype["<$"] = function(subterm, input) {
   }
 }
 
-ValueFiller.prototype[">$"] = function(subterm, input) {
-  const subsFxn = this["$"](subterm)
+ValueFiller.prototype["<()"] = function(subsFxn, input) {
   return (row, key, result, context) => {
-    const value = +subsFxn(row)
+    const value = +subsFxn(row, key, result, context)(row)
+    if (this.ignoredVals.includes(value)) return
+    if (!this.isNumeric(value)) {
+      context.errors.push([input, "NON-NUMERIC-THAN", row])
+      return
+    }
+    if (!(key in result)) {
+      result[key] = value
+    }
+    else if (value < result[key]) {
+      result[key] = value
+    }
+  }
+}
+
+ValueFiller.prototype[">''"] = function(subsFxn, input) {
+  return (row, key, result, context) => {
+    const value = +subsFxn(row, key, result, context)
     if (this.ignoredVals.includes(value)) return
     if (!this.isNumeric(value)) {
       context.errors.push([input, "NON-NUMERIC-THAN", row])
@@ -344,6 +333,23 @@ ValueFiller.prototype[">$"] = function(subterm, input) {
       result[key] = value
     }
     else if (value > result[key]) {
+      result[key] = value
+    }
+  }
+}
+
+ValueFiller.prototype[">()"] = function(subsFxn, input) {
+  return (row, key, result, context) => {
+    const value = +subsFxn(row, key, result, context)(row)
+    if (this.ignoredVals.includes(value)) return
+    if (!this.isNumeric(value)) {
+      context.errors.push([input, "NON-NUMERIC-THAN", row])
+      return
+    }
+    if (!(key in result)) {
+      result[key] = value
+    }
+    else if (value < result[key]) {
       result[key] = value
     }
   }

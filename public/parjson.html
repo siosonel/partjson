@@ -125,10 +125,10 @@ function run() {
 				},
 				blockNames(row) {
 					return row.ownerblock[0] == 'C' 
-						? {name: "Friendly Neighborhood"}
-						: {name: "Sesame Street"}
+						? {name: "Friendly Neighborhood", population: 630}
+						: {name: "Sesame Street", population: 950}
 				},
-				splitO_wners(row) {
+				splitOwners(row) {
 					return typeof row.owners == 'string' ? row.owners.split(",") : row.owners
 				}
 			}, 
