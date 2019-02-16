@@ -1,10 +1,12 @@
 /*
 
 [skip] [timing] [aggregation] [substitution]    stem     [conversion]
-  #      :__       	 +              $         [delimit]       ()
+  #      :__         +              $         [delimit]       ()
          _:_         -              =                         []
          __:         >              &                         {}
-                     <              @                         
+                     <              @
+                    [ ]
+                   [[ ]] 
 */
 
 
@@ -53,15 +55,15 @@ const template0 = {
       }]
     }
   },
-  "#byCat": {
+  "byCat": {
     "$catname": {
       preyTypes: [
       	"$preytype"
       ],
-      distinctPreyType: [
+      distinctPreyType: [[
       	"$preytype"
-      ],
-      "rows": ["$"],
+      ]],
+      //"rows": ["$"],
       nestedRandomId: [
       	"$.nested.random.id"
       ]
@@ -82,10 +84,9 @@ const template0 = {
   		blockName: "&loc.name"
   	},
   },
-  uniqueOwners: [
-  	"$owners{}", 
-  	//"distinct---"
-  ],
+  uniqueOwners: [[
+  	"$owners"
+  ]],
   repeatOwners: [
   	"$owners[]"
   ],
@@ -106,17 +107,15 @@ const template0 = {
   		count: "+1"
   	}
   },
-  roundedPreyMassDistinct: [
-  	"=roundedPreyMass()",
-  	"distinct"
-  ],
+  roundedPreyMassDistinct: [[
+  	"=roundedPreyMass()"
+  ]],
   involvedLocations: [
   	"=locations[]"
   ],
-  distinctLocations: [
-  	"=locations[]",
-  	"distinct"
-  ],
+  distinctLocations: [[
+  	"=locations[]"
+  ]],
   byComputedLocations: {
   	"=locations[]": {
   		location: "@branch",

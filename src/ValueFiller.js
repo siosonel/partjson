@@ -4,7 +4,7 @@ class ValueFiller {
     this.ignoredVals = this.Tree.opts.ignoredVals
   }
 
-  getFxn(input) { 
+  getFxn(input) {
   	if (typeof input.templateVal=='string') {
       return this.getStringFiller(input)
     }
@@ -20,8 +20,7 @@ class ValueFiller {
   }
 
   getStringFiller(input) {
-    const term = input.templateVal
-    const [subterm, symbols] = this.Tree.parseTerm(term);
+    const [subterm, symbols, valTokens] = this.Tree.parseTerm(input.templateVal)
     if (symbols in this) {
       return this[symbols](subterm, input)
     }
@@ -31,7 +30,6 @@ class ValueFiller {
   }
 
   getArrayFiller(input) { 
-    input.valOptions = input.templateVal.length > 1 ? input.templateVal.slice(1) : []
     if (typeof input.templateVal[0] == 'string') {
       const [subterm, symbols] = this.Tree.parseTerm(input.templateVal[0]);
       const bracketedSymbols = '[' + symbols + ']'
@@ -39,7 +37,17 @@ class ValueFiller {
       	return this[bracketedSymbols](subterm, input)
       }
       else {
-      	input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-ARRAY-VALUE'])
+      	input.errors.push(['val', 'UNSUPPORTED-ARRAY-VALUE'])
+      }
+    }
+    else if (Array.isArray(input.templateVal[0])) {
+      const [subterm, symbols] = this.Tree.parseTerm(input.templateVal[0][0]);
+      const bracketedSymbols = '[[' + symbols + ']]'
+      if (bracketedSymbols in this) {
+      	return this[bracketedSymbols](subterm, input)
+      }
+      else {
+      	input.errors.push(['val', 'UNSUPPORTED-SET-VALUE'])
       }
     }
     else if (input.templateVal[0] && typeof input.templateVal[0] == 'object') {
@@ -159,54 +167,48 @@ ValueFiller.prototype["[]"] = function(subterm) {
 
 ValueFiller.prototype["[$]"] = function(subterm, input) {
   const subsFxn = this["$"](subterm)
-  if (!input.valOptions.length)  {
-		return (row, key, result) => {
-	  	if (!(key in result)) result[key] = []
-	  	result[key].push(subsFxn(row))
-	  }
-	}
-  else if (input.valOptions[0] == 'distinct') {
-	  return (row, key, result) => {
-	  	if (!(key in result)) result[key] = new Set()
-	  	result[key].add(subsFxn(row))
-	  }
-	}
-	else {
-		input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
-	}
+	return (row, key, result) => {
+  	if (!(key in result)) result[key] = []
+  	result[key].push(subsFxn(row))
+  }
+}
+
+ValueFiller.prototype["[[$]]"] = function(subterm, input) {
+  const subsFxn = this["$"](subterm)
+  return (row, key, result) => {
+  	if (!(key in result)) result[key] = new Set()
+  	result[key].add(subsFxn(row))
+  }
 }
 
 ValueFiller.prototype["[$[]]"] = function(subterm, input) {
   const subsFxn = this["$"](subterm)
-	if (!input.valOptions.length) {
-		return (row, key, result, context) => {
-	    const values = subsFxn(row)
-	    if (!Array.isArray(values)) {
-      	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
-	    }
-	    else {
-	    	if (!(key in result)) result[key] = []
-	    	result[key].push(...values)
-	    }
-	  }
-	}
-	else if (input.valOptions[0] == "distinct") {
-		return (row, key, result, context) => {
-	    const values = subsFxn(row)
-	    if (!Array.isArray(values)) {
-      	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
-	    }
-	    else {
-	    	if (!(key in result)) result[key] = new Set()
-	    	for(const value of values) {
-	    		result[key].add(value)
-	    	}
-	    }
-	  }
-	}
-	else { 
-		input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
-	}
+	return (row, key, result, context) => {
+    const values = subsFxn(row)
+    if (!Array.isArray(values)) {
+    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
+    }
+    else {
+    	if (!(key in result)) result[key] = []
+    	result[key].push(...values)
+    }
+  }
+}
+
+ValueFiller.prototype["[$[]]"] = function(subterm, input) {
+  const subsFxn = this["$"](subterm)
+	return (row, key, result, context) => {
+    const values = subsFxn(row)
+    if (!Array.isArray(values)) {
+    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
+    }
+    else {
+    	if (!(key in result)) result[key] = new Set()
+    	for(const value of values) {
+    		result[key].add(value)
+    	}
+    }
+  }
 }
 
 ValueFiller.prototype["[{}]"] = function (template, input) {
@@ -335,67 +337,70 @@ ValueFiller.prototype["[=()]"] = function(subterm, input) {
   if (!fxn) {
   	input.errors.push(["val", "ERR-MISSING-FXN"])
   }
-  else if (!input.valOptions.length) {
-	  return (row, key, result, context) => {
-	  	const value = fxn(row, key, result, context)
-    	if (this.ignoredVals.includes(value)) return
-	  	if (!(key in result)) result[key] = []
-	  	result[key].push(value)
-	  }
-	}
-	else if (input.valOptions[0] == "distinct") {
-		return (row, key, result) => {
-	  	if (!(key in result)) result[key] = new Set()
-	  	const value = fxn(row)
-    	if (this.ignoredVals.includes(value)) return
-	  	result[key].add(value)
-	  }
-	}
-	else {
-		input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
-	}
+  return (row, key, result, context) => {
+  	const value = fxn(row, key, result, context)
+  	if (this.ignoredVals.includes(value)) return
+  	if (!(key in result)) result[key] = []
+  	result[key].push(value)
+  }
+}
+
+ValueFiller.prototype["[[=()]]"] = function(subterm, input) {
+	const fxn = this.Tree.opts.fxns[subterm.slice(1)]
+	if (!fxn) {
+  	input.errors.push(["val", "ERR-MISSING-FXN"])
+  	return
+  }
+	return (row, key, result) => {
+  	if (!(key in result)) result[key] = new Set()
+  	const value = fxn(row)
+  	if (this.ignoredVals.includes(value)) return
+  	result[key].add(value)
+  }
 }
 
 ValueFiller.prototype["[=[]]"] = function(subterm, input) {
   const fxn = this.Tree.opts.fxns[subterm.slice(1)]
   if (!fxn) {
   	input.errors.push(["val", "ERR-MISSING-FXN"])
+  	return
   }
-  else if (!input.valOptions.length) {
-	  return (row, key, result, context) => {
-	  	const values = fxn(row)
-	  	if (!Array.isArray(values)) {
-	  		context.errors.push([input, "NON-ARRAY-RESULT", row])
-	  		return
+  return (row, key, result, context) => {
+  	const values = fxn(row)
+  	if (!Array.isArray(values)) {
+  		context.errors.push([input, "NON-ARRAY-RESULT", row])
+  		return
+  	}
+  	else {
+  		if (!(key in result)) result[key] = []
+	  	for(const value of values) {
+	  		if (!this.ignoredVals.includes(value)) {
+	  			result[key].push(value)
+	  		}
 	  	}
-	  	else {
-	  		if (!(key in result)) result[key] = []
-		  	for(const value of values) {
-		  		if (!this.ignoredVals.includes(value)) {
-		  			result[key].push(value)
-		  		}
-		  	}
-		  }
 	  }
-	}
-	else if (input.valOptions[0] == "distinct") {
-		return (row, key, result, context) => {
-	  	const values = fxn(row)
-	  	if (!Array.isArray(values)) {
-	  		context.errors.push([input, "NON-ARRAY-RESULT", row])
-	  		return
+  }
+}
+
+ValueFiller.prototype["[[=[]]]"] = function(subterm, input) {
+  const fxn = this.Tree.opts.fxns[subterm.slice(1)]
+  if (!fxn) {
+  	input.errors.push(["val", "ERR-MISSING-FXN"])
+  	return
+  }
+	return (row, key, result, context) => {
+  	const values = fxn(row)
+  	if (!Array.isArray(values)) {
+  		context.errors.push([input, "NON-ARRAY-RESULT", row])
+  		return
+  	}
+  	else {
+  		if (!(key in result)) result[key] = new Set()
+	  	for(const value of values) {
+	  		if (!this.ignoredVals.includes(value)) {
+	  			result[key].add(value)
+	  		}
 	  	}
-	  	else {
-	  		if (!(key in result)) result[key] = new Set()
-		  	for(const value of values) {
-		  		if (!this.ignoredVals.includes(value)) {
-		  			result[key].add(value)
-		  		}
-		  	}
-		  }
 	  }
-	}
-	else {
-		input.errors.push(["val", "UNSUPPORTED-VALUE-OPTION"])
-	}
+  }
 }

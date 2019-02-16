@@ -92,12 +92,13 @@ See parjson.readme.txt for more information
     
     const steps = this.steps.map(d => [])
     for(const term in template) {
-      const [subterm, symbols, step] = this.parseTerm(term)
+      const [subterm, symbols, keyTokens, step] = this.parseTerm(term)
       const templateVal = template[term]
       const input = filler.inputs[term] = {
         term,
         subterm,
         symbols,
+        keyTokens,
         templateVal,
         lineage: [...lineage, term],
         errors: []
@@ -143,8 +144,9 @@ See parjson.readme.txt for more information
           	: term;
     const subs = this.subsSymbols.includes(subterm[0]) ? subterm[0] : ""
     const symbols = skip ? skip : aggr + subs + conv
-    //console.log([term, skip, time, aggr, subs, subterm, conv])
-    return [subterm, symbols, this.steps.indexOf(time)]
+    const stem = subs ? subterm.slice(1) : subterm
+    const tokens = {skip, time, aggr, subs, stem, conv, subterm}
+    return [subterm, symbols, tokens, this.steps.indexOf(time)]
   }
 
   getEmptyResult(branch=null, parent=null, isArray = false) {
