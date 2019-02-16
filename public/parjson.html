@@ -126,7 +126,7 @@ function run() {
 				blockNames(row) {
 					return row.ownerblock[0] == 'C' 
 						? {name: "Friendly Neighborhood"}
-						: null //{name: "Sesame Street"}
+						: {name: "Sesame Street"}
 				},
 				splitO_wners(row) {
 					return typeof row.owners == 'string' ? row.owners.split(",") : row.owners

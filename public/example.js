@@ -5,8 +5,7 @@
          _:_         -              =                         []
          __:         >              &                         {}
                      <              @
-                    [ ]
-                   [[ ]] 
+                    [ ] 
 */
 
 
@@ -32,12 +31,10 @@ const template0 = {
   "byPreyType": {
     "$preytype": {
       total: "+1",
-      /*mass: "+$preymass",
+      mass: "+$preymass",
       lostMass: "#-$preymass",
       massMin: "<$preymass",
       massMax: ">$preymass",
-      addedb4: "$rowBefore",
-      addedAfter: "$rowAfter",*/
       "rekeyedNested": [{
       	index: "@branch",
       	hunter: "$catname",
@@ -60,9 +57,9 @@ const template0 = {
       preyTypes: [
       	"$preytype"
       ],
-      distinctPreyType: [[
-      	"$preytype"
-      ]],
+      distinctPreyType: [
+      	"$preytype", "distinct"
+      ],
       //"rows": ["$"],
       nestedRandomId: [
       	"$.nested.random.id"
@@ -84,9 +81,13 @@ const template0 = {
   		blockName: "&loc.name"
   	},
   },
-  uniqueOwners: [[
-  	"$owners"
-  ]],
+  blockNames: [
+  	"&loc.name",
+  	"distinct"
+  ],
+  uniqueOwners: [
+  	"$owners[]", "distinct"
+  ],
   repeatOwners: [
   	"$owners[]"
   ],
@@ -107,15 +108,15 @@ const template0 = {
   		count: "+1"
   	}
   },
-  roundedPreyMassDistinct: [[
-  	"=roundedPreyMass()"
-  ]],
+  roundedPreyMassDistinct: [
+  	"=roundedPreyMass()", "distinct"
+  ],
   involvedLocations: [
   	"=locations[]"
   ],
-  distinctLocations: [[
-  	"=locations[]"
-  ]],
+  distinctLocations: [
+  	"=locations[]", "distinct"
+  ],
   byComputedLocations: {
   	"=locations[]": {
   		location: "@branch",

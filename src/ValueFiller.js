@@ -30,31 +30,21 @@ class ValueFiller {
   }
 
   getArrayFiller(input) { 
-    if (typeof input.templateVal[0] == 'string') {
-      const [subterm, symbols] = this.Tree.parseTerm(input.templateVal[0]);
-      const bracketedSymbols = '[' + symbols + ']'
-      if (bracketedSymbols in this) {
-      	return this[bracketedSymbols](subterm, input)
-      }
-      else {
-      	input.errors.push(['val', 'UNSUPPORTED-ARRAY-VALUE'])
-      }
+    if (!input.templateVal[0]) {
+    	return (row, key, result) => {
+    		result[key] = input.templateVal
+    	}
     }
-    else if (Array.isArray(input.templateVal[0])) {
-      const [subterm, symbols] = this.Tree.parseTerm(input.templateVal[0][0]);
-      const bracketedSymbols = '[[' + symbols + ']]'
-      if (bracketedSymbols in this) {
-      	return this[bracketedSymbols](subterm, input)
-      }
-      else {
-      	input.errors.push(['val', 'UNSUPPORTED-SET-VALUE'])
-      }
+    else if (typeof input.templateVal[0] == 'string') {
+      const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal[0])
+      const subsFxn = this[tokens.subs](subterm)
+      if (subsFxn) return this["["+tokens.conv+"]"](subsFxn, input)
     }
     else if (input.templateVal[0] && typeof input.templateVal[0] == 'object') {
       return this["[{}]"](input.templateVal[0], input)
     }
     else {
-    	return this["[]"](input.templateVal[0], input)
+    	input.errors.push("val", "UNSUPPORTED-TEMPLATE-VALUE")
     }
   }
 
@@ -73,8 +63,9 @@ class ValueFiller {
   }
 }
 
-ValueFiller.prototype[""] = function(subterm) {
-  return (row, key, result) => result[key] = subterm
+ValueFiller.prototype[""] = function(subterm, input=null) {
+  return !input ? () => subterm
+  	: (row, key, result) => result[key] = subterm
 }
 
 ValueFiller.prototype["$"] = function(subterm, input=null) {
@@ -100,6 +91,30 @@ ValueFiller.prototype["$"] = function(subterm, input=null) {
 	  		result[key] = row[prop]
 	  	}
 	}
+}
+
+ValueFiller.prototype["="] = function(subterm, input=null) {
+  const fxn = this.Tree.opts.fxns[subterm.slice(1)]
+  if (!fxn) {
+  	input.errors.push(["val", "ERR-MISSING-FXN"])
+  }
+  else {
+  	return !input 
+  		? (row, key, result, context) => fxn(row, key, result, context)
+  		: (row, key, result, context) => result[key] = fxn(row, key, result, context)
+  }
+}
+
+ValueFiller.prototype["=()"] = function(subterm, input=null) {
+  const fxn = this.Tree.opts.fxns[subterm.slice(1)]
+  if (!fxn) {
+  	input.errors.push(["val", "ERR-MISSING-FXN"])
+  }
+  else {
+  	return !input
+  		? (row, key, result, context) => fxn(row, key, result, context)
+  		: (row, key, result, context) => result[key] = fxn(row, key, result, context)
+  }
 }
 
 ValueFiller.prototype["@"] = function(subterm, input=null) {
@@ -142,10 +157,18 @@ ValueFiller.prototype["@"] = function(subterm, input=null) {
 
 ValueFiller.prototype["&"] = function(subterm, input) {
 	const [alias, prop] = subterm.slice(1).split(this.Tree.userDelimit)
-  return (row, key, result) => {
-  	const join = this.Tree.joins.get(alias)
-  	result[key] = join ? join[prop] : null
-  }
+  if (input) {
+  	return (row, key, result) => {
+	  	const join = this.Tree.joins.get(alias)
+	  	result[key] = join ? join[prop] : null
+	  }
+	}
+	else {
+		return () => {
+	  	const join = this.Tree.joins.get(alias)
+	  	return join ? join[prop] : null
+	  }
+	}
 }
 
 ValueFiller.prototype["#"] = function(subterm, input) {
@@ -158,57 +181,66 @@ ValueFiller.prototype["#"] = function(subterm, input) {
   this.Tree.commentedTerms.get(input).values.add(subterm)
 }
 
-ValueFiller.prototype["[]"] = function(subterm) {
-  return (row, key, result) => {
-  	if (!(key in result)) result[key] = []
-  	if (subterm) result[key].push(subterm)
-  }
+ValueFiller.prototype["[]"] = function(subsFxn, input) {
+  const option = input.templateVal[1] ? input.templateVal[1] : ""
+  if (!option || option != "distinct") {
+		return (row, key, result, context) => {
+	  	if (!(key in result)) result[key] = []
+	  	result[key].push(subsFxn(row, key, result, context))
+	  }
+	}
+	else {
+		return (row, key, result, context) => {
+	  	if (!(key in result)) result[key] = new Set()
+	  	result[key].add(subsFxn(row, key, result, context))
+	  }
+	}
 }
 
-ValueFiller.prototype["[$]"] = function(subterm, input) {
-  const subsFxn = this["$"](subterm)
-	return (row, key, result) => {
-  	if (!(key in result)) result[key] = []
-  	result[key].push(subsFxn(row))
-  }
+ValueFiller.prototype["[()]"] = function(subsFxn, input) {
+  const option = input.templateVal[1] ? input.templateVal[1] : ""
+  if (!option || option != "distinct") {
+		return (row, key, result, context) => {
+	  	if (!(key in result)) result[key] = []
+	  	result[key].push(subsFxn(row, key, result, context))
+	  }
+	}
+	else {
+		return (row, key, result, context) => {
+	  	if (!(key in result)) result[key] = new Set()
+	  	result[key].add(subsFxn(row, key, result, context))
+	  }
+	}
 }
 
-ValueFiller.prototype["[[$]]"] = function(subterm, input) {
-  const subsFxn = this["$"](subterm)
-  return (row, key, result) => {
-  	if (!(key in result)) result[key] = new Set()
-  	result[key].add(subsFxn(row))
-  }
-}
-
-ValueFiller.prototype["[$[]]"] = function(subterm, input) {
-  const subsFxn = this["$"](subterm)
-	return (row, key, result, context) => {
-    const values = subsFxn(row)
-    if (!Array.isArray(values)) {
-    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
-    }
-    else {
-    	if (!(key in result)) result[key] = []
-    	result[key].push(...values)
-    }
-  }
-}
-
-ValueFiller.prototype["[$[]]"] = function(subterm, input) {
-  const subsFxn = this["$"](subterm)
-	return (row, key, result, context) => {
-    const values = subsFxn(row)
-    if (!Array.isArray(values)) {
-    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
-    }
-    else {
-    	if (!(key in result)) result[key] = new Set()
-    	for(const value of values) {
-    		result[key].add(value)
-    	}
-    }
-  }
+ValueFiller.prototype["[[]]"] = function(subsFxn, input) {
+  const option = input.templateVal[1] ? input.templateVal[1] : ""
+  if (!option || option != "distinct") {
+		return (row, key, result, context) => {
+	    const values = subsFxn(row, key, result, context)
+	    if (!Array.isArray(values)) {
+	    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
+	    }
+	    else {
+	    	if (!(key in result)) result[key] = []
+	    	result[key].push(...values)
+	    }
+	  }
+	}
+	else {
+		return (row, key, result, context) => {
+	    const values = subsFxn(row, key, result, context)
+	    if (!Array.isArray(values)) {
+	    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
+	    }
+	    else {
+	    	if (!(key in result)) result[key] = new Set()
+	    	for(const value of values) {
+	    		result[key].add(value)
+	    	}
+	    }
+	  }
+	}
 }
 
 ValueFiller.prototype["[{}]"] = function (template, input) {
@@ -314,93 +346,5 @@ ValueFiller.prototype[">$"] = function(subterm, input) {
     else if (value > result[key]) {
       result[key] = value
     }
-  }
-}
-
-ValueFiller.prototype["=()"] = function(subterm, input) {
-  const fxn = this.Tree.opts.fxns[subterm.slice(1)]
-  if (!fxn) {
-  	input.errors.push(["val", "ERR-MISSING-FXN"])
-  }
-  else if (input.subterm == "@before" || input.subterm == "@after") { 
-  	return (row, key, result, context) => {
-  		result[key] = fxn(row, row, key, context)
-  	}
-  }
-  else {
-  	return (row, key, result) => result[key] = fxn(row)
-  }
-}
-
-ValueFiller.prototype["[=()]"] = function(subterm, input) {
-  const fxn = this.Tree.opts.fxns[subterm.slice(1)]
-  if (!fxn) {
-  	input.errors.push(["val", "ERR-MISSING-FXN"])
-  }
-  return (row, key, result, context) => {
-  	const value = fxn(row, key, result, context)
-  	if (this.ignoredVals.includes(value)) return
-  	if (!(key in result)) result[key] = []
-  	result[key].push(value)
-  }
-}
-
-ValueFiller.prototype["[[=()]]"] = function(subterm, input) {
-	const fxn = this.Tree.opts.fxns[subterm.slice(1)]
-	if (!fxn) {
-  	input.errors.push(["val", "ERR-MISSING-FXN"])
-  	return
-  }
-	return (row, key, result) => {
-  	if (!(key in result)) result[key] = new Set()
-  	const value = fxn(row)
-  	if (this.ignoredVals.includes(value)) return
-  	result[key].add(value)
-  }
-}
-
-ValueFiller.prototype["[=[]]"] = function(subterm, input) {
-  const fxn = this.Tree.opts.fxns[subterm.slice(1)]
-  if (!fxn) {
-  	input.errors.push(["val", "ERR-MISSING-FXN"])
-  	return
-  }
-  return (row, key, result, context) => {
-  	const values = fxn(row)
-  	if (!Array.isArray(values)) {
-  		context.errors.push([input, "NON-ARRAY-RESULT", row])
-  		return
-  	}
-  	else {
-  		if (!(key in result)) result[key] = []
-	  	for(const value of values) {
-	  		if (!this.ignoredVals.includes(value)) {
-	  			result[key].push(value)
-	  		}
-	  	}
-	  }
-  }
-}
-
-ValueFiller.prototype["[[=[]]]"] = function(subterm, input) {
-  const fxn = this.Tree.opts.fxns[subterm.slice(1)]
-  if (!fxn) {
-  	input.errors.push(["val", "ERR-MISSING-FXN"])
-  	return
-  }
-	return (row, key, result, context) => {
-  	const values = fxn(row)
-  	if (!Array.isArray(values)) {
-  		context.errors.push([input, "NON-ARRAY-RESULT", row])
-  		return
-  	}
-  	else {
-  		if (!(key in result)) result[key] = new Set()
-	  	for(const value of values) {
-	  		if (!this.ignoredVals.includes(value)) {
-	  			result[key].add(value)
-	  		}
-	  	}
-	  }
   }
 }
