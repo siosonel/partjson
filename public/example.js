@@ -21,14 +21,14 @@ const template0 = {
   	nestedExamples: []
   },
 	":__logNumB4": [
-		"=numMammalsBefore()",
+		"=nested.numMammalsBefore()",
 	],
 	"__:logNumAf": [
 		"=numMammalsAfter()",
 	],
 	//"@before()": "=logFishCount()",
 	//"@after()": "=logFishCount()",
-  "#byPreyType": {
+  "byPreyType": {
     "$preytype": {
       total: "+1",
       mass: "+$preymass",

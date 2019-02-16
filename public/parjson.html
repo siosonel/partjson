@@ -130,6 +130,12 @@ function run() {
 				},
 				splitOwners(row) {
 					return typeof row.owners == 'string' ? row.owners.split(",") : row.owners
+				},
+				nested: {
+					numMammalsBefore: (row, key, obj, context) => {
+						const bp = context.root.byPreyType
+						return bp && bp.mammal && bp.mammal.total ? bp.mammal.total : 0
+					}
 				}
 			}, 
 			ignoredVals: [

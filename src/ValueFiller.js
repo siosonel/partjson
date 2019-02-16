@@ -104,12 +104,14 @@ ValueFiller.prototype["$"] = function(subterm, input) {
 }
 
 ValueFiller.prototype["="] = function(subterm, input) {
-  const fxn = this.Tree.opts.fxns[subterm.slice(1)]
+  const nestedProps = subterm.slice(1).split(this.Tree.treeDelimit)
+  const reducer = (d,k) => d && k in d ? d[k] : null
+  const fxn = nestedProps.reduce(reducer, this.Tree.opts.fxns)
   if (!fxn) {
   	input.errors.push(["val", "ERR-MISSING-FXN"])
   }
   else {
-  	return fxn //() => fxn(row, key, result, context)
+  	return fxn //do not call yet
   }
 }
 
