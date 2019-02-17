@@ -7,7 +7,9 @@ Princess	female	Alice,Mike	C2	C3	2019-01-07 09:45	fish	catfish	1.6
 Princess	female	Alice,Mike	C2	C3	2019-01-09 09:45	amphibian	frog	0.7`
 
 const examples = [{
-	title: "Group by a data property value",
+	section: "quick-examples",
+	id: "group-by-data-value",
+	title: "Group by data value",
 	template: {
 		byCat: {
     	"$catname": {
@@ -16,7 +18,9 @@ const examples = [{
   	}
   }
 },{
-	title: "List by prey types",
+	section: "quick-examples",
+	id: "list-by-value",
+	title: "List by data value",
 	template: {
 		distinctPreyType: [
     	"$preytype", "distinct"
@@ -26,13 +30,50 @@ const examples = [{
     ]
   }
 },{
-	title: "List by prey types",
+	section: "quick-examples",
+	id: "min-max-values",
+	title: "Find the minimum and maximum values",
 	template: {
-		distinctPreyType: [
-    	"$preytype", "distinct"
-    ],
-    nonDistinct: [
-    	"$preytype"
-    ]
+		massMin: "<$preymass",
+    massMax: ">$preymass",
+    total: "+1",
+    "byPreyType": {
+	    "$preytype": {
+	      total: "+1",
+	      mass: "+$preymass",
+	      lostMass: "#-$preymass",
+	      massMin: "<$preymass",
+	      massMax: ">$preymass",
+	    }
+	  }
+  }
+},{
+	section: "substitution",
+	id: "substitute-a-data-value",
+	title: `"$" substitutes a data value`,
+	template: {
+		byCat: {
+    	"$catname": {
+    	  total: "+1"
+   		}
+  	}
+  }
+},{
+	section: "substitution",
+	id: "substitute-a-function",
+	title: `"=" substitutes a user supplied function`,
+	template: {
+		"adjustedPreyMass": {
+    	"$preytype": "+=adjustPreyMass()"
+		}
   }
 }]
+
+const fxns = {
+	adjustPreyMass(row) {
+		return row.preymass*0.8
+	},
+	splitOwners(row) { 
+		return row.owners.split(",")
+	}
+}

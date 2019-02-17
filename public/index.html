@@ -15,11 +15,52 @@
 		text-align: center;
 	}
 
+	.nav-bar {
+    background: #555;
+    color: #fff;
+    padding: 5px;
+	}
+
+	.nav-col {
+		display: inline-block;
+		padding: 5px;
+    vertical-align: top;
+		text-align: center;
+	}
+
+	.nav-tab {
+		text-align: center;
+	}
+
+	.no-ht {
+	 	height: 0;
+	 	opacity: 0;
+	}
+
+	.section-title {
+		margin: 30px 0 16px 4%; 
+		text-align: left;
+	}
+
+	.example-div {
+ 		width: 90%;
+    margin: auto;
+    margin-bottom: 40px;
+    background: #ececec;
+    padding: 10px;
+  }
+
+  .example-title {
+  	margin: 0 0 0 4%; 
+  	font-style: italic;
+  }
+
 	.jsondiv {
 		display: inline-block; 
 		height: 20vh;
 		width: 45%;
 		margin: 10px;
+		white-space: nowrap;
 	}
 
 	.inputlabel {
@@ -31,12 +72,17 @@
 	.inputtext {
 		width:100%; 
 		height:100%;
+    background: #555;
+    color: #fff;
 	}
 
 	.tsv {
 		width: 92%; 
 		height: 10vh;
 		margin: 0 4%;
+    background: #555;
+    color: #fff;
+		white-space: nowrap;
 	}
 	</style>
 	<script src="test.js"></script>
@@ -47,10 +93,100 @@
 	<script src="/parjson/src/Err.js" charset="utf-8"></script>
 </head>
 <body>
-<h1>Parjson</h1>
+
+<div class="nav-bar" style="height:20px">
+	<div style="float:left; padding: 0 12px; font-size: 24px;">ParJSON</div>
+	<div style="float:right; height: 16px">
+		<div class="nav-col">
+			<div class="nav-tab"> [ skip ] </div>
+			<div class="nav-tab no-ht"> # </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab"> [ timing ] </div>
+			<div class="nav-tab no-ht" style="font-weight: 600"> :__ </div>
+			<div class="nav-tab no-ht" style="font-weight: 600"> _:_ </div>
+			<div class="nav-tab no-ht" style="font-weight: 600"> __: </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab"> [ aggregation ] </div>
+			<div class="nav-tab no-ht" style="font-weight: 600"> + </div>
+			<div class="nav-tab no-ht" style="font-weight: 600"> - </div>
+			<div class="nav-tab no-ht"> &lt; </div>
+			<div class="nav-tab no-ht"> &gt; </div>
+			<div class="nav-tab no-ht"> [ &nbsp; ] </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab"> [ substitution ] </div>
+			<div class="nav-tab no-ht"> $ </div>
+			<div class="nav-tab no-ht"> = </div>
+			<div class="nav-tab no-ht"> & </div>
+			<div class="nav-tab no-ht"> @ </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab">  stem  </div>
+			<div class="nav-tab no-ht"> [ delim ] </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab"> [ conversion ] </div>
+			<div class="nav-tab no-ht"> () </div>
+			<div class="nav-tab no-ht"> [] </div>
+		</div>
+	</div>
+</div>
+
+<div class="nav-bar" style="height: 95px;">
+	<div style="float:right; height: 16px">
+		<div class="nav-col">
+			<div class="nav-tab no-ht"> [ skip ] </div>
+			<div class="nav-tab"> # </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab no-ht"> [ timing ] </div>
+			<div class="nav-tab" style="font-weight: 600"> :__ </div>
+			<div class="nav-tab" style="font-weight: 600"> _:_ </div>
+			<div class="nav-tab" style="font-weight: 600"> __: </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab no-ht"> [ aggregation ] </div>
+			<div class="nav-tab" style="font-weight: 600"> + </div>
+			<div class="nav-tab" style="font-weight: 600"> - </div>
+			<div class="nav-tab"> &lt; </div>
+			<div class="nav-tab"> &gt; </div>
+			<div class="nav-tab"> [ &nbsp; ] </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab no-ht"> [ substitution ] </div>
+			<div class="nav-tab"> $ </div>
+			<div class="nav-tab"> = </div>
+			<div class="nav-tab"> & </div>
+			<div class="nav-tab"> @ </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab no-ht">  stem  </div>
+			<div class="nav-tab"> [ delim ] </div>
+		</div>
+		<div class="nav-col">
+			<div class="nav-tab no-ht"> [ conversion ] </div>
+			<div class="nav-tab"> ( ) </div>
+			<div class="nav-tab"> [ ] </div>
+		</div>
+	</div>
+</div>
+
+<div id='quick-examples'>
+	<h3 class='section-title'>Quick Examples</h3>
+</div>
+<hr>
+
+<div id='substitution'>
+	<h3 class='section-title'>Substitution</h3>
+</div>
+<hr>
+
+
 <template id='emptyExample'>
-	<div style='width:100%;'>
-		<h4 id="#" style='margin: 50px 0 0 5%'></h4>
+	<div class="example-div">
+		<h4 id="" class="example-title"></h4>
 		<div style="text-align: center">
 			<div class='jsondiv'>
 				<h3 class='inputlabel'>
@@ -75,6 +211,7 @@
 const emptyExample = document.querySelector('#emptyExample')
 examples.forEach(renderExample)
 
+
 function renderExample(example,i) {
 	const clone = document.importNode(emptyExample.content, true)
 	const results = clone.querySelector(".results")
@@ -90,16 +227,19 @@ function renderExample(example,i) {
 	title.innerHTML = example.title
 	
 	const attr = document.createAttribute("my_attrib")
-	title.setAttribute("id", "example-"+i)
+	title.setAttribute("id", example.id)
 
-	document.body.appendChild(clone)
+	document.querySelector('#'+example.section).appendChild(clone)
 
-	const run = getRunFxn({template, tsv, results})
+	const run = getRunFxn({template, tsv, results, title})
 	const inputLabels = document.querySelectorAll('.inputlabel') 
 	for(const label of inputLabels) {
 		label.onclick = run
 	}
 	run()
+	if (window.location.hash == '#' + example.id) {
+		setTimeout(()=>title.scrollIntoView(), 100)
+	}
 }
 
 function getRunFxn(dom) {
@@ -124,7 +264,7 @@ function getRunFxn(dom) {
 			tracker = new Parjson({
 				template,
 				data,
-				fxns: {}
+				fxns
 			})
 		}
 
@@ -154,7 +294,6 @@ function parseTsv(tsv) {
 		c['line #'] = i 
 		header.map((key, j) => c[key]=d[j]);
 		c.nested = {random: {id: Math.random().toFixed(3)}}
-		c.owners = c.owners.split(',')
 		c.testObj = {}
 		data.push(c)
 	}); 

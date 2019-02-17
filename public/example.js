@@ -117,44 +117,6 @@ const template0 = {
   	"=locations[]": {
   		location: "@branch",
   		count: "+1",
-
-  		/*
-  		time0: [ "_::=test0" ],
-  		time1: [ ":_:=test1" ],
-  		time2: [ "::_=test2" ],
-
-  		timeA: [ "_::$testA" ],
-  		timeB: [ ":_:$testB" ],
-  		timeC: [ "::_$testC" ],
-
-
-  		timeX: [ "__:=testx" ],
-  		timeY: [ "_:_=testy" ],
-  		timeZ: [ ":__=testz" ],
-  		timeX: [ "__:=testx" ],
-  		timeY: [ "_:_=testy" ],
-  		timeZ: [ ":__=testz" ],
-			*/
-
-
-  		// * Callbacks
-  		// @before(row)
-  		// @after(row, @parent)    "__:"
-  		// @end(all-result)
-
-  		// * Built-ins
-  		// "@dist()": ["@root@.final"]
   	}
   },
-  /*
-  tentative: {
-  	dataProp: "$property",
-  	d1: "$",
-  	d2: "$.",
-  	d2a: "$propnext/then"
-  	d3: "$.prop.next.then",
-  	d4: "$$prop$next$then",
-  	d5: "$|prop|next|then",
-  }
-  */
 };
