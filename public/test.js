@@ -13,7 +13,7 @@ const examples = [{
 	template: {
 		byCat: {
     	"$catname": {
-    	  total: "+1"
+    	  count: "+1"
    		}
   	}
   }
@@ -36,18 +36,18 @@ const examples = [{
 	template: {
 		massMin: "<$preymass",
     massMax: ">$preymass",
-    total: "+1"
+    count: "+1"
   }
 },{
 	symbol: "$",
 	tokenType: "subs",
 	section: "substitution",
 	id: "substitute-a-data-value",
-	title: `"$" substitutes a data value`,
+	title: `<span class="code-snippet">$</span> substitutes a data value`,
 	template: {
 		byCat: {
     	"$catname": {
-    	  total: "+1"
+    	  count: "+1"
    		}
   	}
   }
@@ -56,7 +56,7 @@ const examples = [{
 	tokenType: "subs",
 	section: "substitution",
 	id: "substitute-a-function",
-	title: `"=" substitutes a user supplied function`,
+	title: `<span class="code-snippet">=</span> substitutes a user supplied function`,
 	template: {
 		"adjustedPreyMass": {
     	"$preytype": "+=adjustPreyMass()"
@@ -68,14 +68,14 @@ const examples = [{
 	tabLabel: "&amp;",
 	section: "substitution",
 	id: "substitute-a-join",
-	title: `"&" substitutes a joined property`,
+	title: `<span class="code-snippet">&amp;</span> substitutes a joined property`,
 	template: {}
 },{
 	symbol: "@",
 	tokenType: "subs",
 	section: "substitution",
 	id: "substitute-a-result",
-	title: `"@" substitutes a result value`,
+	title: `<span class="code-snippet">@</span> substitutes a result value`,
 	template: {}
 },{
 	section: "stem",
@@ -85,38 +85,38 @@ const examples = [{
 },{
 	symbol: "[delim]",
 	tokenType: "stem",
-	tabLabel: "[&nbsp;delim&nbsp;]",
+	tabLabel: "[delim]",
 	section: "stem",
 	id: "stem-delim",
 	title: `Nested values are indicated by partitioning the stem word with a user supplied delimiter.`,
 	template: {}
 },{
-	symbol: "( )",
+	symbol: "()",
 	tokenType: "conv",
 	section: "conversion",
 	id: "convert-a-value",
-	title: `"()" calls a substituted value as a function`,
+	title: `<span class="code-snippet">()</span> calls a substituted value as a function`,
 	template: {}
 },{
-	symbol: "[ ]",
+	symbol: "[]",
 	tokenType: "conv",
 	section: "conversion",
 	id: "convert-a-value",
-	title: `"[]" distributes the returned value of a function call`,
+	title: `<span class="code-snippet">[]</span> distributes the returned value of a function call`,
 	template: {}
 },{
 	symbol: "+",
 	tokenType: "aggr",
 	section: "aggregation",
-	id: "aggregate-a-value",
-	title: `"+" adds the computed value from a running total`,
+	id: "add-a-value",
+	title: `<span class="code-snippet">+</span> adds the computed value from a running count`,
 	template: {}
 },{
 	symbol: "-",
 	tokenType: "aggr",
 	section: "aggregation",
-	id: "aggregate-a-value",
-	title: `"-" subtracts the computed value from a running total`,
+	id: "subtract-a-value",
+	title: `<span class="code-snippet">-</span> subtracts the computed value from a running count`,
 	template: {}
 },{
 	symbol: "<",
@@ -124,7 +124,7 @@ const examples = [{
 	tabLabel: "&lt;",
 	section: "aggregation",
 	id: "find-min-value",
-	title: `"<" finds the minimum value`,
+	title: `<span class="code-snippet">&lt;</span> finds the minimum value`,
 	template: {}
 },{
 	symbol: ">",
@@ -132,42 +132,42 @@ const examples = [{
 	tabLabel: "&gt;",
 	section: "aggregation",
 	id: "find-max-value",
-	title: `">" finds the maximum value`,
+	title: `<span class="code-snippet">&gt;</span> finds the maximum value`,
 	template: {}
 },{
-	symbol: "[ &nbsp; ]",
+	symbol: "[ ]",
 	tokenType: "aggr",
 	section: "aggregation",
 	id: "collect-into-a-list",
-	title: `"[ ]" collects values into a list`,
+	title: `<span class="code-snippet">[ ]</span> collects values into a list`,
 	template: {}
 },{
 	symbol: ":__",
 	tokenType: "time",
 	section: "timing",
 	id: "compute-before-unmarked-inputs",
-	title: `A ":__" prefix will cause a template input to be processed before unmarked inputs`,
+	title: `A <span class="code-snippet">:__</span> prefix will cause a template input to be processed before unmarked inputs`,
 	template: {}
 },{
 	symbol: "_:_",
 	tokenType: "time",
 	section: "timing",
 	id: "compute-after-unmarked-inputs",
-	title: `A "_:_" prefix will cause a template input to be processed after unmarked inputs`,
+	title: `A <span class="code-snippet">_:_</span> prefix will cause a template input to be processed after unmarked inputs`,
 	template: {}
 },{
 	symbol: "__:",
 	tokenType: "time",
 	section: "timing",
 	id: "compute-after-all-rows",
-	title: `A "__:" prefix will cause a template input to be processed after the last data row has been looped through`,
+	title: `A <span class="code-snippet">__:</span> prefix will cause a template input to be processed after the last data row has been looped through`,
 	template: {}
 },{
 	symbol: "#",
 	tokenType: "skip",
 	section: "skip",
 	id: "skip-an-input",
-	title: `"#" causes a template input to be ignored`,
+	title: `<span class="code-snippet">#</span> causes a template input to be ignored`,
 	template: {}
 }]
 

@@ -33,7 +33,7 @@
 	.nav-banner {
 		padding: 5px;
     background: #333;
-    color: #99cc00;
+    color: #fff;
     overflow: hidden;
 	}
 
@@ -58,6 +58,8 @@
 		text-align: center;
     background: #333;
     cursor: pointer;
+    font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
+    font-size: 12px;
 	}
 
 	.nav-symbol {
@@ -69,6 +71,8 @@
     cursor: pointer;
     overflow: hidden;
     transition: height ease 0.1s, padding ease 0.1s;
+    font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
+    font-size: 12px;
   }
 
   .nav-tab:hover, .nav-symbol:hover {
@@ -78,6 +82,14 @@
 
   content {
   	flex: 1;
+  }
+
+  .code-snippet {
+  	font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
+    font-size: 14px;
+    color: #990033;
+    font-style: normal;
+    background: #fff;
   }
 
 	.section-title {
@@ -118,13 +130,15 @@
     background: #333;
     color: #99cc00;
     white-space: pre;
+    font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
+    font-size: 12px;
 	}
 
 	.tsv {
 		display: none;
-		width: 92%; 
+		width: 96%; 
 		height: 10vh;
-		margin: 0 4%;
+		margin: 0 2%;
     background: #333;
     color: #ff9900;
 		white-space: pre;
@@ -132,6 +146,7 @@
 
 	.btn-div {
 		margin: auto;
+		padding: 2px;
 		text-align: center;
 	}
 	</style>
@@ -153,22 +168,22 @@
 		onmouseleave="collapseSymbols()">
 		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
 			<div class="nav-col" id="nav-col-skip">
-				<div class="nav-tab"> [ skip ] </div>
+				<div class="nav-tab"> [skip] </div>
 			</div>
 			<div class="nav-col" id="nav-col-time">
-				<div class="nav-tab"> [ timing ] </div>
+				<div class="nav-tab"> [timing] </div>
 			</div>
 			<div class="nav-col" id="nav-col-aggr">
-				<div class="nav-tab"> [ aggregation ] </div>
+				<div class="nav-tab"> [aggregation] </div>
 			</div>
 			<div class="nav-col" id="nav-col-subs">
-				<div class="nav-tab"> [ substitution ] </div>
+				<div class="nav-tab"> [substitution] </div>
 			</div>
 			<div class="nav-col" id="nav-col-stem">
 				<div class="nav-tab">  stem  </div>
 			</div>
 			<div class="nav-col" id="nav-col-conv">
-				<div class="nav-tab"> [ conversion ] </div>
+				<div class="nav-tab"> [conversion] </div>
 			</div>
 		</div>
 	</nav>
@@ -231,8 +246,8 @@
 			</div>
 		</div>
 		<div class='btn-div'>
-			<button class='tsv-btn'>Data</button>
-			<button class='update-btn'>Update</button>
+			<button class='tsv-btn'>TSV Data</button>
+			<button class='update-btn'>Update Result</button>
 		</div>
 		<textarea class='tsv'>
 		</textarea>
@@ -249,7 +264,7 @@ function renderExample(example,i) {
 	
 	// the ParJSON template, not a DOM template
 	const template = clone.querySelector(".template")
-	template.innerHTML = JSON.stringify(example.template, null, '    ')
+	template.innerHTML = JSON.stringify(example.template, null, "  ")
 	
 	const tsv = clone.querySelector(".tsv")
 	tsv.innerHTML = tsvText
@@ -323,7 +338,7 @@ function getRunFxn(dom) {
 			})
 		}
 
-		dom.results.value = JSON.stringify(tracker.tree, null, "    ")
+		dom.results.value = JSON.stringify(tracker.tree, null, "  ")
 	}
 }
 
