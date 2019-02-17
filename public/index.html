@@ -5,9 +5,20 @@
 	<meta charset="utf-8">
 	<link rel="shortcut icon" href="">
 	<style>
+	html {
+	  height: 100vh;
+	}
+
 	body {
-		font-family: arial, helvetica, sans serif;
 		height: 100vh;
+		display: flex;
+		flex-direction: column;
+  	align-items: stretch;
+		font-family: arial, helvetica, sans serif;
+	}
+
+	flex-fill {
+	  flex: 1 1 auto;
 	}
 
 	h1, h3 {
@@ -15,10 +26,24 @@
 		text-align: center;
 	}
 
+	.nav-top {
+		width: 100%;
+	}
+
+	.nav-banner {
+		padding: 5px;
+    background: #333;
+    color: #99cc00;
+    overflow: hidden;
+	}
+
 	.nav-bar {
-    background: #555;
-    color: #fff;
-    padding: 5px;
+		min-height:16px;
+    padding: 2px;
+    text-align: center;
+    background: #333;
+    color: #99cc00;
+    overflow: hidden;
 	}
 
 	.nav-col {
@@ -29,13 +54,31 @@
 	}
 
 	.nav-tab {
+		padding: 2px;
 		text-align: center;
+    background: #333;
+    cursor: pointer;
 	}
 
-	.no-ht {
-	 	height: 0;
-	 	opacity: 0;
-	}
+	.nav-symbol {
+		height: 0;
+		padding: 0;
+    width: 100%;
+		text-align: center;
+    background: #333;
+    cursor: pointer;
+    overflow: hidden;
+    transition: height ease 0.1s, padding ease 0.1s;
+  }
+
+  .nav-tab:hover, .nav-symbol:hover {
+  	color: #ff0;
+  	background: #999;
+  }
+
+  content {
+  	flex: 1;
+  }
 
 	.section-title {
 		margin: 30px 0 16px 4%; 
@@ -72,17 +115,24 @@
 	.inputtext {
 		width:100%; 
 		height:100%;
-    background: #555;
-    color: #fff;
+    background: #333;
+    color: #99cc00;
+    white-space: pre;
 	}
 
 	.tsv {
+		display: none;
 		width: 92%; 
 		height: 10vh;
 		margin: 0 4%;
-    background: #555;
-    color: #fff;
-		white-space: nowrap;
+    background: #333;
+    color: #ff9900;
+		white-space: pre;
+	}
+
+	.btn-div {
+		margin: auto;
+		text-align: center;
 	}
 	</style>
 	<script src="test.js"></script>
@@ -94,95 +144,72 @@
 </head>
 <body>
 
-<div class="nav-bar" style="height:20px">
-	<div style="float:left; padding: 0 12px; font-size: 24px;">ParJSON</div>
-	<div style="float:right; height: 16px">
-		<div class="nav-col">
-			<div class="nav-tab"> [ skip ] </div>
-			<div class="nav-tab no-ht"> # </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab"> [ timing ] </div>
-			<div class="nav-tab no-ht" style="font-weight: 600"> :__ </div>
-			<div class="nav-tab no-ht" style="font-weight: 600"> _:_ </div>
-			<div class="nav-tab no-ht" style="font-weight: 600"> __: </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab"> [ aggregation ] </div>
-			<div class="nav-tab no-ht" style="font-weight: 600"> + </div>
-			<div class="nav-tab no-ht" style="font-weight: 600"> - </div>
-			<div class="nav-tab no-ht"> &lt; </div>
-			<div class="nav-tab no-ht"> &gt; </div>
-			<div class="nav-tab no-ht"> [ &nbsp; ] </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab"> [ substitution ] </div>
-			<div class="nav-tab no-ht"> $ </div>
-			<div class="nav-tab no-ht"> = </div>
-			<div class="nav-tab no-ht"> & </div>
-			<div class="nav-tab no-ht"> @ </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab">  stem  </div>
-			<div class="nav-tab no-ht"> [ delim ] </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab"> [ conversion ] </div>
-			<div class="nav-tab no-ht"> () </div>
-			<div class="nav-tab no-ht"> [] </div>
-		</div>
+<div class='nav-top'>
+	<div class="nav-banner">
+		<div style="float:left; padding: 0 12px; font-size: 24px;">ParJSON</div>
 	</div>
+	<nav class="nav-bar" 
+		onmouseenter="expandSymbols()" 
+		onmouseleave="collapseSymbols()">
+		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
+			<div class="nav-col" id="nav-col-skip">
+				<div class="nav-tab"> [ skip ] </div>
+			</div>
+			<div class="nav-col" id="nav-col-time">
+				<div class="nav-tab"> [ timing ] </div>
+			</div>
+			<div class="nav-col" id="nav-col-aggr">
+				<div class="nav-tab"> [ aggregation ] </div>
+			</div>
+			<div class="nav-col" id="nav-col-subs">
+				<div class="nav-tab"> [ substitution ] </div>
+			</div>
+			<div class="nav-col" id="nav-col-stem">
+				<div class="nav-tab">  stem  </div>
+			</div>
+			<div class="nav-col" id="nav-col-conv">
+				<div class="nav-tab"> [ conversion ] </div>
+			</div>
+		</div>
+	</nav>
 </div>
 
-<div class="nav-bar" style="height: 95px;">
-	<div style="float:right; height: 16px">
-		<div class="nav-col">
-			<div class="nav-tab no-ht"> [ skip ] </div>
-			<div class="nav-tab"> # </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab no-ht"> [ timing ] </div>
-			<div class="nav-tab" style="font-weight: 600"> :__ </div>
-			<div class="nav-tab" style="font-weight: 600"> _:_ </div>
-			<div class="nav-tab" style="font-weight: 600"> __: </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab no-ht"> [ aggregation ] </div>
-			<div class="nav-tab" style="font-weight: 600"> + </div>
-			<div class="nav-tab" style="font-weight: 600"> - </div>
-			<div class="nav-tab"> &lt; </div>
-			<div class="nav-tab"> &gt; </div>
-			<div class="nav-tab"> [ &nbsp; ] </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab no-ht"> [ substitution ] </div>
-			<div class="nav-tab"> $ </div>
-			<div class="nav-tab"> = </div>
-			<div class="nav-tab"> & </div>
-			<div class="nav-tab"> @ </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab no-ht">  stem  </div>
-			<div class="nav-tab"> [ delim ] </div>
-		</div>
-		<div class="nav-col">
-			<div class="nav-tab no-ht"> [ conversion ] </div>
-			<div class="nav-tab"> ( ) </div>
-			<div class="nav-tab"> [ ] </div>
-		</div>
-	</div>
-</div>
+<content>
+	<section id='quick-examples'>
+		<h3 class='section-title'>Quick Examples</h3>
+	</section>
+	<hr>
 
-<div id='quick-examples'>
-	<h3 class='section-title'>Quick Examples</h3>
-</div>
-<hr>
+	<section id='stem'>
+		<h3 class='section-title'>Stem words</h3>
+	</section>
+	<hr>
 
-<div id='substitution'>
-	<h3 class='section-title'>Substitution</h3>
-</div>
-<hr>
+	<section id='substitution'>
+		<h3 class='section-title'>Substitution</h3>
+	</section>
+	<hr>
 
+	<section id='conversion'>
+		<h3 class='section-title'>Conversion</h3>
+	</section>
+	<hr>
+
+	<section id='aggregation'>
+		<h3 class='section-title'>Aggregation</h3>
+	</section>
+	<hr>
+
+	<section id='timing'>
+		<h3 class='section-title'>Timing</h3>
+	</section>
+	<hr>
+
+	<section id='skip'>
+		<h3 class='section-title'>Skip</h3>
+	</section>
+	<hr>
+</content>
 
 <template id='emptyExample'>
 	<div class="example-div">
@@ -203,14 +230,18 @@
 				</textarea>
 			</div>
 		</div>
+		<div class='btn-div'>
+			<button class='tsv-btn'>Data</button>
+			<button class='update-btn'>Update</button>
+		</div>
 		<textarea class='tsv'>
 		</textarea>
 	</div>
 </template>
 <script>
 const emptyExample = document.querySelector('#emptyExample')
+const renderedBySymbol = {}
 examples.forEach(renderExample)
-
 
 function renderExample(example,i) {
 	const clone = document.importNode(emptyExample.content, true)
@@ -225,26 +256,50 @@ function renderExample(example,i) {
 
 	const title = clone.querySelector('h4')
 	title.innerHTML = example.title
-	
-	const attr = document.createAttribute("my_attrib")
 	title.setAttribute("id", example.id)
 
-	document.querySelector('#'+example.section).appendChild(clone)
-
 	const run = getRunFxn({template, tsv, results, title})
-	const inputLabels = document.querySelectorAll('.inputlabel') 
+	
+	const inputLabels = clone.querySelectorAll('.inputlabel')
 	for(const label of inputLabels) {
 		label.onclick = run
 	}
+
+	clone.querySelector('.update-btn').onclick = run
+
+	clone.querySelector('.tsv-btn').onclick = ()=>{
+		tsv.style.display = tsv.style.display == "block" ? "none" : "block"
+	}
+
+	document.querySelector('#'+example.section).appendChild(clone)
 	run()
+
 	if (window.location.hash == '#' + example.id) {
 		setTimeout(()=>title.scrollIntoView(), 100)
+	}
+
+	if (example.symbol && !renderedBySymbol[example.symbol]) {
+		const tab = document.createElement('div')
+		tab.setAttribute("class", "nav-symbol")
+		tab.innerHTML = example.tabLabel ? example.tabLabel : example.symbol
+		const navCol = document.querySelector("#nav-col-" + example.tokenType)
+		navCol.appendChild(tab)
+		
+		tab.onclick = () => {
+			collapseSymbols()
+			setTimeout(()=>window.location.hash = "#" + example.id, 100)
+		}
+
+		navCol.querySelector('.nav-tab').onclick = () => {
+			collapseSymbols()
+			setTimeout(()=>window.location.hash = "#" + example.section, 100)
+		}
 	}
 }
 
 function getRunFxn(dom) {
 	let tracker
-	return () => {
+	return function() {
 		const template = JSON.parse(
 			dom.template.value
 				.trim()
@@ -270,6 +325,20 @@ function getRunFxn(dom) {
 
 		dom.results.value = JSON.stringify(tracker.tree, null, "    ")
 	}
+}
+
+function expandSymbols() {
+	document.querySelectorAll(".nav-symbol").forEach(elem => {
+		elem.style.height = "16px"
+		elem.style.padding = "2px"
+	})
+}
+
+function collapseSymbols() {
+	document.querySelectorAll(".nav-symbol").forEach(elem => {
+		elem.style.height = 0
+		elem.style.padding = 0
+	})
 }
 
 function parseTsv(tsv) {

@@ -36,18 +36,11 @@ const examples = [{
 	template: {
 		massMin: "<$preymass",
     massMax: ">$preymass",
-    total: "+1",
-    "byPreyType": {
-	    "$preytype": {
-	      total: "+1",
-	      mass: "+$preymass",
-	      lostMass: "#-$preymass",
-	      massMin: "<$preymass",
-	      massMax: ">$preymass",
-	    }
-	  }
+    total: "+1"
   }
 },{
+	symbol: "$",
+	tokenType: "subs",
 	section: "substitution",
 	id: "substitute-a-data-value",
 	title: `"$" substitutes a data value`,
@@ -59,6 +52,8 @@ const examples = [{
   	}
   }
 },{
+	symbol: "=",
+	tokenType: "subs",
 	section: "substitution",
 	id: "substitute-a-function",
 	title: `"=" substitutes a user supplied function`,
@@ -67,6 +62,113 @@ const examples = [{
     	"$preytype": "+=adjustPreyMass()"
 		}
   }
+},{
+	symbol: "&",
+	tokenType: "subs",
+	tabLabel: "&amp;",
+	section: "substitution",
+	id: "substitute-a-join",
+	title: `"&" substitutes a joined property`,
+	template: {}
+},{
+	symbol: "@",
+	tokenType: "subs",
+	section: "substitution",
+	id: "substitute-a-result",
+	title: `"@" substitutes a result value`,
+	template: {}
+},{
+	section: "stem",
+	id: "stem",
+	title: `A stem word can be modified by any of the optional symbols.`,
+	template: {}
+},{
+	symbol: "[delim]",
+	tokenType: "stem",
+	tabLabel: "[&nbsp;delim&nbsp;]",
+	section: "stem",
+	id: "stem-delim",
+	title: `Nested values are indicated by partitioning the stem word with a user supplied delimiter.`,
+	template: {}
+},{
+	symbol: "( )",
+	tokenType: "conv",
+	section: "conversion",
+	id: "convert-a-value",
+	title: `"()" calls a substituted value as a function`,
+	template: {}
+},{
+	symbol: "[ ]",
+	tokenType: "conv",
+	section: "conversion",
+	id: "convert-a-value",
+	title: `"[]" distributes the returned value of a function call`,
+	template: {}
+},{
+	symbol: "+",
+	tokenType: "aggr",
+	section: "aggregation",
+	id: "aggregate-a-value",
+	title: `"+" adds the computed value from a running total`,
+	template: {}
+},{
+	symbol: "-",
+	tokenType: "aggr",
+	section: "aggregation",
+	id: "aggregate-a-value",
+	title: `"-" subtracts the computed value from a running total`,
+	template: {}
+},{
+	symbol: "<",
+	tokenType: "aggr",
+	tabLabel: "&lt;",
+	section: "aggregation",
+	id: "find-min-value",
+	title: `"<" finds the minimum value`,
+	template: {}
+},{
+	symbol: ">",
+	tokenType: "aggr",
+	tabLabel: "&gt;",
+	section: "aggregation",
+	id: "find-max-value",
+	title: `">" finds the maximum value`,
+	template: {}
+},{
+	symbol: "[ &nbsp; ]",
+	tokenType: "aggr",
+	section: "aggregation",
+	id: "collect-into-a-list",
+	title: `"[ ]" collects values into a list`,
+	template: {}
+},{
+	symbol: ":__",
+	tokenType: "time",
+	section: "timing",
+	id: "compute-before-unmarked-inputs",
+	title: `A ":__" prefix will cause a template input to be processed before unmarked inputs`,
+	template: {}
+},{
+	symbol: "_:_",
+	tokenType: "time",
+	section: "timing",
+	id: "compute-after-unmarked-inputs",
+	title: `A "_:_" prefix will cause a template input to be processed after unmarked inputs`,
+	template: {}
+},{
+	symbol: "__:",
+	tokenType: "time",
+	section: "timing",
+	id: "compute-after-all-rows",
+	title: `A "__:" prefix will cause a template input to be processed after the last data row has been looped through`,
+	template: {}
+},{
+	symbol: "#",
+	tokenType: "skip",
+	section: "skip",
+	id: "skip-an-input",
+	title: `"#" causes a template input to be ignored`,
+	template: {}
 }]
 
 const fxns = {
