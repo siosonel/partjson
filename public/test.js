@@ -34,8 +34,8 @@ const examples = [{
 	id: "min-max-values",
 	title: "Find the minimum and maximum values",
 	template: {
-		massMin: "<$preymass",
-    massMax: ">$preymass",
+    massMin: ">$preymass",
+		massMax: "<$preymass",
     count: "+1"
   }
 },{
@@ -248,7 +248,7 @@ const fxns = {
 		return context.self.totalPreyMass / context.self.count
 	},
 	roundedPreyMass: d => isNumeric(d.preymass) 
-		? d.preymass.toPrecision(2) 
+		? +d.preymass.toPrecision(2) 
 		: null,
 	adjustPreyMass(row) {
 		return row.preymass*0.8

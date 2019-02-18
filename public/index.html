@@ -27,9 +27,13 @@
 		text-align: center;
 	}
 
-	p {
+	p, ul {
 		width: 90%;
 		margin: auto;
+	}
+
+	li {
+		margin: 5px;
 	}
 
 	.nav-top {
@@ -211,12 +215,33 @@
 		<p>
 			Parjson fills a JSON-based template for 
 			partitioning rows of data into a well-defined tree of 
-			data collections and aggregated results. It is
-			a data shaping utility that lessens loops and if-else
-			branches in code. More importantly, it helps code consumers
-			to understand the overall data processing intent by having 
-			the target structure laid out at the beginning. 
-		</p>
+			data collections and aggregated results. The template
+			syntax and filler design is guided by the following 
+			motivations:
+    <p>
+    <br/>
+		<ul>
+      <li>
+      	To minimize coding errors by using a well-tested and reliable template 
+      	filler to handle the data processing: 
+      	<i>help assure code correctness</i>
+      </li>
+		  <li>
+		    To better communicate the overall data processing intent by having 
+	      the target data structure laid out from the beginning:
+	      <i>improve code readability and maintainability</i>
+      </li>
+			<li>
+				To significantly reduce the lines and complexity of data processing 
+				code in a non-data oriented programming language such as Javascript:
+				<i>reduce loops and if-else branches</i>
+			</li>
+			<li>
+				To encourage performant template fillers that only pass through each data
+				row once, making partitioning and aggregation suitable for streaming data 
+				and parallelized processing
+			</li>
+		</ul>
 		<br/>
 	</section>
 
