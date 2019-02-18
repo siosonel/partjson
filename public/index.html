@@ -17,13 +17,19 @@
 		font-family: arial, helvetica, sans serif;
 	}
 
-	flex-fill {
-	  flex: 1 1 auto;
+	section {
+		/*border-bottom: 1px solid #eee;*/
 	}
+
 
 	h1, h3 {
 		margin: 0.25rem;
 		text-align: center;
+	}
+
+	p {
+		width: 90%;
+		margin: auto;
 	}
 
 	.nav-top {
@@ -125,6 +131,7 @@
 	.inputlabel {
 		color: #777;
 	 	text-decoration: underline; 
+	 	font-size: 14px;
 	 	cursor: pointer;
 	}
 
@@ -195,40 +202,45 @@
 </div>
 
 <content>
+	<section id='intro'>
+		<h3 class='section-title'>Basics</h3>
+		<p>
+			Parjson fills a JSON-based template for 
+			partitioning rows of data into a well-defined tree of 
+			shaped data collections and aggregated results. It is
+			a data shaping utility that lessens loops and if-else
+			branches in code.
+		</p>
+		<br/>
+	</section>
+
 	<section id='quick-examples'>
 		<h3 class='section-title'>Quick Examples</h3>
 	</section>
-	<hr>
 
 	<section id='stem'>
 		<h3 class='section-title'>Stem words</h3>
 	</section>
-	<hr>
 
 	<section id='substitution'>
 		<h3 class='section-title'>Substitution</h3>
 	</section>
-	<hr>
 
 	<section id='conversion'>
 		<h3 class='section-title'>Conversion</h3>
 	</section>
-	<hr>
 
 	<section id='aggregation'>
 		<h3 class='section-title'>Aggregation</h3>
 	</section>
-	<hr>
 
 	<section id='timing'>
 		<h3 class='section-title'>Timing</h3>
 	</section>
-	<hr>
 
 	<section id='skip'>
 		<h3 class='section-title'>Skip</h3>
 	</section>
-	<hr>
 </content>
 
 <template id='emptyExample'>
@@ -381,15 +393,22 @@ function parseTsv(tsv) {
 		}
 		const c = Object.create(null)
 		c['line #'] = i 
-		header.map((key, j) => c[key]=d[j]);
-		c.nested = {random: {id: Math.random().toFixed(3)}}
+		header.map((key, j) => {
+			if (key.endsWith("-json")) {
+				c[key.slice(0,-5)] = JSON.parse(d[j])
+			}
+			else {
+				c[key] = d[j]
+			}
+		});
+
 		c.testObj = {}
 		data.push(c)
 	}); 
 	if (tsvParseErrors.length) {
 		console.log('Error parsing tsv: ', tsvParseErrors)
 	}
-	// console.log(data)
+	
 	return data
 }
 

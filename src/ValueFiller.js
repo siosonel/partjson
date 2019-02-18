@@ -182,7 +182,7 @@ ValueFiller.prototype["''"] = function(subsFxn, input) {
 
 ValueFiller.prototype["()"] = function(subsFxn, input) {
  	return (row, key, result, context) => {
- 		result[key] = subsFxn(row, key, result, context)(row)
+ 		result[key] = subsFxn(row, key, result, context)
  	}
 }
 

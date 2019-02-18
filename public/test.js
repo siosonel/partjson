@@ -1,10 +1,10 @@
-const tsvText = `catname	catsex	owners	ownerblock	huntblock	huntdate	preytype	preysubtype	preymass
-Jerry	male	Bob	A1	B1	2019-01-02 19:25	bird	robin	0.596
-Jerry	male	Bob	A1	B4	2019-01-04 20:45	mammal	rat	0.601
-Jerry	male	Bob,Jane	A1	C3	2019-01-07 06:45	mammal	squirel	0.8
-Princess	female	Alice,Joe	C2	C3	2019-01-05 09:45	fish	minnow	0.1
-Princess	female	Alice,Mike	C2	C3	2019-01-07 09:45	fish	catfish	1.6
-Princess	female	Alice,Mike	C2	C3	2019-01-09 09:45	amphibian	frog	0.7`
+const tsvText = `catname	catsex	owners	ownerblock	huntblock	huntdate	preytype	preysubtype	preymass	nested-json
+Jerry	male	Bob	A1	B1	2019-01-02 19:25	bird	robin	0.596	{"random":{"id": "a10c"}}
+Jerry	male	Bob	A1	B4	2019-01-04 20:45	mammal	rat	0.601	{"random":{"id": "bkd0"}}
+Jerry	male	Bob,Jane	A1	C3	2019-01-07 06:45	mammal	squirel	0.8	{"random":{"id": "jjkl"}}
+Princess	female	Alice,Joe	C2	C3	2019-01-05 09:45	fish	minnow	0.1	{"random":{"id": "hgys"}}
+Princess	female	Alice,Mike	C2	C3	2019-01-07 09:45	fish	catfish	1.6	{"random":{"id": "irty"}}
+Princess	female	Alice,Mike	C2	C3	2019-01-09 09:45	amphibian	frog	0.7	{"random":{"id": "34jd"}}`
 
 const examples = [{
 	section: "quick-examples",
@@ -39,6 +39,25 @@ const examples = [{
     count: "+1"
   }
 },{
+	section: "stem",
+	id: "stem",
+	title: `A stem word can be modified by any of the optional symbols to`
+		+ ` indicate the type of processing that needs to happen.`,
+	template: {
+		"$catname": "unprocessed-stem",
+		"unprocessed-stem": "+$preymass"
+	}
+},{
+	symbol: "[delim]",
+	tokenType: "stem",
+	tabLabel: "[delim]",
+	section: "stem",
+	id: "stem-delim",
+	title: `Nested values are indicated by partitioning the stem word with a user supplied delimiter.`,
+	template: {
+		"$.nested.random.id": ["$catname"]
+	}
+},{
 	symbol: "$",
 	tokenType: "subs",
 	section: "substitution",
@@ -69,41 +88,53 @@ const examples = [{
 	section: "substitution",
 	id: "substitute-a-join",
 	title: `<span class="code-snippet">&amp;</span> substitutes a joined property`,
-	template: {}
+	template: {
+  	"@join()": {
+  		"loc": "=blockInfo()"
+  	},
+  	"$catname": {
+  		count: "+1",
+  		blockName: "&loc.name",
+  		blockPop: "&loc.population"
+  	}
+  }
 },{
 	symbol: "@",
 	tokenType: "subs",
 	section: "substitution",
 	id: "substitute-a-result",
 	title: `<span class="code-snippet">@</span> substitutes a result value`,
-	template: {}
-},{
-	section: "stem",
-	id: "stem",
-	title: `A stem word can be modified by any of the optional symbols.`,
-	template: {}
-},{
-	symbol: "[delim]",
-	tokenType: "stem",
-	tabLabel: "[delim]",
-	section: "stem",
-	id: "stem-delim",
-	title: `Nested values are indicated by partitioning the stem word with a user supplied delimiter.`,
-	template: {}
+	template: {
+		"staticResult": "0.5",
+		"child": {
+			"version": "@parent.staticResult"
+		}
+	}
 },{
 	symbol: "()",
 	tokenType: "conv",
 	section: "conversion",
-	id: "convert-a-value",
+	id: "convert-via-function",
 	title: `<span class="code-snippet">()</span> calls a substituted value as a function`,
-	template: {}
+	template: {
+		"$preytype": "=roundedPreyMass()"
+	}
 },{
 	symbol: "[]",
 	tokenType: "conv",
 	section: "conversion",
-	id: "convert-a-value",
+	id: "convert-array",
 	title: `<span class="code-snippet">[]</span> distributes the returned value of a function call`,
-	template: {}
+	template: {
+		"byOwner": {
+			"=splitOwners[]": "+$preymass"
+		},
+		"byPreyType": {
+			"$preytype": [
+				"=splitOwners[]", "distinct"
+			]
+		}
+	}
 },{
 	symbol: "+",
 	tokenType: "aggr",
@@ -145,22 +176,22 @@ const examples = [{
 	symbol: ":__",
 	tokenType: "time",
 	section: "timing",
-	id: "compute-before-unmarked-inputs",
-	title: `A <span class="code-snippet">:__</span> prefix will cause a template input to be processed before unmarked inputs`,
+	id: "compute-before-untimed-inputs",
+	title: `A <span class="code-snippet">:__</span> prefix will cause a template input to be processed before untimed inputs are processed for the same data row.`,
 	template: {}
 },{
 	symbol: "_:_",
 	tokenType: "time",
 	section: "timing",
-	id: "compute-after-unmarked-inputs",
-	title: `A <span class="code-snippet">_:_</span> prefix will cause a template input to be processed after unmarked inputs`,
+	id: "compute-after-untimed-inputs",
+	title: `A <span class="code-snippet">_:_</span> prefix will delay the processing of a template input after untimed inputs are processed for the same data row.`,
 	template: {}
 },{
 	symbol: "__:",
 	tokenType: "time",
 	section: "timing",
 	id: "compute-after-all-rows",
-	title: `A <span class="code-snippet">__:</span> prefix will cause a template input to be processed after the last data row has been looped through`,
+	title: `A <span class="code-snippet">__:</span> prefix will delay the processing of a template input after the last data row has been looped through.`,
 	template: {}
 },{
 	symbol: "#",
@@ -184,10 +215,18 @@ const examples = [{
 }]
 
 const fxns = {
+	roundedPreyMass: d => isNumeric(d.preymass) 
+		? d.preymass.toPrecision(2) 
+		: null,
 	adjustPreyMass(row) {
 		return row.preymass*0.8
 	},
 	splitOwners(row) { 
 		return row.owners.split(",")
+	},
+	blockInfo(row) {
+		return row.ownerblock[0] == 'C' 
+			? {name: "Friendly Neighborhood", population: 630}
+			: {name: "Sesame Street", population: 950}
 	}
 }
