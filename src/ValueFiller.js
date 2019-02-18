@@ -22,7 +22,7 @@ class ValueFiller {
   }
 
   getStringFiller(input) {
-    const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal);
+    const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal)
     const subsToken = tokens.skip ? symbols : tokens.subs
     if (subsToken in this) {
     	const subsFxn = this[subsToken](subterm, input)
@@ -102,7 +102,8 @@ ValueFiller.prototype["$"] = function(subterm, input) {
   	return (row) => row
   }
   else if (subterm.includes(this.Tree.userDelimit)) {
-  	const nestedProps = subterm.split(this.Tree.userDelimit).slice(1);
+  	const nestedProps = subterm.slice(1).split(this.Tree.userDelimit)
+  	if (nestedProps[0] == "") nestedProps.shift()
     const reducer = (d,k) => d ? d[k] : null
     return (row) => nestedProps.reduce(reducer, row)
   }

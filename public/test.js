@@ -55,7 +55,7 @@ const examples = [{
 	id: "stem-delim",
 	title: `Nested values are indicated by partitioning the stem word with a user supplied delimiter.`,
 	template: {
-		"$.nested.random.id": ["$catname"]
+		"$nested.random.id": ["$catname"]
 	}
 },{
 	symbol: "$",
@@ -162,7 +162,7 @@ const examples = [{
 	tabLabel: "&lt;",
 	section: "aggregation",
 	id: "find-max-value",
-	title: `<span class="code-snippet">&lt;</span> finds the maximum value, by replacing the result's current input value when it is less than current data row's computed input value`,
+	title: `<span class="code-snippet">&lt;</span> finds the maximum value, by replacing a result's input by a greater value`,
 	template: {
 		massMax: "<$preymass"
   }
@@ -172,7 +172,7 @@ const examples = [{
 	tabLabel: "&gt;",
 	section: "aggregation",
 	id: "find-min-value",
-	title: `<span class="code-snippet">&gt;</span> finds the minimum value, by replacing the result's current input value when it is greater than current data row's computed input value`,
+	title: `<span class="code-snippet">&gt;</span> finds the minimum value, by replacing a result's input by a lesser value`,
 	template: {
     massMin: ">$preymass"
   }
