@@ -126,6 +126,7 @@ ValueFiller.prototype["="] = function(subterm, input) {
 }
 
 ValueFiller.prototype["@"] = function(subterm, input) {
+	if (this.Tree.reservedOpts.includes(subterm)) return
   const nestedSymbol = "@" + this.Tree.treeDelimit
   if (subterm == "@" || subterm == nestedSymbol) {
   	return (row, key, result) => result

@@ -6,6 +6,7 @@ class KeyFiller {
   }
 
   getFxn(subterm, symbols, input) {
+		if (this.Tree.reservedOpts.includes(subterm)) return
     if (input.keyTokens.skip) {
     	this["#"](subterm, input)
     }

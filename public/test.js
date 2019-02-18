@@ -41,8 +41,9 @@ const examples = [{
 },{
 	section: "stem",
 	id: "stem",
-	title: `A stem word can be modified by any of the optional symbols to`
-		+ ` indicate the type of processing that needs to happen.`,
+	title: `A stem may either be a unprocessed constant or a substitutable 
+	  property name, alias, or keyword. The stem forms the 'root word' of 
+	  an input key or value term.`,
 	template: {
 		"$catname": "unprocessed-stem",
 		"unprocessed-stem": "+$preymass"
@@ -53,8 +54,11 @@ const examples = [{
 	tabLabel: "[delim]",
 	section: "stem",
 	id: "stem-delim",
-	title: `Nested values are indicated by partitioning the stem word with a user supplied delimiter.`,
+	title: `Nested values are indicated by using multiple stems with a string delimiter.
+	 This delimiter character defaults to <span class="code-snippet">.</span>, but 
+	 may be overriden by declaring a @userDelimit value in the template root.`,
 	template: {
+		"@userDelimit": ".",
 		"$nested.random.id": ["$catname"]
 	}
 },{
@@ -75,7 +79,8 @@ const examples = [{
 	tokenType: "subs",
 	section: "substitution",
 	id: "substitute-a-function",
-	title: `<span class="code-snippet">=</span> substitutes a user supplied function`,
+	title: `<span class="code-snippet">=</span> substitutes a user supplied function or property 
+	  that was supplied directly to the filler application`,
 	template: {
 		"adjustedPreyMass": {
     	"$preytype": "+=adjustPreyMass()"

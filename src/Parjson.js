@@ -39,8 +39,14 @@ See parjson.readme.txt for more information
     this.aggrSymbols = ["+", "-", "<", ">"]
     this.timeSymbols = [":__", "_:_", "__:"]
     this.skipSymbols = ["#"]
+    this.reservedOpts = ["@userDelimit", "@treeDelimit"]
     this.reservedFxns = ["@before()", "@after()", "@dist()", "@join()"]
-    this.reservedTerms = ["@branch", "@parent", "@root"].concat(this.reservedTerms)
+    this.reservedContexts = ["@branch", "@parent", "@root"]
+    this.reservedTerms = [
+      ...this.reservedOpts,
+      ...this.reservedFxns,
+    	...this.reservedContexts
+    ]
     this.steps = [":__", "", "_:_"]
     this.errors = new Err(this)
     this.keyFiller = new KeyFiller(this)
@@ -51,8 +57,8 @@ See parjson.readme.txt for more information
   refresh(opts={}) {
     this.errors.clear()
   	Object.assign(this.opts,opts)
-  	if (this.opts.userDelimit) {
-  		this.userDelimit = this.opts.userDelimit
+  	if (this.opts.template['@userDelimit']) {
+  		this.userDelimit = this.opts.template['@userDelimit']
   	}
   	if (opts.treeDelimit) {
   		this.treeDelimit = this.opts.treeDelimit
