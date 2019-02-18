@@ -167,8 +167,20 @@ const examples = [{
 	tokenType: "skip",
 	section: "skip",
 	id: "skip-an-input",
-	title: `<span class="code-snippet">#</span> causes a template input to be ignored`,
-	template: {}
+	title: `<span class="code-snippet">#</span> in an input key or value causes a template input to be ignored`,
+	template: {
+  	"#$preytype": "+1",
+  	"$catname": "#+1",
+  }
+},{
+	section: "skip",
+	id: "skip-may-create-empty-an-object",
+	title: `<span class="code-snippet">#</span> in a nested input may create an empty object`,
+	template: {
+  	"$preytype": {
+  	  "count": "#+1"
+  	}
+  }
 }]
 
 const fxns = {

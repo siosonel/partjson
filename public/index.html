@@ -28,13 +28,18 @@
 
 	.nav-top {
 		width: 100%;
+    height: 70px;
+    z-index: 1;
+    overflow: visible;
 	}
 
 	.nav-banner {
 		padding: 5px;
     background: #333;
     color: #fff;
-    overflow: hidden;
+    overflow: hidden; 
+    font-size: 24px;
+    font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
 	}
 
 	.nav-bar {
@@ -107,7 +112,6 @@
 
   .example-title {
   	margin: 0 0 0 4%; 
-  	font-style: italic;
   }
 
 	.jsondiv {
@@ -132,6 +136,8 @@
     white-space: pre;
     font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
     font-size: 12px;
+    text-align: left;
+		overflow: scroll;
 	}
 
 	.tsv {
@@ -161,29 +167,28 @@
 
 <div class='nav-top'>
 	<div class="nav-banner">
-		<div style="float:left; padding: 0 12px; font-size: 24px;">ParJSON</div>
+		<div style="float:left; padding: 0 12px;">Parjson</div>
 	</div>
 	<nav class="nav-bar" 
-		onmouseenter="expandSymbols()" 
 		onmouseleave="collapseSymbols()">
 		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
 			<div class="nav-col" id="nav-col-skip">
-				<div class="nav-tab"> [skip] </div>
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [skip] </div>
 			</div>
 			<div class="nav-col" id="nav-col-time">
-				<div class="nav-tab"> [timing] </div>
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [timing] </div>
 			</div>
 			<div class="nav-col" id="nav-col-aggr">
-				<div class="nav-tab"> [aggregation] </div>
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [aggregation] </div>
 			</div>
 			<div class="nav-col" id="nav-col-subs">
-				<div class="nav-tab"> [substitution] </div>
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [substitution] </div>
 			</div>
 			<div class="nav-col" id="nav-col-stem">
-				<div class="nav-tab">  stem  </div>
+				<div class="nav-tab" onmouseenter="expandSymbols()">  stem  </div>
 			</div>
 			<div class="nav-col" id="nav-col-conv">
-				<div class="nav-tab"> [conversion] </div>
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [conversion] </div>
 			</div>
 		</div>
 	</nav>
@@ -228,7 +233,7 @@
 
 <template id='emptyExample'>
 	<div class="example-div">
-		<h4 id="" class="example-title"></h4>
+		<p id="" class="example-title"></p>
 		<div style="text-align: center">
 			<div class='jsondiv'>
 				<h3 class='inputlabel'>
@@ -246,8 +251,8 @@
 			</div>
 		</div>
 		<div class='btn-div'>
-			<button class='tsv-btn'>TSV Data</button>
-			<button class='update-btn'>Update Result</button>
+			<button class='tsv-btn'>TSV</button>
+			<button class='update-btn'>Update</button>
 		</div>
 		<textarea class='tsv'>
 		</textarea>
@@ -264,12 +269,12 @@ function renderExample(example,i) {
 	
 	// the ParJSON template, not a DOM template
 	const template = clone.querySelector(".template")
-	template.innerHTML = JSON.stringify(example.template, null, "  ")
+	template.value = JSON.stringify(example.template, null, "  ")
 	
 	const tsv = clone.querySelector(".tsv")
-	tsv.innerHTML = tsvText
+	tsv.value = tsvText
 
-	const title = clone.querySelector('h4')
+	const title = clone.querySelector('p')
 	title.innerHTML = example.title
 	title.setAttribute("id", example.id)
 
@@ -302,12 +307,12 @@ function renderExample(example,i) {
 		
 		tab.onclick = () => {
 			collapseSymbols()
-			setTimeout(()=>window.location.hash = "#" + example.id, 100)
+			window.location.hash = "#" + example.id
 		}
 
 		navCol.querySelector('.nav-tab').onclick = () => {
 			collapseSymbols()
-			setTimeout(()=>window.location.hash = "#" + example.section, 100)
+			window.location.hash = "#" + example.section
 		}
 	}
 }

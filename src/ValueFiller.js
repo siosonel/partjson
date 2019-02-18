@@ -22,11 +22,14 @@ class ValueFiller {
   }
 
   getStringFiller(input) {
-    const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal)
-    const subsFxn = this[tokens.subs](subterm, input)
-    if (subsFxn) {
-      const conv = tokens.conv ? tokens.conv : "''"
-      return this[tokens.aggr + conv] ? this[tokens.aggr + conv](subsFxn, input) : null
+    const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal);
+    const subsToken = tokens.skip ? symbols : tokens.subs
+    if (subsToken in this) {
+    	const subsFxn = this[subsToken](subterm, input)
+    	if (subsFxn) {
+      	const conv = tokens.conv ? tokens.conv : "''"
+      	return this[tokens.aggr + conv] ? this[tokens.aggr + conv](subsFxn, input) : null
+      }
     }
     else {
       input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE-SYMBOL'])
@@ -41,11 +44,17 @@ class ValueFiller {
     }
     else if (typeof input.templateVal[0] == 'string') {
       const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal[0])
-      const subsFxn = this[tokens.subs](subterm, input)
-      if (subsFxn) {
-      	const conv = tokens.conv ? tokens.conv : "''"
-      	return this["["+ conv +"]"](subsFxn, input)
+      const subsToken = tokens.skip ? symbols : tokens.subs
+      if (subsToken in this) {
+      	const subsFxn = this[subsToken](subterm, input)
+      	if (subsFxn) {
+      		const conv = tokens.conv ? tokens.conv : "''"
+      		return this["["+ conv +"]"](subsFxn, input)
+      	}
       }
+	    else {
+	      input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE-SYMBOL'])
+	    }
     }
     else if (input.templateVal[0] && typeof input.templateVal[0] == 'object') {
       return this["[{}]"](input.templateVal[0], input)
