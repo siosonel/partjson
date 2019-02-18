@@ -23,7 +23,7 @@ const template0 = {
 	":__logNumB4": [
 		"=nested.numMammalsBefore()",
 	],
-	"__:logNumAf": [
+	"_:_logNumAf": [
 		"=numMammalsAfter()",
 	],
 	//"@before()": "=logFishCount()",
@@ -33,8 +33,8 @@ const template0 = {
       total: "+1",
       mass: "+$preymass",
       lostMass: "#-$preymass",
-      massMin: "<$preymass",
-      massMax: ">$preymass",
+      massMax: "<$preymass",
+      massMin: ">$preymass",
       "rekeyedNested": [{
       	index: "@branch",
       	hunter: "$catname",

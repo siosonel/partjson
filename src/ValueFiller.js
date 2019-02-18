@@ -101,7 +101,7 @@ ValueFiller.prototype["$"] = function(subterm, input) {
   if (subterm == "$" || subterm == nestedSymbol) {
   	return (row) => row
   }
-  else if (subterm.startsWith(nestedSymbol)) {
+  else if (subterm.includes(this.Tree.userDelimit)) {
   	const nestedProps = subterm.split(this.Tree.userDelimit).slice(1);
     const reducer = (d,k) => d ? d[k] : null
     return (row) => nestedProps.reduce(reducer, row)
@@ -312,7 +312,7 @@ ValueFiller.prototype["<''"] = function(subsFxn, input) {
     if (!(key in result)) {
       result[key] = value
     }
-    else if (value < result[key]) {
+    else if (result[key] < value) {
       result[key] = value
     }
   }
@@ -329,7 +329,7 @@ ValueFiller.prototype["<()"] = function(subsFxn, input) {
     if (!(key in result)) {
       result[key] = value
     }
-    else if (value < result[key]) {
+    else if (result[key] < value) {
       result[key] = value
     }
   }
@@ -346,7 +346,7 @@ ValueFiller.prototype[">''"] = function(subsFxn, input) {
     if (!(key in result)) {
       result[key] = value
     }
-    else if (value > result[key]) {
+    else if (result[key] > value) {
       result[key] = value
     }
   }
@@ -363,7 +363,7 @@ ValueFiller.prototype[">()"] = function(subsFxn, input) {
     if (!(key in result)) {
       result[key] = value
     }
-    else if (value < result[key]) {
+    else if (result[key] > value) {
       result[key] = value
     }
   }

@@ -150,12 +150,16 @@
 
 	.tsv {
 		display: none;
-		width: 96%; 
+		width: 94%; 
 		height: 10vh;
-		margin: 0 2%;
+		margin: 0 3%;
+		border: none;
     background: #333;
     color: #ff9900;
 		white-space: pre;
+    font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
+    font-size: 12px;
+    text-align: left;
 	}
 
 	.btn-div {
@@ -207,9 +211,11 @@
 		<p>
 			Parjson fills a JSON-based template for 
 			partitioning rows of data into a well-defined tree of 
-			shaped data collections and aggregated results. It is
+			data collections and aggregated results. It is
 			a data shaping utility that lessens loops and if-else
-			branches in code.
+			branches in code. More importantly, it helps code consumers
+			to understand the overall data processing intent by having 
+			the target structure laid out at the beginning. 
 		</p>
 		<br/>
 	</section>

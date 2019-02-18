@@ -161,20 +161,20 @@ const examples = [{
 	tokenType: "aggr",
 	tabLabel: "&lt;",
 	section: "aggregation",
-	id: "find-min-value",
-	title: `<span class="code-snippet">&lt;</span> finds the minimum value`,
+	id: "find-max-value",
+	title: `<span class="code-snippet">&lt;</span> finds the maximum value, by replacing the result's current input value when it is less than current data row's computed input value`,
 	template: {
-		massMin: "<$preymass"
+		massMax: "<$preymass"
   }
 },{
 	symbol: ">",
 	tokenType: "aggr",
 	tabLabel: "&gt;",
 	section: "aggregation",
-	id: "find-max-value",
-	title: `<span class="code-snippet">&gt;</span> finds the maximum value`,
+	id: "find-min-value",
+	title: `<span class="code-snippet">&gt;</span> finds the minimum value, by replacing the result's current input value when it is greater than current data row's computed input value`,
 	template: {
-    massMax: ">$preymass"
+    massMin: ">$preymass"
   }
 },{
 	symbol: "[ ]",
@@ -195,7 +195,7 @@ const examples = [{
 	tokenType: "time",
 	section: "timing",
 	id: "compute-before-untimed-inputs",
-	title: `A <span class="code-snippet">:__</span> and prefix will cause a template input to be processed before untimed inputs are processed for the same data row.`,
+	title: `A <span class="code-snippet">:__</span> prefix tells the template filler to process the input before untimed inputs for the same data row.`,
 	template: {
 		"count": "+1",
 		":__b4count": "@.count"
@@ -205,7 +205,7 @@ const examples = [{
 	tokenType: "time",
 	section: "timing",
 	id: "compute-after-untimed-inputs",
-	title: `A <span class="code-snippet">_:_</span> prefix will delay the processing of a template input after untimed inputs are processed for the same data row.`,
+	title: `A <span class="code-snippet">_:_</span> prefix tells the template filler to process the input after untimed inputs have been processed for the same data row.`,
 	template: {
 		"count": "+1",
 		":__b4count": "@.count",

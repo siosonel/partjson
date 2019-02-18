@@ -204,17 +204,19 @@ See parjson.readme.txt for more information
 
   processResult(result) {
   	const context = this.contexts.get(result)
-  	for(const term of context.filler["__:"]) { 
-  		const input = context.filler.inputs[term];
-  		if (input.keyFxn && input.valFxn) {
-        const keys = input.keyFxn(null, context)
-        for(const key of keys) {
-          if (input.valFxn) {
-          	input.valFxn(null, key, result, context)
-          }
-        }
-      }
-  	}
+  	if (context) {
+	  	for(const term of context.filler["__:"]) { 
+	  		const input = context.filler.inputs[term];
+	  		if (input.keyFxn && input.valFxn) {
+	        const keys = input.keyFxn(null, context)
+	        for(const key of keys) {
+	          if (input.valFxn) {
+	          	input.valFxn(null, key, result, context)
+	          }
+	        }
+	      }
+	  	}
+	  }
 
   	for(const key in result) {
   		const value = result[key]
@@ -293,7 +295,10 @@ Parjson.prototype["@dist"] = function (_subterm, input) {
 	return (context) => {
 	  context["@dist"] = (result) => {
 	  	const target = subsFxn(null, null, result, context)
-	  	if (Array.isArray(target)) {
+	  	if (!target) {
+	  		context.errors.push([input, "MISSING-DIST-TARGET"])
+	  	}
+	  	else if (Array.isArray(target)) {
 	  		target.push(result)
 	  	}
 	    else {
