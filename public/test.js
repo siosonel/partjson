@@ -245,7 +245,7 @@ const examples = [{
 
 const fxns = {
 	totalMassOverCount(row, key, result, context) {
-		context.self[key] = context.self.totalPreyMass / context.self.count
+		return context.self.totalPreyMass / context.self.count
 	},
 	roundedPreyMass: d => isNumeric(d.preymass) 
 		? d.preymass.toPrecision(2) 

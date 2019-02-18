@@ -184,11 +184,15 @@ ValueFiller.prototype["''"] = function(subsFxn, input) {
 }
 
 ValueFiller.prototype["()"] = function(subsFxn, input) {
- 	return subsFxn
+ 	return (row, key, result, context) => {
+ 		result[key] = subsFxn(row, key, result, context)
+ 	}
 }
 
 ValueFiller.prototype["[]"] = function(subsFxn, input) {
- 	return subsFxn
+ 	return (row, key, result, context) => {
+ 		result[key] = subsFxn(row, key, result, context)
+ 	}
 }
 
 /* Aggregation into an array or set collection */
