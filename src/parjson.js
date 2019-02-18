@@ -41,7 +41,7 @@ See parjson.readme.txt for more information
     this.skipSymbols = ["#"]
     this.reservedFxns = ["@before()", "@after()", "@dist()", "@join()"]
     this.reservedTerms = ["@branch", "@parent", "@root"].concat(this.reservedTerms)
-    this.steps = [":__", "", "_:_", "__:"]
+    this.steps = [":__", "", "_:_"]
     this.errors = new Err(this)
     this.keyFiller = new KeyFiller(this)
     this.valueFiller = new ValueFiller(this)
@@ -88,6 +88,7 @@ See parjson.readme.txt for more information
     filler.inputs = Object.create(null)
     filler["@before"] = this.trueFxn
     filler["@after"] = this.trueFxn
+    filler["__:"] = []
     this.fillers.set(template, filler)
     
     const steps = this.steps.map(d => [])
@@ -110,7 +111,12 @@ See parjson.readme.txt for more information
 	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input)
 	      if (input.keyFxn) {
 	        input.valFxn = this.valueFiller.getFxn(input)
-	      	steps[step].push(term)
+	      	if (keyTokens.time == "__:") {
+		      	filler["__:"].push(term)
+		      }
+	      	else {
+	      		steps[step].push(term)
+	      	}
 	      }
 	    }
       if (templateVal) {
@@ -197,6 +203,19 @@ See parjson.readme.txt for more information
   }
 
   processResult(result) {
+  	const context = this.contexts.get(result)
+  	for(const term of context.filler["__:"]) { 
+  		const input = context.filler.inputs[term];
+  		if (input.keyFxn && input.valFxn) {
+        const keys = input.keyFxn(null, context)
+        for(const key of keys) {
+          if (input.valFxn) {
+          	input.valFxn(null, key, result, context)
+          }
+        }
+      }
+  	}
+
   	for(const key in result) {
   		const value = result[key]
   		if (value instanceof Set) {
@@ -220,7 +239,7 @@ See parjson.readme.txt for more information
   			}
   		}
   	}
-  	this.errors.markErrors(result, this.contexts.get(result))
+  	this.errors.markErrors(result, context)
   }
 
   trueFxn() {

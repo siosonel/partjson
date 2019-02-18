@@ -141,14 +141,21 @@ const examples = [{
 	section: "aggregation",
 	id: "add-a-value",
 	title: `<span class="code-snippet">+</span> adds the computed value from a running count`,
-	template: {}
+	template: {
+		byCat: {
+    	"$catname": "+1"
+   	}
+  }
 },{
 	symbol: "-",
 	tokenType: "aggr",
 	section: "aggregation",
 	id: "subtract-a-value",
 	title: `<span class="code-snippet">-</span> subtracts the computed value from a running count`,
-	template: {}
+	template: {
+		lostmass: {
+    	"$catname": "-$preymass"
+   	}}
 },{
 	symbol: "<",
 	tokenType: "aggr",
@@ -156,7 +163,9 @@ const examples = [{
 	section: "aggregation",
 	id: "find-min-value",
 	title: `<span class="code-snippet">&lt;</span> finds the minimum value`,
-	template: {}
+	template: {
+		massMin: "<$preymass"
+  }
 },{
 	symbol: ">",
 	tokenType: "aggr",
@@ -164,35 +173,55 @@ const examples = [{
 	section: "aggregation",
 	id: "find-max-value",
 	title: `<span class="code-snippet">&gt;</span> finds the maximum value`,
-	template: {}
+	template: {
+    massMax: ">$preymass"
+  }
 },{
 	symbol: "[ ]",
 	tokenType: "aggr",
 	section: "aggregation",
 	id: "collect-into-a-list",
 	title: `<span class="code-snippet">[ ]</span> collects values into a list`,
-	template: {}
+	template: {
+		"distinctPreyType": [
+			"$preytype", "distinct"
+		],
+    nonDistinct: [
+    	"$preytype"
+    ]
+	}
 },{
 	symbol: ":__",
 	tokenType: "time",
 	section: "timing",
 	id: "compute-before-untimed-inputs",
-	title: `A <span class="code-snippet">:__</span> prefix will cause a template input to be processed before untimed inputs are processed for the same data row.`,
-	template: {}
+	title: `A <span class="code-snippet">:__</span> and prefix will cause a template input to be processed before untimed inputs are processed for the same data row.`,
+	template: {
+		"count": "+1",
+		":__b4count": "@.count"
+	}
 },{
 	symbol: "_:_",
 	tokenType: "time",
 	section: "timing",
 	id: "compute-after-untimed-inputs",
 	title: `A <span class="code-snippet">_:_</span> prefix will delay the processing of a template input after untimed inputs are processed for the same data row.`,
-	template: {}
+	template: {
+		"count": "+1",
+		":__b4count": "@.count",
+		"_:_afterCount": "@.count",
+	}
 },{
 	symbol: "__:",
 	tokenType: "time",
 	section: "timing",
 	id: "compute-after-all-rows",
 	title: `A <span class="code-snippet">__:</span> prefix will delay the processing of a template input after the last data row has been looped through.`,
-	template: {}
+	template: {
+		"count": "+1",
+		"totalPreyMass": "+$preymass",
+		"__:averagePreyMass": "=totalMassOverCount()"
+	}
 },{
 	symbol: "#",
 	tokenType: "skip",
@@ -215,6 +244,9 @@ const examples = [{
 }]
 
 const fxns = {
+	totalMassOverCount(row, key, result, context) {
+		context.self[key] = context.self.totalPreyMass / context.self.count
+	},
 	roundedPreyMass: d => isNumeric(d.preymass) 
 		? d.preymass.toPrecision(2) 
 		: null,

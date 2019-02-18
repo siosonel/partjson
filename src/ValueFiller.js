@@ -133,13 +133,16 @@ ValueFiller.prototype["@"] = function(subterm, input) {
   	const nestedProps = subterm.split(this.Tree.treeDelimit)
     const reducer = (rc, d) => {
     	if (!d || !rc) return null
-    	if (d[0] == "@") {
-    		const contextProp = rc[1][d.slice(1)];
-    		const result = typeof contextProp != "string" ? contextProp.self : null
+    	if (d == "@") {
+    		return rc
+    	}
+    	else if (d[0] == "@") {
+    		const contextProp =  rc[1][d.slice(1)];
+    		const result = contextProp && typeof contextProp != "string" ? contextProp.self : null
     		return [contextProp, this.Tree.contexts.get(contextProp)]
     	}
     	else {
-    		const resultProp = rc[0][d];
+    		const resultProp = rc[0] ? rc[0][d] : null;
     		return [resultProp, this.Tree.contexts.get(resultProp)]
     	}
     }
@@ -181,15 +184,11 @@ ValueFiller.prototype["''"] = function(subsFxn, input) {
 }
 
 ValueFiller.prototype["()"] = function(subsFxn, input) {
- 	return (row, key, result, context) => {
- 		result[key] = subsFxn(row, key, result, context)
- 	}
+ 	return subsFxn
 }
 
 ValueFiller.prototype["[]"] = function(subsFxn, input) {
- 	return (row, key, result, context) => {
- 		result[key] = subsFxn(row, key, result, context)(row)
- 	}
+ 	return subsFxn
 }
 
 /* Aggregation into an array or set collection */
