@@ -55,19 +55,19 @@ export default class KeyFiller {
 
 KeyFiller.prototype["''"] = function(subsFxn, input) {
   return (row, context) => {
-  	return this.getAllowedKeys([subsFxn(row)], row, input, context)
+  	return this.getAllowedKeys([subsFxn(row, context)], row, input, context)
   }
 }
     
 KeyFiller.prototype["()"] = function(subsFxn, input) {
 	return (row, context) => {
-  	return this.getAllowedKeys([subsFxn(row)], row, input, context)
+  	return this.getAllowedKeys([subsFxn(row, context)], row, input, context)
   }
 }
 
 KeyFiller.prototype["[]"] = function(subsFxn, input) {
 	return (row, context) => {
-  	return this.getAllowedKeys(subsFxn(row), row, input, context)
+  	return this.getAllowedKeys(subsFxn(row, context), row, input, context)
   }
 }
 

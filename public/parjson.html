@@ -106,17 +106,17 @@ function run() {
 					? d.preymass.toPrecision(2) 
 					: null,
 				locations: d => [d.ownerblock, d.huntblock],
-				numMammalsBefore: (row, key, obj, context) => {
+				numMammalsBefore: (row, context) => {
 					const bp = context.root.byPreyType
 					return bp && bp.mammal && bp.mammal.total ? bp.mammal.total : 0
 				},
-				numMammalsAfter: (row, key, obj, context) => {
+				numMammalsAfter: (row, context) => {
 					const bp = context.root.byPreyType
 					return bp && bp.mammal && bp.mammal.total ? bp.mammal.total : 0
 				},
 				after: d => d.rowAfter = "after process",
 				locMetadata: ()=>{},
-				logFishCount: (row, result, context)=>{
+				logFishCount: (row, context)=>{
 					const bp = context ? context.root.byPreyType : null
 					console.log([
 						'logFishCount', bp && bp.fish && bp.fish.total ? bp.fish.total : 0
@@ -132,7 +132,7 @@ function run() {
 					return typeof row.owners == 'string' ? row.owners.split(",") : row.owners
 				},
 				nested: {
-					numMammalsBefore: (row, key, obj, context) => {
+					numMammalsBefore: (row, context) => {
 						const bp = context.root.byPreyType
 						return bp && bp.mammal && bp.mammal.total ? bp.mammal.total : 0
 					}

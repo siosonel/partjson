@@ -257,31 +257,17 @@
 
 	<section id='conversion'>
 		<h3 class='section-title'>Conversion</h3>
-		<p>When used as an input key term, a conversion function will be passed 
-	  (<span class="code-snippet">row</span>,
-	  <span class="code-snippet">context</span>) as arguments. The input key function
-	  should return an array of string <span class='code-snippet'>key</span> values,
+		<p>When used as an input key term, a function
+	  must return an array of string <span class='code-snippet'>key</span> values,
 	  or an empty array if the filler is to ignore the input for the current data row.  
-	  </p>
-	  <br/>
-	  <p>
-	  As an input value term, it will be passed 
-		(<span class="code-snippet">row</span>,
-		<span class="code-snippet">key</span>, 
-		<span class="code-snippet">result</span>, 
-		<span class="code-snippet">context</span>) as
-		arguments, and should set <span class='code-snippet'>result[key] = /*value*/</span>
-		inside the function. The arguments are:
+	  As an input value term, it must return the value for the result[key] input that is 
+	  being filled. A function will be passed the following arguments in order: 
 	  </p>
 		<ul>
 			<li><span class="code-snippet">row</span>: 
 				the current data row</li>
-			<li><span class="code-snippet">key</span>: 
-			 the computed input key value</li>
-			<li><span class="code-snippet">result</span>: 
-				the current result object being filled with the input</li>
 			<li><span class="code-snippet">context</span>: 
-			 the context of the current result object</li>
+			 the <a href='#reserved-context'>context</a> of the current result object being processed</li>
 		</ul>
 		<br/>
 		<p>

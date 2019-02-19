@@ -302,7 +302,7 @@ Parjson.prototype["@dist"] = function (_subterm, input) {
 	const subsFxn = this.valueFiller["@"](subterm)
 	return (context) => {
 	  context["@dist"] = (result) => {
-	  	const target = subsFxn(null, null, result, context)
+	  	const target = subsFxn(null, context)
 	  	if (!target) {
 	  		context.errors.push([input, "MISSING-DIST-TARGET"])
 	  	}

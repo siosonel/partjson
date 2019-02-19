@@ -279,7 +279,7 @@ const examples = [{
 	 to which a result is attached to the parent tree. 
 	 <br/>
 	 The <span class="code-snippet">@parent</span>
-	 refers to result object that contains the current result. 
+	 refers to result object that contains the current result as a subproperty. 
 	 <br/>
 	 The <span class="code-snippet">@root</span> refers to the overall result object.`,
 	template: {
@@ -303,26 +303,16 @@ const examples = [{
 	section: "reserved",
 	id: "reserved-before-after",
 	title: `
-		The <span class="code-snippet">@before()</span> is linked to a user supplied function
+		The <span class="code-snippet">@before()</span> term is linked to a user supplied function
 		and gets called before a data row is processed by any input functions. An example use case
 		is to clean data row keys and values before input functions are applied to fill a template.
 		<br/><br/>
 		The <span class="code-snippet">@after()</span> term gets called after all the input functions have 
 		been called.
 		<br/><br/>
-		A function supplied to either of the above terms will be passed 
-		(<span class="code-snippet">row</span>,
-		<span class="code-snippet">key</span>, 
-		<span class="code-snippet">result</span>, 
-		<span class="code-snippet">context</span>) as
-		arguments, where:
+		A function supplied to either of the above terms will be passed:
 		<ul>
-			<li><span class="code-snippet">row</span>: 
-				the current data row</li>
-			<li><span class="code-snippet">key</span>: 
-			 the computed input key value</li>
-			<li><span class="code-snippet">result</span>: 
-				the current result object being filled with the input</li>
+			<li><span class="code-snippet">row</span>: the current data row</li>
 			<li><span class="code-snippet">context</span>: 
 			 the context of the current result object</li>
 		</ul>`,
@@ -345,7 +335,7 @@ const examples = [{
 		Usually, this would copy deeply nested result objects into one or more root object arrays, 
 		for easier access at the end of data processing.
 		<br/><br/>
-	  The array of result branches, supplied as input value to the 
+	  An array of result branches, supplied as input value to the 
 	  <span class="code-snippet">@dist()</span> key, will receive
 	  the distributed results.`,
 	template: {
@@ -388,7 +378,7 @@ const examples = [{
 }]
 
 const fxns = {
-	totalMassOverCount(row, key, result, context) {
+	totalMassOverCount(row, context) {
 		return context.self.totalPreyMass / context.self.count
 	},
 	roundedPreyMass: d => isNumeric(d.preymass) 
