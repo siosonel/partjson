@@ -54,12 +54,12 @@ const examples = [{
 	tabLabel: "[delim]",
 	section: "stem",
 	id: "stem-delim",
-	title: `Nested values are indicated by using multiple stems with a string delimiter.
+	title: `Nested values are indicated by joining multiple stems with a string delimiter.
 	 This delimiter character defaults to <span class="code-snippet">.</span>, but 
 	 may be overriden by declaring a @userDelimit value in the template root.`,
 	template: {
-		"@userDelimit": ".",
-		"$nested.random.id": ["$catname"]
+		"@userDelimit": "|",
+		"$nested|random|id": ["$catname"]
 	}
 },{
 	symbol: "$",
@@ -68,22 +68,18 @@ const examples = [{
 	id: "substitute-a-data-value",
 	title: `<span class="code-snippet">$</span> substitutes a data value`,
 	template: {
-		byCat: {
-    	"$catname": {
-    	  count: "+1"
-   		}
-  	}
+    "$catname": "+1"
   }
 },{
 	symbol: "=",
 	tokenType: "subs",
 	section: "substitution",
 	id: "substitute-external-value",
-	title: `<span class="code-snippet">=</span> substitutes an externally 
-	  supplied function or property that was supplied directly to the filler application.`,
+	title: `<span class="code-snippet">=</span> substitutes an external 
+	  function or property that was supplied directly to the template filler.`,
 	template: {
 		"adjustedPreyMass": {
-    	"$preytype": "+=adjustPreyMass()"
+    	"=roundedPreyMass()": "+1"
 		}
   }
 },{
@@ -108,7 +104,7 @@ const examples = [{
 	tokenType: "subs",
 	section: "substitution",
 	id: "substitute-a-result",
-	title: `<span class="code-snippet">@</span> substitutes a result value`,
+	title: `<span class="code-snippet">@</span> substitutes a result or context value`,
 	template: {
 		"staticResult": "0.5",
 		"child": {
@@ -273,9 +269,9 @@ const examples = [{
 	section: "reserved",
 	id: "reserved-context",
 	title: `The <span class="code-snippet">@</span> context refers to the current result,
-	 equivalent <span class="code-snippet">context.self</span>.
+	 equivalent to <span class="code-snippet">context.self</span>.
 	 <br/>
-	 The <span class="code-snippet">@branch</span> refers to string key or integer index
+	 The <span class="code-snippet">@branch</span> refers to the string key or integer index
 	 to which a result is attached to the parent tree. 
 	 <br/>
 	 The <span class="code-snippet">@parent</span>
@@ -310,12 +306,7 @@ const examples = [{
 		The <span class="code-snippet">@after()</span> term gets called after all the input functions have 
 		been called.
 		<br/><br/>
-		A function supplied to either of the above terms will be passed:
-		<ul>
-			<li><span class="code-snippet">row</span>: the current data row</li>
-			<li><span class="code-snippet">context</span>: 
-			 the context of the current result object</li>
-		</ul>`,
+		The arguments supplied to these functions are defined in the <a href='#conversion'>conversion</a> section.`,
 	template: {
   	"@before()": "=savedDoublePreyMass()",
   	"will-show-double-mass": {
