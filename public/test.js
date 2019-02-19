@@ -268,14 +268,14 @@ const examples = [{
 	tokenType: "reserved",
 	section: "reserved",
 	id: "reserved-context",
-	title: `The <span class="code-snippet">@</span> context refers to the current result,
+	title: `A <span class="code-snippet">@</span> refers to the current result,
 	 equivalent to <span class="code-snippet">context.self</span>.
 	 <br/>
-	 The <span class="code-snippet">@branch</span> refers to the string key or integer index
+	 A <span class="code-snippet">@branch</span> refers to the string key or integer index
 	 to which a result is attached to the parent tree. 
 	 <br/>
-	 The <span class="code-snippet">@parent</span>
-	 refers to result object that contains the current result as a subproperty. 
+	 A <span class="code-snippet">@parent</span>
+	 refers to the result object that contains the current result as a subproperty. 
 	 <br/>
 	 The <span class="code-snippet">@root</span> refers to the overall result object.`,
 	template: {
@@ -369,33 +369,35 @@ const examples = [{
 }]
 
 const fxns = {
-	totalMassOverCount(row, context) {
-		return context.self.totalPreyMass / context.self.count
-	},
-	roundedPreyMass: d => isNumeric(d.preymass) 
-		? +d.preymass.toPrecision(2) 
-		: null,
-	savedDoublePreyMass: d => {
-		d.preymass = isNumeric(d.preymass) 
-			? 2*+d.preymass 
-			: 0
-		return d.preymass
-	},
-	savedTriplePreyMass: d => {
-		d.preymass = isNumeric(d.preymass) 
-			? 3*+d.preymass 
-			: 0
-		return d.preymass
-	},
-	adjustPreyMass(row) {
-		return row.preymass*0.8
-	},
-	splitOwners(row) {
-		return row.owners.split(",")
-	},
-	blockInfo(row) {
-		return row.ownerblock[0] == 'C' 
-			? {name: "Friendly Neighborhood", population: 630}
-			: {name: "Sesame Street", population: 950}
-	}
+totalMassOverCount(row, context) {
+	return context.self.totalPreyMass / context.self.count
+},
+roundedPreyMass(row, context) {
+	return isNumeric(row.preymass) 
+	? +row.preymass.toPrecision(2) 
+	: null
+},
+savedDoublePreyMass(row) {
+	row.preymass = isNumeric(row.preymass) 
+		? 2 * +row.preymass 
+		: 0
+	return row.preymass
+},
+savedTriplePreyMass(row) {
+	row.preymass = isNumeric(row.preymass) 
+		? 3 * +row.preymass 
+		: 0
+	return row.preymass
+},
+adjustPreyMass(row) {
+	return row.preymass*0.8
+},
+splitOwners(row) {
+	return row.owners.split(",")
+},
+blockInfo(row) {
+	return row.ownerblock[0] == 'C' 
+		? {name: "Friendly Neighborhood", population: 630}
+		: {name: "Sesame Street", population: 950}
+}
 }

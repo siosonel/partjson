@@ -166,6 +166,38 @@
     text-align: left;
 	}
 
+	.fxns {
+		display: none;
+		width: 94%; 
+		height: 10vh;
+		margin: 0 3%;
+		border: none;
+    background: #333;
+    color: #fff;
+		white-space: pre;
+    font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    text-align: left;
+    overflow: scroll;
+	}
+
+	.fxn-keyword {
+		color: #13a4d8;
+	}
+
+	.fxn-name {
+		color: #99cc00;
+	}
+
+	.fxn-arg {
+		color: #ff9900;
+	}
+
+	.fxn-return {
+		color: #d82323;
+	}
+
 	.btn-div {
 		margin: auto;
 		padding: 2px;
@@ -313,7 +345,10 @@
 		<div class='btn-div'>
 			<button class='tsv-btn'>Data</button>
 			<button class='update-btn'>Update</button>
+			<button class='fxns-btn' style="display:none">Functions</button>
 		</div>
+		<code class='fxns'>
+		</code>
 		<textarea class='tsv'>
 		</textarea>
 	</div>
@@ -326,6 +361,7 @@ examples.forEach(renderExample)
 function renderExample(example,i) {
 	const clone = document.importNode(emptyExample.content, true)
 	const results = clone.querySelector(".results")
+	const fxns = clone.querySelector(".fxns")
 	
 	// the ParJSON template, not a DOM template
 	const template = clone.querySelector(".template")
@@ -349,10 +385,12 @@ function renderExample(example,i) {
 
 	clone.querySelector('.tsv-btn').onclick = ()=>{
 		tsv.style.display = tsv.style.display == "block" ? "none" : "block"
+		fxns.style.display = "none"
 	}
 
 	document.querySelector('#'+example.section).appendChild(clone)
-	run()
+	const fxnStr = run()
+	displayFxns(fxnStr, example)
 
 	if (window.location.hash == '#' + example.id) {
 		setTimeout(()=>title.scrollIntoView(), 100)
@@ -406,6 +444,50 @@ function getRunFxn(dom) {
 		}
 
 		dom.results.value = JSON.stringify(tracker.tree, null, "  ")
+
+		const fxnStr = {}
+		for(const templateFiller of tracker.fillers) {
+			const [template, filler] = templateFiller
+			for(const term in filler.inputs) {
+				if (term[0]=="=") {
+					const fxnName = term.slice(1,-2)
+					if (!fxnStr[fxnName]) {
+						fxnStr[fxnName] = tracker.opts.fxns[fxnName].toString()
+					}
+				}
+				const templateVal = filler.inputs[term].templateVal
+				if (typeof templateVal == "string" && templateVal[0] == "=") {
+					const fxnName = templateVal.slice(1,-2)
+					if (!fxnStr[fxnName]) {
+						fxnStr[fxnName] = tracker.opts.fxns[fxnName].toString()
+					}
+				}
+			}
+		}
+		return fxnStr
+	}
+}
+
+function displayFxns(fxnStr, example) {
+	if (!Object.keys(fxnStr).length) return
+	const node = document.querySelector('#'+example.id).parentNode
+	let str = ""
+	for(const fxnName in fxnStr) {
+		str += "<i class='fxn-keyword'>function&nbsp;</i>"
+				+ fxnStr[fxnName]
+					.replace(fxnName, "<span class='fxn-name'>"+ fxnName + "</span>")
+					.replace(/row/g, "<span class='fxn-arg'>row</span>")
+					.replace(/context/g, "<span class='fxn-arg'>context</span>") 
+					.replace(/return\ /g, "<span class='fxn-return'>return </span>")
+			  +  "\n\n"
+	}
+
+	node.querySelector(".fxns").innerHTML = str //JSON.stringify(fxnStr)
+	node.querySelector(".fxns-btn").style.display = "inline"
+	node.querySelector(".fxns-btn").onclick = ()=>{
+		const currDisplay = node.querySelector(".fxns").style.display
+		node.querySelector(".fxns").style.display = currDisplay != "block" ? "block" : "none"
+		node.querySelector(".tsv").style.display = "none"
 	}
 }
 
