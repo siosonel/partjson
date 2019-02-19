@@ -215,10 +215,11 @@
 		<p>
 			Parjson fills a JSON-based template for 
 			partitioning rows of data into a well-defined tree of 
-			data collections and aggregated results. The template
+			data collections and aggregated results. 
+    <p><!--
+    <p>The template
 			syntax and filler design is guided by the following 
-			motivations:
-    <p>
+			motivations:</p>
     <br/>
 		<ul>
       <li>
@@ -239,7 +240,7 @@
 				and parallelized processing
 			</li>
 		</ul>
-		<br/>
+		<br/>-->
 	</section>
 
 	<section id='quick-examples'>
@@ -256,6 +257,37 @@
 
 	<section id='conversion'>
 		<h3 class='section-title'>Conversion</h3>
+		<p>When used as an input key term, a conversion function will be passed 
+	  (<span class="code-snippet">row</span>,
+	  <span class="code-snippet">context</span>) as arguments. The input key function
+	  should return an array of string <span class='code-snippet'>key</span> values,
+	  or an empty array if the filler is to ignore the input for the current data row.  
+	  </p>
+	  <br/>
+	  <p>
+	  As an input value term, it will be passed 
+		(<span class="code-snippet">row</span>,
+		<span class="code-snippet">key</span>, 
+		<span class="code-snippet">result</span>, 
+		<span class="code-snippet">context</span>) as
+		arguments, and should set <span class='code-snippet'>result[key] = /*value*/</span>
+		inside the function. The arguments are:
+	  </p>
+		<ul>
+			<li><span class="code-snippet">row</span>: 
+				the current data row</li>
+			<li><span class="code-snippet">key</span>: 
+			 the computed input key value</li>
+			<li><span class="code-snippet">result</span>: 
+				the current result object being filled with the input</li>
+			<li><span class="code-snippet">context</span>: 
+			 the context of the current result object</li>
+		</ul>
+		<br/>
+		<p>
+		See reserved terms for other function signatures and arguments.
+	  </p>
+	  <br/>
 	</section>
 
 	<section id='aggregation'>

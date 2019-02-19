@@ -78,9 +78,9 @@ const examples = [{
 	symbol: "=",
 	tokenType: "subs",
 	section: "substitution",
-	id: "substitute-a-function",
-	title: `<span class="code-snippet">=</span> substitutes a user supplied function or property 
-	  that was supplied directly to the filler application`,
+	id: "substitute-external-value",
+	title: `<span class="code-snippet">=</span> substitutes an externally 
+	  supplied function or property that was supplied directly to the filler application.`,
 	template: {
 		"adjustedPreyMass": {
     	"$preytype": "+=adjustPreyMass()"
@@ -129,7 +129,8 @@ const examples = [{
 	tokenType: "conv",
 	section: "conversion",
 	id: "convert-array",
-	title: `<span class="code-snippet">[]</span> distributes the returned value of a function call`,
+	title: `<span class="code-snippet">[]</span> distributes the returned 
+	  value of a function call.`,
 	template: {
 		"byOwner": {
 			"=splitOwners[]": "+$preymass"
@@ -271,7 +272,8 @@ const examples = [{
 	tokenType: "reserved",
 	section: "reserved",
 	id: "reserved-context",
-	title: `The <span class="code-snippet">@</span> context refers to the current result.
+	title: `The <span class="code-snippet">@</span> context refers to the current result,
+	 equivalent <span class="code-snippet">context.self</span>.
 	 <br/>
 	 The <span class="code-snippet">@branch</span> refers to string key or integer index
 	 to which a result is attached to the parent tree. 
@@ -300,12 +302,30 @@ const examples = [{
 	tokenType: "reserved",
 	section: "reserved",
 	id: "reserved-before-after",
-	title: `The <span class="code-snippet">@before()</span> is linked to a user supplied function
+	title: `
+		The <span class="code-snippet">@before()</span> is linked to a user supplied function
 		and gets called before a data row is processed by any input functions. An example use case
 		is to clean data row keys and values before input functions are applied to fill a template.
 		<br/><br/>
 		The <span class="code-snippet">@after()</span> term gets called after all the input functions have 
-		been called.`,
+		been called.
+		<br/><br/>
+		A function supplied to either of the above terms will be passed 
+		(<span class="code-snippet">row</span>,
+		<span class="code-snippet">key</span>, 
+		<span class="code-snippet">result</span>, 
+		<span class="code-snippet">context</span>) as
+		arguments, where:
+		<ul>
+			<li><span class="code-snippet">row</span>: 
+				the current data row</li>
+			<li><span class="code-snippet">key</span>: 
+			 the computed input key value</li>
+			<li><span class="code-snippet">result</span>: 
+				the current result object being filled with the input</li>
+			<li><span class="code-snippet">context</span>: 
+			 the context of the current result object</li>
+		</ul>`,
 	template: {
   	"@before()": "=savedDoublePreyMass()",
   	"will-show-double-mass": {
@@ -323,7 +343,11 @@ const examples = [{
 	title: `The <span class="code-snippet">@dist()</span> function distributes 
 		results from one subtree to another once template branches are filled with final results. 
 		Usually, this would copy deeply nested result objects into one or more root object arrays, 
-		for easier access at the end of data processing.`,
+		for easier access at the end of data processing.
+		<br/><br/>
+	  The array of result branches, supplied as input value to the 
+	  <span class="code-snippet">@dist()</span> key, will receive
+	  the distributed results.`,
 	template: {
 		"dist-target": [],
   	"my": {
@@ -347,8 +371,10 @@ const examples = [{
 	section: "reserved",
 	id: "reserved-join",
 	title: `A <span class="code-snippet">@join()</span> object takes aliases and functions
-	 as key-values. The join alias is later referenced with <span class="code-snippet">&amp;</span>
-	 prefixed terms in a template input.`,
+	 as key-values. The function will be passed the current data 
+	 <span class="code-snippet">row</span> as argument, and should return an object
+	 with key-values to be referenced later as <span class="code-snippet">&amp;</span>
+	 prefixed terms in template inputs.`,
 	template: {
 		"@join()": {
   		"loc": "=blockInfo()"
