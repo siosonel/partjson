@@ -41,7 +41,7 @@ const examples = [{
 },{
 	section: "stem",
 	id: "stem",
-	title: `A stem may either be a unprocessed constant or a substitutable 
+	title: `A stem may either be an unprocessed constant or substitutable 
 	  property name, alias, or keyword. The stem forms the 'root word' of 
 	  an input key or value term.`,
 	template: {
@@ -246,6 +246,119 @@ const examples = [{
   	  "count": "#+1"
   	}
   }
+},{
+	symbol: "options",
+	tokenType: "reserved",
+	section: "reserved",
+	id: "reserved-options",
+	title: `The <span class="code-snippet">@userDelimit</span> and <span class="code-snippet">@treeDelimit</span> 
+		characters default to <span class="code-snippet">.</span>, but may be reset at the template root.`,
+	template: {
+  	"@userDelimit": "_",
+  	"test": {
+  		"$nested_random_id": "test"
+  	},
+  	"@treeDelimit": "|",
+  	"version": "0.1",
+  	"trial": {
+  		"child": {
+  			"version": "@parent|@parent|version"
+  		}
+  	}
+  }
+},{
+	symbol: "context",
+	tokenType: "reserved",
+	section: "reserved",
+	id: "reserved-context",
+	title: `The <span class="code-snippet">@</span> context refers to the current result.
+	 <br/>
+	 The <span class="code-snippet">@branch</span> refers to string key or integer index
+	 to which a result is attached to the parent tree. 
+	 <br/>
+	 The <span class="code-snippet">@parent</span>
+	 refers to result object that contains the current result. 
+	 <br/>
+	 The <span class="code-snippet">@root</span> refers to the overall result object.`,
+	template: {
+  	"property": 0.1,
+  	"self-context-prop": "@.property",
+  	"trial": {
+  		"parent-context-prop": "@parent.property",
+  		"child": {
+  		  "attachment-key": "@branch",
+  			"granchild": {
+  				"root-context-prop": "@root.property",
+  				"ancestor-context-prop": "@parent.@parent.@parent.property",
+  				"parent-branch": "@parent.@branch"
+  			}
+  		}
+  	}
+  }
+},{
+	symbol: "functions",
+	tokenType: "reserved",
+	section: "reserved",
+	id: "reserved-before-after",
+	title: `The <span class="code-snippet">@before()</span> is linked to a user supplied function
+		and gets called before a data row is processed by any input functions. An example use case
+		is to clean data row keys and values before input functions are applied to fill a template.
+		<br/><br/>
+		The <span class="code-snippet">@after()</span> term gets called after all the input functions have 
+		been called.`,
+	template: {
+  	"@before()": "=savedDoublePreyMass()",
+  	"will-show-double-mass": {
+  		"$preytype": "+$preymass",
+  	},
+  	"@after()": "=savedTriplePreyMass()",
+  	"will-ALSO-show-DOUBLE-mass-NOT-TRIPLE": {
+  		"$preytype": "+$preymass",
+  	}
+  }
+},{
+	tokenType: "reserved",
+	section: "reserved",
+	id: "reserved-dist",
+	title: `The <span class="code-snippet">@dist()</span> function distributes 
+		results from one subtree to another once template branches are filled with final results. 
+		Usually, this would copy deeply nested result objects into one or more root object arrays, 
+		for easier access at the end of data processing.`,
+	template: {
+		"dist-target": [],
+  	"my": {
+  		"deep": {
+  			"deep": {
+  				"results": {
+  					"$preytype": {
+  						"type": "@branch",
+  						"total": "+1",
+  						"@dist()": [
+	  						"@root.dist-target"
+	  					]
+  					}
+  				}
+  			}
+  		}
+  	}
+  }
+},{
+	tokenType: "reserved",
+	section: "reserved",
+	id: "reserved-join",
+	title: `A <span class="code-snippet">@join()</span> object takes aliases and functions
+	 as key-values. The join alias is later referenced with <span class="code-snippet">&amp;</span>
+	 prefixed terms in a template input.`,
+	template: {
+		"@join()": {
+  		"loc": "=blockInfo()"
+  	},
+  	"$catname": {
+  		count: "+1",
+  		blockName: "&loc.name",
+  		blockPop: "&loc.population"
+  	}
+  }
 }]
 
 const fxns = {
@@ -255,10 +368,22 @@ const fxns = {
 	roundedPreyMass: d => isNumeric(d.preymass) 
 		? +d.preymass.toPrecision(2) 
 		: null,
+	savedDoublePreyMass: d => {
+		d.preymass = isNumeric(d.preymass) 
+			? 2*+d.preymass 
+			: 0
+		return d.preymass
+	},
+	savedTriplePreyMass: d => {
+		d.preymass = isNumeric(d.preymass) 
+			? 3*+d.preymass 
+			: 0
+		return d.preymass
+	},
 	adjustPreyMass(row) {
 		return row.preymass*0.8
 	},
-	splitOwners(row) { 
+	splitOwners(row) {
 		return row.owners.split(",")
 	},
 	blockInfo(row) {

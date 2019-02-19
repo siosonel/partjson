@@ -41,7 +41,7 @@ See parjson.readme.txt for more information
     this.skipSymbols = ["#"]
     this.reservedOpts = ["@userDelimit", "@treeDelimit"]
     this.reservedFxns = ["@before()", "@after()", "@dist()", "@join()"]
-    this.reservedContexts = ["@branch", "@parent", "@root"]
+    this.reservedContexts = ["@branch", "@parent", "@root", "@self"]
     this.reservedTerms = [
       ...this.reservedOpts,
       ...this.reservedFxns,
@@ -60,8 +60,8 @@ See parjson.readme.txt for more information
   	if (this.opts.template['@userDelimit']) {
   		this.userDelimit = this.opts.template['@userDelimit']
   	}
-  	if (opts.treeDelimit) {
-  		this.treeDelimit = this.opts.treeDelimit
+  	if (this.opts.template['@treeDelimit']) {
+  		this.treeDelimit = this.opts.template['@treeDelimit']
   	}
   	
   	//console.clear()
