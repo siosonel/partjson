@@ -1,4 +1,4 @@
-class ValueFiller {
+export default class ValueFiller {
   constructor(Tree) {
     this.Tree = Tree
     this.ignoredVals = this.Tree.opts.ignoredVals

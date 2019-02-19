@@ -173,10 +173,7 @@
 	}
 	</style>
 	<script src="test.js"></script>
-	<script src="/parjson/src/Parjson.js" charset="utf-8"></script>
-	<script src="/parjson/src/KeyFiller.js" charset="utf-8"></script>
-	<script src="/parjson/src/ValueFiller.js" charset="utf-8"></script>
-	<script src="/parjson/src/Err.js" charset="utf-8"></script>
+	<script src="/parjson/dist/parjson.umd.js" charset="utf-8"></script>
 </head>
 <body>
 
@@ -206,7 +203,7 @@
 				<div class="nav-tab" onmouseenter="expandSymbols()"> [conversion] </div>
 			</div>
 			<div class="nav-col" id="nav-col-reserved">
-				<div class="nav-tab" style="color: #fff" onmouseenter="expandSymbols()"> reserved </div>
+				<div class="nav-tab" onmouseenter="expandSymbols()"> reserved </div>
 			</div>
 		</div>
 	</nav>
@@ -226,18 +223,15 @@
 		<ul>
       <li>
       	To minimize coding errors by using a well-tested and reliable template 
-      	filler to handle the data processing: 
-      	<i>help assure code correctness</i>
+      	filler to handle the data processing
       </li>
 		  <li>
 		    To better communicate the overall data processing intent by having 
-	      the target data structure laid out from the beginning:
-	      <i>improve code readability and maintainability</i>
+	      the target data structure laid out from the beginning
       </li>
 			<li>
 				To significantly reduce the lines and complexity of data processing 
-				code in a non-data oriented programming language such as Javascript:
-				<i>reduce loops and if-else branches</i>
+				code in a non-data oriented programming language such as Javascript
 			</li>
 			<li>
 				To encourage performant template fillers that only pass through each data
@@ -357,12 +351,14 @@ function renderExample(example,i) {
 		
 		tab.onclick = () => {
 			collapseSymbols()
-			window.location.hash = "#" + example.id
+			//window.location.hash = "#" + example.id
+			document.querySelector('#'+example.id).scrollIntoView()
 		}
 
 		navCol.querySelector('.nav-tab').onclick = () => {
 			collapseSymbols()
-			window.location.hash = "#" + example.section
+			//window.location.hash = "#" + example.section
+			document.querySelector('#'+example.section).scrollIntoView()
 		}
 	}
 }

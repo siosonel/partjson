@@ -1,4 +1,4 @@
-class Err {
+export default class Err {
 	constructor() {
     this.errors = new Set()
     this.resultLog = Object.create(null)

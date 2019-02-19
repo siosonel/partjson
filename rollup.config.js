@@ -1,19 +1,21 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
+import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
 export default [
 	// browser-friendly UMD build
 	{
-		input: 'src/parjson.js',
+		input: 'src/Parjson.js',
 		output: {
-			name: 'howLongUntilLunch',
+			name: 'Parjson',
 			file: pkg.browser,
 			format: 'umd'
 		},
 		plugins: [
 			resolve(), 
-			commonjs()
+			commonjs(),
+			terser()
 		]
 	},
 
@@ -24,11 +26,13 @@ export default [
 	// an array for the `output` option, where we can specify 
 	// `file` and `format` for each target)
 	{
-		input: 'src/main.js',
-		external: ['ms'],
+		input: 'src/Parjson.js',
 		output: [
 			{ file: pkg.main, format: 'cjs' },
 			{ file: pkg.module, format: 'es' }
+		],
+		plugins: [
+			terser()
 		]
 	}
 ];

@@ -1,4 +1,4 @@
-class KeyFiller { 
+export default class KeyFiller { 
   constructor(Tree) {
     this.Tree = Tree
     this.ignoredVals = Tree.opts.ignoredVals

@@ -1,4 +1,6 @@
-"use strict"
+import KeyFiller from "./KeyFiller"
+import ValueFiller from "./ValueFiller"
+import Err from "./Err"
 
 /*
 -------
@@ -19,7 +21,7 @@ See parjson.html for an example template.
 See parjson.readme.txt for more information
 */
 
-/*export default*/ class Parjson {
+export default class Parjson {
   constructor(opts={}) {
     this.defaultOpts = {
       template: {},
