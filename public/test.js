@@ -55,7 +55,7 @@ const examples = [{
 	section: "stem",
 	id: "stem-delim",
 	title: `Nested values are indicated by joining multiple stems with a string delimiter.
-	 This delimiter character defaults to <span class="code-snippet">.</span>, but 
+	 The delimiter defaults to <span class="code-snippet">.</span>, but 
 	 may be overriden by declaring a @userDelimit value in the template root.`,
 	template: {
 		"@userDelimit": "|",
@@ -76,7 +76,7 @@ const examples = [{
 	section: "substitution",
 	id: "substitute-external-value",
 	title: `<span class="code-snippet">=</span> substitutes an external 
-	  function or property that was supplied directly to the template filler.`,
+	  property or function reference that was supplied directly to the template filler.`,
 	template: {
 		"adjustedPreyMass": {
     	"=roundedPreyMass()": "+1"
@@ -88,7 +88,7 @@ const examples = [{
 	tabLabel: "&amp;",
 	section: "substitution",
 	id: "substitute-a-join",
-	title: `<span class="code-snippet">&amp;</span> substitutes a joined property`,
+	title: `<span class="code-snippet">&amp;</span> substitutes a joined property.`,
 	template: {
   	"@join()": {
   		"loc": "=blockInfo()"
@@ -106,7 +106,7 @@ const examples = [{
 	id: "substitute-a-result",
 	title: `<span class="code-snippet">@</span> substitutes a result or context value`,
 	template: {
-		"staticResult": "0.5",
+		"staticResult": 0.5,
 		"child": {
 			"version": "@parent.staticResult"
 		}
@@ -256,7 +256,7 @@ const examples = [{
   		"$nested_random_id": "test"
   	},
   	"@treeDelimit": "|",
-  	"version": "0.1",
+  	"version": 0.1,
   	"trial": {
   		"child": {
   			"version": "@parent|@parent|version"
@@ -269,14 +269,19 @@ const examples = [{
 	section: "reserved",
 	id: "reserved-context",
 	title: `A <span class="code-snippet">@</span> refers to the current result,
-	 equivalent to <span class="code-snippet">context.self</span>.
-	 <br/>
+	 equivalent to <span class="code-snippet">context.self</span>. When referring to
+	 a property of the current result, a delimiter right after the 
+	 <span class="code-snippet">@</span> must be used to access 
+	 nested subproperties, for example <span class="code-snippet">@.property</span>.
+	 This is because all stems attached directly to the <span class="code-snippet">@</span> 
+	 symbol are reserved terms.
+	 <br/><br/>
 	 A <span class="code-snippet">@branch</span> refers to the string key or integer index
 	 to which a result is attached to the parent tree. 
-	 <br/>
+	 <br/><br/>
 	 A <span class="code-snippet">@parent</span>
 	 refers to the result object that contains the current result as a subproperty. 
-	 <br/>
+	 <br/><br/>
 	 The <span class="code-snippet">@root</span> refers to the overall result object.`,
 	template: {
   	"property": 0.1,
@@ -285,7 +290,7 @@ const examples = [{
   		"parent-context-prop": "@parent.property",
   		"child": {
   		  "attachment-key": "@branch",
-  			"granchild": {
+  			"grandchild": {
   				"root-context-prop": "@root.property",
   				"ancestor-context-prop": "@parent.@parent.@parent.property",
   				"parent-branch": "@parent.@branch"
@@ -355,7 +360,8 @@ const examples = [{
 	 as key-values. The function will be passed the current data 
 	 <span class="code-snippet">row</span> as argument, and should return an object
 	 with key-values to be referenced later as <span class="code-snippet">&amp;</span>
-	 prefixed terms in template inputs.`,
+	 prefixed terms in template inputs. Or, if null or undefined is returned, the data
+	 row will not be used to fill in the current result.`,
 	template: {
 		"@join()": {
   		"loc": "=blockInfo()"

@@ -143,7 +143,7 @@ if [[ "$ENV" != "scp-prod" ]]; then
 	rm -rf $APP
 	mkdir $APP
 	mv public/* $APP/
-	mv src $APP
+	mv dist $APP
 
 	cd $APP
 	tar -cvzf ../$APP-$REV.tgz .
@@ -176,7 +176,6 @@ ssh -t $DEPLOYER@$REMOTEHOST "
 
 	rm -Rf $REMOTEDIR/$APP-prev
 	mv $REMOTEDIR/$APP $REMOTEDIR/$APP-prev
-	touch $REMOTEDIR/$APP-prev/*
 
 	mv $REMOTEDIR/$APP-new $REMOTEDIR/$APP
 	chmod -R 755 $REMOTEDIR/$APP
