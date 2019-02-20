@@ -1,3 +1,22 @@
+function relabelNavCols() {
+	const aliases = {
+		substitution: "subs",
+		conversion: "conv",
+		aggregation: "aggr",
+		timing: "time"
+	}
+
+	const narrowScreen = window.innerWidth < 550;
+	for(const label in aliases) {
+		const short = aliases[label]
+		const navCol = document.getElementById("nav-col-"+short)
+		navCol.querySelector('.nav-tab').innerHTML = "[" + (narrowScreen ? short : label) + "]"
+	}
+}
+
+relabelNavCols()
+window.onresize = relabelNavCols
+
 demo([{
 	section: "stem",
 	id: "stem-undelim",

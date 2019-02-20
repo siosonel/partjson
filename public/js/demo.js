@@ -1,4 +1,4 @@
-function expandSymbols() {
+function expandSymbols() { 
 	document.querySelectorAll(".nav-symbol").forEach(elem => {
 		elem.style.height = "16px"
 		elem.style.padding = "2px"
@@ -12,6 +12,22 @@ function collapseSymbols() {
 	})
 }
 
+function toggleNavBar() {
+	const cls = window.event.target.className
+	if (cls == "nav-tab" || cls == 'nav-symbol' || cls == 'nav-page') {
+		return
+	}
+	const ht = parseFloat(document.querySelector(".nav-symbol").style.height)
+	if (isNaN(ht) || ht === 0) {
+		expandSymbols()
+	}
+	else {
+		collapseSymbols()
+	}
+}
+
+document.querySelector(".nav-top").onclick = toggleNavBar
+
 function isNumeric(d) {
 	return !isNaN(parseFloat(d)) && isFinite(d) && d!==''
 }
@@ -19,7 +35,8 @@ function isNumeric(d) {
 function demo(examples, reveal=false) {
 	const opts = getOpts()
 	const renderedBySymbol = {}
-	setTimeout(go, 0)
+	go()
+  document.querySelector(".nav-bar").style.opacity = 1
 
 	function go(){
 		examples.forEach(renderExample)

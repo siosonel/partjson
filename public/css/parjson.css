@@ -39,9 +39,11 @@ button {
 }
 
 .nav-top {
+	position: relative;
 	width: 100%;
-  height: 70px;
-  margin-bottom: 15px;
+  height: 64px;
+  margin-bottom: 10px;
+  background: #333;
   z-index: 1;
   overflow: visible;
 }
@@ -70,7 +72,9 @@ button {
   text-align: center;
   background: #333;
   color: #99cc00;
-  overflow: scroll;
+  overflow: hidden;
+  transition: opacity 0.25s ease;
+  opacity: 0;
 }
 
 .nav-col {
@@ -81,7 +85,7 @@ button {
 }
 
 .nav-tab {
-	min-width: 50px;
+	min-width: 30px;
 	padding: 2px;
 	text-align: center;
   background: #333;
@@ -123,7 +127,7 @@ button {
 
 .example-div {
 	position: relative;
-		width: 90%;
+	width: 90%;
   margin: auto;
   margin-bottom: 40px;
   background: #ececec;
@@ -161,6 +165,7 @@ button {
 	display: inline-block; 
 	height: 20vh;
 	width: 45%;
+	min-width: 300px;
 	margin: 10px;
 	white-space: nowrap;
 }
@@ -173,8 +178,8 @@ button {
 }
 
 .inputtext {
-	width:100%; 
-	height:100%;
+	width: 100%; 
+	height: 100%;
 	border: none;
   background: #333;
   color: #99cc00;
