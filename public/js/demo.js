@@ -17,7 +17,9 @@ function toggleNavBar() {
 	if (cls == "nav-tab" || cls == 'nav-symbol' || cls == 'nav-page') {
 		return
 	}
-	const ht = parseFloat(document.querySelector(".nav-symbol").style.height)
+	const navSymbol = document.querySelector(".nav-symbol")
+	if (!navSymbol) return
+	const ht = parseFloat(navSymbol.style.height)
 	if (isNaN(ht) || ht === 0) {
 		expandSymbols()
 	}

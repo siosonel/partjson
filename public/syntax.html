@@ -15,7 +15,7 @@
 <div class='nav-top'>
 	<div class="nav-banner">
 		<div style="float:left; padding: 0 12px;">Parjson</div>
-		<div style="float:right">
+		<div  class='nav-page-wrapper'>
 			<a href='./' class="nav-page">Home</a>
 			<a href='syntax.html' class="nav-page">Syntax</a>
 			<a href='reserved.html' class="nav-page">Reserved</a>
@@ -47,6 +47,47 @@
 </div>
 
 <content>
+	<section id='intro'>
+		<h3 class='section-title'>Syntax</h3>
+		<p>
+			Parjson uses optional prefixes and suffixes on input keys and values to
+			create template filler functions.  The placement of symbols are based on 
+			the processor category of the symbol. The sequence matches the listed order
+			of the navigation tabs above, which is:
+			<ul>
+				<li>
+					<a href="#skip" class="nodecor">
+						<span class='code-snippet'>skip</span>
+					</a>
+				</li>
+				<li>
+					<a href="#timing" class="nodecor">
+						<span class='code-snippet'>timing</span>
+					</a>
+				</li>
+				<li>
+					<a href="#aggregation" class="nodecor">
+						<span class='code-snippet'>aggregation</span>
+					</a>
+				</li>
+				<li>
+					<a href="#substitution" class="nodecor">
+						<span class='code-snippet'>substitution</span>
+					</a>
+				</li>
+				<li>
+					<a href="#stem" class="nodecor">
+						<span class='code-snippet'>stem</span>
+					</a>
+				</li>
+				<li>
+					<a href="#conversion" class="nodecor">
+						<span class='code-snippet'>conversion</span>
+					</a>
+				</li>
+			</ul>
+    </p>
+	</section>
 	<section id='stem'>
 		<h3 class='section-title'>Stem words</h3>
 	</section>
@@ -62,7 +103,7 @@
 			<li><span class="code-snippet">row</span>: 
 				the current data row, or <span class='code-snippet'>null</span> when called post-loop</li>
 			<li><span class="code-snippet">context</span>: 
-			 the <a href='#reserved-context'>context</a> of the current result object being processed</li>
+			 the <a href='reserved.html#context'>context</a> of the current result object being processed</li>
 		</ul>
 		<p>When used as an input key term, a function
 	  must return an array of string <span class='code-snippet'>key</span> values,

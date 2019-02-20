@@ -38,6 +38,10 @@ button {
 	font-size: 12px;
 }
 
+.nodecor {
+	text-decoration: none;
+}
+
 .nav-top {
 	position: relative;
 	width: 100%;
@@ -55,6 +59,11 @@ button {
   overflow: hidden; 
   font-size: 24px;
   font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
+}
+
+.nav-page-wrapper {
+	float: right;
+	margin-right: 12px;
 }
 
 .nav-page {

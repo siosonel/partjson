@@ -32,7 +32,7 @@ demo([{
 	tokenType: "context",
 	section: "context",
 	id: "self",
-	title: `A <span class="code-snippet">@</span> refers to the current result,
+	title: `A <span class="code-snippet">@</span> by itself refers to the current result,
 	 equivalent to <span class="code-snippet">context.self</span>. When referring to
 	 a property of the current result, a delimiter right after the 
 	 <span class="code-snippet">@</span> must be used to access 
