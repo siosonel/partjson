@@ -103,7 +103,7 @@ demo([{
 		<a href='./syntax.html#conversion'>conversion</a> section.`,
 	template: {
   	"@before()": "=savedDoublePreyMass()",
-  	"will-show-double-mass": {
+  	"shows-double": {
   		"$preytype": "+$preymass",
   	}
   }
@@ -119,7 +119,7 @@ demo([{
 		<a href='./syntax.html#conversion'>conversion</a> section.`,
 	template: {
   	"@after()": "=savedTriplePreyMass()",
-  	"will-NOT-TRIPLE": {
+  	"shows-before-triple": {
   		"$preytype": "+$preymass",
   	}
   }

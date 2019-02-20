@@ -1,6 +1,6 @@
 demo([{
 	section: "stem",
-	id: "stem",
+	id: "stem-undelim",
 	title: `A stem may either be an unprocessed constant or substitutable 
 	  property name, alias, or keyword. The stem forms the 'root word' of 
 	  an input key or value term.`,

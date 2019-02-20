@@ -18,50 +18,51 @@ function isNumeric(d) {
 
 function demo(examples, reveal=false) {
 	const opts = getOpts()
-	const emptyExample = opts.createTemplate()
 	const renderedBySymbol = {}
-	go()
+	setTimeout(go, 0)
 
 	function go(){
 		examples.forEach(renderExample)
 	}
 
 	function renderExample(example,i) {
-		const clone = document.importNode(emptyExample.content, true)
-		clone.querySelector('.example-div').setAttribute("id", example.id)
-		const results = clone.querySelector(".results")
-		const fxns = clone.querySelector(".fxns")
-		
-		// the ParJSON template, not a DOM template
-		const template = clone.querySelector(".template")
-		template.innerHTML = highlightTokens(example.template)
-		
-		const tsv = clone.querySelector(".tsv")
-		tsv.innerHTML = opts.tsvText
+		const dom = opts.setExampleDiv(example)
+		dom.template.innerHTML = highlightTokens(example.template)
+		dom.tsv.innerHTML = opts.tsvText
+		dom.title.innerHTML = example.title
 
-		const title = clone.querySelector('p')
-		title.innerHTML = example.title
+		const run = getRunFxn(dom)
 
-		const run = getRunFxn({template, tsv, results, title})
-		setTryDiv(clone, run, example)
-
-		const inputLabels = clone.querySelectorAll('.inputlabel')
-		for(const label of inputLabels) {
+		dom.updateBtn.onclick = run
+		for(const label of dom.inputLabels) {
 			label.onclick = run
 		}
 
-		clone.querySelector('.update-btn').onclick = run
-
-		clone.querySelector('.tsv-btn').onclick = ()=>{
-			tsv.style.display = tsv.style.display == "block" ? "none" : "block"
-			fxns.style.display = "none"
+		dom.tsvBtn.onclick = ()=>{
+			dom.tsv.style.display = dom.tsv.style.display == "block" ? "none" : "block"
+			dom.fxns.style.display = "none"
 		}
 
-		document.querySelector('#'+example.section).appendChild(clone)
-
-		if (window.location.hash == '#' + example.id) {
-			setTimeout(()=>title.scrollIntoView(), 100)
+		dom.tryBtn.onclick = () => {
+			const display = dom.tryDiv.style.display != "block" ? "block" : "none"
+			dom.tryDiv.style.display = display
+			if (display == "none") return
+			const fxnStr = run()
+			displayFxns(fxnStr, example)
 		}
+
+		if (reveal) {
+			dom.tryDiv.style.display = "block"
+			const fxnStr = run()
+			displayFxns(fxnStr, example)
+		}
+
+		if (window.location.hash == '#' + example.id) { 
+			setTimeout(()=>dom.title.scrollIntoView(), 100)
+		} 
+		else if (window.location.hash == '#' + example.section) {
+			document.getElementById(example.section).scrollIntoView()
+		} 
 
 		if (example.symbol && !renderedBySymbol[example.symbol]) {
 			const tab = document.createElement('div')
@@ -81,22 +82,6 @@ function demo(examples, reveal=false) {
 				window.location.hash = "#" + example.section
 				//document.querySelector('#'+example.section).scrollIntoView()
 			}
-		}
-	}
-
-	function setTryDiv(clone, run, example) {
-		const tryDiv = clone.querySelector(".example-try")
-		clone.querySelector(".try-btn").onclick = () => {
-			const display = tryDiv.style.display != "block" ? "block" : "none"
-			tryDiv.style.display = display
-			if (display == "none") return
-			const fxnStr = run()
-			displayFxns(fxnStr, example)
-		}
-		if (reveal) {
-			tryDiv.style.display = "block"
-			const fxnStr = run()
-			displayFxns(fxnStr, example)
 		}
 	}
 
@@ -176,10 +161,11 @@ function demo(examples, reveal=false) {
 	}
 
 	function displayFxns(fxnStr, example) {
-		if (!Object.keys(fxnStr).length) return; console.log(fxnStr)
-		const node = document.querySelector('#'+example.id).parentNode
+		if (!Object.keys(fxnStr).length) return; 
+		const div = document.querySelector('#'+example.id)
+		if (!div) return
 		let str = ""
-		for(const fxnName in fxnStr) { console.log(fxnName)
+		for(const fxnName in fxnStr) {
 			str += "<i class='fxn-keyword'>function&nbsp;</i>"
 					+ fxnStr[fxnName]
 						.replace(fxnName, "<span class='fxn-name'>"+ fxnName + "</span>")
@@ -188,13 +174,12 @@ function demo(examples, reveal=false) {
 						.replace(/return\ /g, "<span class='fxn-return'>return </span>")
 				  +  "\n\n"
 		}
-console.log(node.querySelector(".fxns-btn"))
-		node.querySelector(".fxns").innerHTML = str //JSON.stringify(fxnStr)
-		node.querySelector(".fxns-btn").style.display = "inline"
-		node.querySelector(".fxns-btn").onclick = ()=>{
-			const currDisplay = node.querySelector(".fxns").style.display
-			node.querySelector(".fxns").style.display = currDisplay != "block" ? "block" : "none"
-			node.querySelector(".tsv").style.display = "none"
+		div.querySelector(".fxns").innerHTML = str
+		div.querySelector(".fxns-btn").style.display = "inline"
+		div.querySelector(".fxns-btn").onclick = ()=>{
+			const currDisplay = div.querySelector(".fxns").style.display
+			div.querySelector(".fxns").style.display = currDisplay != "block" ? "block" : "none"
+			div.querySelector(".tsv").style.display = "none"
 		}
 	}
 
@@ -285,10 +270,11 @@ Princess	female	Alice,Mike	C2	C3	2019-01-07 09:45	fish	catfish	1.6	{"random":{"i
 Princess	female	Alice,Mike	C2	C3	2019-01-09 09:45	amphibian	frog	0.7	{"random":{"id": "34jd"}}`
 ,
 
-	createTemplate() {
-		const template = document.createElement('template')
-		template.setAttribute('id', 'emptyExample')
-		template.innerHTML = `<div id="" class="example-div">
+setExampleDiv(example) {
+		const child = document.createElement('div')
+		child.setAttribute('id', example.id); //console.log(div.id)
+		child.setAttribute('class', 'example-div')
+		child.innerHTML = `
 	<button class="try-btn">try</button>
 	<p class="example-title"></p>
 	<div class="example-try">
@@ -317,11 +303,23 @@ Princess	female	Alice,Mike	C2	C3	2019-01-09 09:45	amphibian	frog	0.7	{"random":{
 		</code>
 		<textarea class='tsv'>
 		</textarea>
-	</div>
-</div>`;
+	</div>`;
 
-			document.body.appendChild(template)
-			return document.querySelector('#emptyExample')
+			const div = document.getElementById(example.section).appendChild(child); 
+			return {
+				div,
+				title: div.querySelector('p'),
+				// the ParJSON template, not a DOM template
+				template: div.querySelector(".template"),
+				results: div.querySelector(".results"),
+				tsv: div.querySelector(".tsv"),
+				fxns: div.querySelector(".fxns"),
+				inputLabels: div.querySelectorAll('.inputlabel'),
+				updateBtn: div.querySelector('.update-btn'),
+				tsvBtn: div.querySelector('.tsv-btn'),
+				tryDiv: div.querySelector('.example-try'),
+				tryBtn: div.querySelector('.try-btn')
+			}
 		}
 	}
 }

@@ -70,6 +70,7 @@ button {
   text-align: center;
   background: #333;
   color: #99cc00;
+  overflow: scroll;
 }
 
 .nav-col {
@@ -80,6 +81,7 @@ button {
 }
 
 .nav-tab {
+	min-width: 50px;
 	padding: 2px;
 	text-align: center;
   background: #333;
