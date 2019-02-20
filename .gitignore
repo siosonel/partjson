@@ -2,3 +2,4 @@
 node_modules
 dist/*
 !dist/parjson.esm.js
+!dist/parjson.umd.js
