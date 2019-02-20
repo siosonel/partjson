@@ -40,6 +40,12 @@ export default class Err {
 	      	if (Array.isArray(input.templateVal)) {
 	      		result[input.term] = ["{{ " + message + " }} ", ...input.templateVal]
 	      	}
+	      	else if (typeof input.templateVal == "string")  {
+	      		result[input.term] = "{{ " + message + " }} " + input.templateVal
+	      	}
+	      	else {
+	      		result[input.term] = "{{ " + message + " }} "
+	      	}
 	      }
 			}
   	}

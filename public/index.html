@@ -176,7 +176,7 @@
     color: #fff;
 		white-space: pre;
     font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 300;
     text-align: left;
     overflow: scroll;
@@ -202,6 +202,10 @@
 		margin: auto;
 		padding: 2px;
 		text-align: center;
+	}
+
+	.parjson-token {
+		color: #ff0;  /*#efbf64;*/
 	}
 	</style>
 	<script src="test.js"></script>
@@ -331,15 +335,15 @@
 				<h3 class='inputlabel'>
 					Template
 				</h3>
-				<textarea class='template inputtext'>
-				</textarea>
+				<pre class='template inputtext' contenteditable="true">
+				</pre>
 			</div>
 			<div class='jsondiv'>
 				<h3 class='inputlabel'>
 					Result
 				</h3>
-				<textarea class='results inputtext' disabled="true">
-				</textarea>
+				<pre class='results inputtext' disabled="true">
+				</pre>
 			</div>
 		</div>
 		<div class='btn-div'>
@@ -365,10 +369,10 @@ function renderExample(example,i) {
 	
 	// the ParJSON template, not a DOM template
 	const template = clone.querySelector(".template")
-	template.value = JSON.stringify(example.template, null, "  ")
+	template.innerHTML = highlightTokens(example.template)
 	
 	const tsv = clone.querySelector(".tsv")
-	tsv.value = tsvText
+	tsv.innerHTML = tsvText
 
 	const title = clone.querySelector('p')
 	title.innerHTML = example.title
@@ -421,7 +425,7 @@ function getRunFxn(dom) {
 	let tracker
 	return function() {
 		const template = JSON.parse(
-			dom.template.value
+			dom.template.innerText
 				.trim()
 				.replace("&lt;","<")
 				.replace("&gt;",">")
@@ -443,7 +447,7 @@ function getRunFxn(dom) {
 			})
 		}
 
-		dom.results.value = JSON.stringify(tracker.tree, null, "  ")
+		dom.results.innerHTML = JSON.stringify(tracker.tree, null, "  ")
 
 		const fxnStr = {}
 		for(const templateFiller of tracker.fillers) {
@@ -451,14 +455,14 @@ function getRunFxn(dom) {
 			for(const term in filler.inputs) {
 				if (term[0]=="=") {
 					const fxnName = term.slice(1,-2)
-					if (!fxnStr[fxnName]) {
+					if (!fxnStr[fxnName] && tracker.opts.fxns[fxnName]) {
 						fxnStr[fxnName] = tracker.opts.fxns[fxnName].toString()
 					}
 				}
 				const templateVal = filler.inputs[term].templateVal
 				if (typeof templateVal == "string" && templateVal[0] == "=") {
 					const fxnName = templateVal.slice(1,-2)
-					if (!fxnStr[fxnName]) {
+					if (!fxnStr[fxnName] && tracker.opts.fxns[fxnName]) {
 						fxnStr[fxnName] = tracker.opts.fxns[fxnName].toString()
 					}
 				}
@@ -466,6 +470,30 @@ function getRunFxn(dom) {
 		}
 		return fxnStr
 	}
+}
+
+function highlightTokens(str) {
+	return JSON.stringify(str, null, "  ")
+	.replace(/\"\</g, "\"&lt;")
+	.replace(/\"\>/g, "\"&gt;")
+	.replace(/\"\&lt\;\$/g, "\"<span class='parjson-token'>&lt;$</span>")
+	.replace(/\"\&gt\;\$/g, "\"<span class='parjson-token'>&gt;$</span>")
+	.replace(/\"\&lt\;/g, "\"<span class='parjson-token'>&lt;</span>")
+	.replace(/\"\&gt\;/g, "\"<span class='parjson-token'>&gt;</span>")
+	.replace(/\"\=/g, "\"<span class='parjson-token'>=</span>")
+	.replace(/\"\$/g, "\"<span class='parjson-token'>$</span>")
+	.replace(/\"\+\$/g, "\"<span class='parjson-token'>+$</span>")
+	.replace(/\"\-\$/g, "\"<span class='parjson-token'>-$</span>")
+	.replace(/\"\&/g, "\"<span class='parjson-token'>&</span>")
+	.replace(/\"\@/g, "\"<span class='parjson-token'>@</span>")
+	.replace(/\"\+/g, "\"<span class='parjson-token'>+</span>")
+	.replace(/\"\-/g, "\"<span class='parjson-token'>-</span>")
+	.replace(/\(\)\"/g, "<span class='parjson-token'>()</span>\"")
+	.replace(/\[\]\"/g, "<span class='parjson-token'>[]</span>\"")
+	.replace(/\:\ \[\n/g, ": <span class='parjson-token'>[</span>\n")
+	.replace(/\]\n/g, "<span class='parjson-token'>]</span>\n")
+	.replace(/\]\,\n/g, "<span class='parjson-token'>]</span>,\n")
+	.replace(/\"\#/g, "<span class='parjson-token'>\"#</span>")
 }
 
 function displayFxns(fxnStr, example) {
