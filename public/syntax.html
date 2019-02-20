@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Parjson</title>
+	<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<link rel="stylesheet" href="./css/normalize.css">
+	<link rel="stylesheet" href="./css/parjson.css">
+	<style>
+	</style>
+	<script src="/parjson/dist/parjson.umd.js" charset="utf-8"></script>
+</head>
+<body>
+
+<div class='nav-top'>
+	<div class="nav-banner">
+		<div style="float:left; padding: 0 12px;">Parjson</div>
+		<div style="float:right">
+			<a href='./' class="nav-page">Home</a>
+			<a href='syntax.html' class="nav-page">Syntax</a>
+			<a href='reserved.html' class="nav-page">Reserved</a>
+		</div>
+	</div>
+	<nav class="nav-bar" 
+		onmouseleave="collapseSymbols()">
+		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
+			<div class="nav-col" id="nav-col-skip">
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [skip] </div>
+			</div>
+			<div class="nav-col" id="nav-col-time">
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [timing] </div>
+			</div>
+			<div class="nav-col" id="nav-col-aggr">
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [aggregation] </div>
+			</div>
+			<div class="nav-col" id="nav-col-subs">
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [substitution] </div>
+			</div>
+			<div class="nav-col" id="nav-col-stem">
+				<div class="nav-tab" onmouseenter="expandSymbols()">  stem  </div>
+			</div>
+			<div class="nav-col" id="nav-col-conv">
+				<div class="nav-tab" onmouseenter="expandSymbols()"> [conversion] </div>
+			</div>
+		</div>
+	</nav>
+</div>
+
+<content>
+	<section id='stem'>
+		<h3 class='section-title'>Stem words</h3>
+	</section>
+
+	<section id='substitution'>
+		<h3 class='section-title'>Substitution</h3>
+	</section>
+
+	<section id='conversion'>
+		<h3 class='section-title'>Conversion</h3>
+		<p>A function will be passed the following arguments in order:</p>
+		<ul>
+			<li><span class="code-snippet">row</span>: 
+				the current data row, or <span class='code-snippet'>null</span> when called post-loop</li>
+			<li><span class="code-snippet">context</span>: 
+			 the <a href='#reserved-context'>context</a> of the current result object being processed</li>
+		</ul>
+		<p>When used as an input key term, a function
+	  must return an array of string <span class='code-snippet'>key</span> values,
+	  or an empty array if the filler is to ignore the input for the current data row.  
+	  As an input value term, it must return the value for the result[key] input that is 
+	  being filled.  
+	  </p>
+	  <br/>
+	</section>
+
+	<section id='aggregation'>
+		<h3 class='section-title'>Aggregation</h3>
+	</section>
+
+	<section id='timing'>
+		<h3 class='section-title'>Timing</h3>
+	</section>
+
+	<section id='skip'>
+		<h3 class='section-title'>Skip</h3>
+	</section>
+</content>
+<script src="./js/demo.js"></script>
+<script src="./js/syntax.js"></script>
+</body>
+</html>
+

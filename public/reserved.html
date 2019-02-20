@@ -24,34 +24,34 @@
 	<nav class="nav-bar" 
 		onmouseleave="collapseSymbols()">
 		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
-			<!--<div class="nav-col" id="nav-col-skip">
-				<div class="nav-tab" > Syntax </div>
+			<div class="nav-col" id="nav-col-options">
+				<div class="nav-tab" onmouseenter="expandSymbols()">[options]</div>
 			</div>
-			<div class="nav-col" id="nav-col-time">
-				<div class="nav-tab"> Reserved </div>
-			</div>-->
+			<div class="nav-col" id="nav-col-context">
+				<div class="nav-tab" onmouseenter="expandSymbols()">[context]</div>
+			</div>
+			<div class="nav-col" id="nav-col-functions">
+				<div class="nav-tab" onmouseenter="expandSymbols()">[functions]</div>
+			</div>
 		</div>
 	</nav>
 </div>
+
 <content>
-	<section id='intro'>
-		<h3 class='section-title'>Basics</h3>
-		<p>
-			Parjson fills a JSON-based template for 
-			partitioning rows of data into a well-defined tree of 
-			data collections and aggregated results. 
-    </p>
+	<section id='options'>
+		<h3 class='section-title'>Options</h3>
 	</section>
 
-	<section id='quick-examples'>
-		<h3 class='section-title'>Quick Examples</h3>
-		<!--<p>Click the <button class='try-btn' style='position:relative'>try</button> button in 
-		the upper right corner of the examples below.</p>-->
-		<br/>
+	<section id='context'>
+		<h3 class='section-title'>Context</h3>
+	</section>
+
+	<section id='functions'>
+		<h3 class='section-title'>Functions</h3>
 	</section>
 </content>
 <script src="./js/demo.js"></script>
-<script src="./js/quick.js"></script>
+<script src="./js/reserved.js"></script>
 </body>
 </html>
 
