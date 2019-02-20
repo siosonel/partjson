@@ -4,6 +4,7 @@
 	<title>Parjson</title>
 	<meta charset="utf-8">
 	<link rel="shortcut icon" href="">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
 	<style>
 	html {
 	  height: 100vh;
@@ -16,6 +17,11 @@
   	align-items: stretch;
 		font-family: arial, helvetica, sans serif;
 	}
+
+  content {
+  	flex: 2;
+  	overflow: scroll;
+  }
 
 	section {
 		/*border-bottom: 1px solid #eee;*/
@@ -39,6 +45,7 @@
 	.nav-top {
 		width: 100%;
     height: 70px;
+    margin-bottom: 15px;
     z-index: 1;
     overflow: visible;
 	}
@@ -95,10 +102,6 @@
   	background: #999;
   }
 
-  content {
-  	flex: 1;
-  }
-
   .code-snippet {
   	font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
     font-size: 14px;
@@ -113,6 +116,7 @@
 	}
 
 	.example-div {
+		position: relative;
  		width: 90%;
     margin: auto;
     margin-bottom: 40px;
@@ -122,6 +126,29 @@
 
   .example-title {
   	margin: 0 0 0 4%; 
+  }
+
+  .example-try {
+  	display: none;
+  }
+
+  .try-btn {
+  	position: absolute;
+  	top: 0;
+  	right: 0;
+    font-family: Menlo, Monospace, Consolas, Arial, sans-serif;
+  	font-size: 12px;
+  	line-height: 12px;
+  	border-style: none;
+  	vertical-align: middle;
+  	background: #333;
+  	color: #99cc00;
+  	opacity: 0.75;
+  	cursor: pointer;
+  }
+
+  .try-btn:hover {
+  	opacity: 1;
   }
 
 	.jsondiv {
@@ -252,35 +279,14 @@
 			Parjson fills a JSON-based template for 
 			partitioning rows of data into a well-defined tree of 
 			data collections and aggregated results. 
-    <p><!--
-    <p>The template
-			syntax and filler design is guided by the following 
-			motivations:</p>
-    <br/>
-		<ul>
-      <li>
-      	To minimize coding errors by using a well-tested and reliable template 
-      	filler to handle the data processing
-      </li>
-		  <li>
-		    To better communicate the overall data processing intent by having 
-	      the target data structure laid out from the beginning
-      </li>
-			<li>
-				To significantly reduce the lines and complexity of data processing 
-				code in a non-data oriented programming language such as Javascript
-			</li>
-			<li>
-				To encourage performant template fillers that only pass through each data
-				row once, making partitioning and aggregation suitable for streaming data 
-				and parallelized processing
-			</li>
-		</ul>
-		<br/>-->
+    </p>
 	</section>
 
 	<section id='quick-examples'>
 		<h3 class='section-title'>Quick Examples</h3>
+		<p>Click the <button class='try-btn' style='position:relative'>try</button> button in 
+		the upper right corner of the examples below.</p>
+		<br/>
 	</section>
 
 	<section id='stem'>
@@ -306,7 +312,6 @@
 	  As an input value term, it must return the value for the result[key] input that is 
 	  being filled.  
 	  </p>
-	  </p>
 	  <br/>
 	</section>
 
@@ -328,33 +333,36 @@
 </content>
 
 <template id='emptyExample'>
-	<div class="example-div">
-		<p id="" class="example-title"></p>
-		<div style="text-align: center">
-			<div class='jsondiv'>
-				<h3 class='inputlabel'>
-					Template
-				</h3>
-				<pre class='template inputtext' contenteditable="true">
-				</pre>
+	<div id="" class="example-div">
+		<button class="try-btn">try</button>
+		<p class="example-title"></p>
+		<div class="example-try">
+			<div style="text-align: center">
+				<div class='jsondiv'>
+					<h3 class='inputlabel'>
+						Template
+					</h3>
+					<pre class='template inputtext' contenteditable="true">
+					</pre>
+				</div>
+				<div class='jsondiv'>
+					<h3 class='inputlabel'>
+						Result
+					</h3>
+					<pre class='results inputtext' disabled="true">
+					</pre>
+				</div>
 			</div>
-			<div class='jsondiv'>
-				<h3 class='inputlabel'>
-					Result
-				</h3>
-				<pre class='results inputtext' disabled="true">
-				</pre>
+			<div class='btn-div'>
+				<button class='tsv-btn'>Data</button>
+				<button class='update-btn'>Update</button>
+				<button class='fxns-btn' style="display:none">Functions</button>
 			</div>
+			<code class='fxns'>
+			</code>
+			<textarea class='tsv'>
+			</textarea>
 		</div>
-		<div class='btn-div'>
-			<button class='tsv-btn'>Data</button>
-			<button class='update-btn'>Update</button>
-			<button class='fxns-btn' style="display:none">Functions</button>
-		</div>
-		<code class='fxns'>
-		</code>
-		<textarea class='tsv'>
-		</textarea>
 	</div>
 </template>
 <script>
@@ -364,6 +372,7 @@ examples.forEach(renderExample)
 
 function renderExample(example,i) {
 	const clone = document.importNode(emptyExample.content, true)
+	clone.querySelector('.example-div').setAttribute("id", example.id)
 	const results = clone.querySelector(".results")
 	const fxns = clone.querySelector(".fxns")
 	
@@ -376,7 +385,15 @@ function renderExample(example,i) {
 
 	const title = clone.querySelector('p')
 	title.innerHTML = example.title
-	title.setAttribute("id", example.id)
+	
+  const tryDiv = clone.querySelector(".example-try")
+	clone.querySelector(".try-btn").onclick = () => {
+		const display = tryDiv.style.display != "block" ? "block" : "none"
+		tryDiv.style.display = display
+		if (display == "none") return
+		const fxnStr = run()
+		displayFxns(fxnStr, example)
+	}
 
 	const run = getRunFxn({template, tsv, results, title})
 	
@@ -393,8 +410,6 @@ function renderExample(example,i) {
 	}
 
 	document.querySelector('#'+example.section).appendChild(clone)
-	const fxnStr = run()
-	displayFxns(fxnStr, example)
 
 	if (window.location.hash == '#' + example.id) {
 		setTimeout(()=>title.scrollIntoView(), 100)
