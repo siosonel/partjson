@@ -115,7 +115,7 @@ ValueFiller.prototype["$"] = function(subterm, input) {
 ValueFiller.prototype["="] = function(subterm, input) {
   const nestedProps = subterm.slice(1).split(this.Tree.treeDelimit)
   const reducer = (d,k) => d && k in d ? d[k] : null
-  const fxn = nestedProps.reduce(reducer, this.Tree.opts.fxns)
+  const fxn = nestedProps.reduce(reducer, this.Tree.opts["="])
   if (!fxn) {
   	input.errors.push(["val", "ERR-MISSING-FXN"])
   }

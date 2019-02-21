@@ -25,7 +25,7 @@ export default class Parjson {
   constructor(opts={}) {
     this.defaultOpts = {
       template: {},
-      fxns: {},
+      "=": {},
       ignoredVals: []
     }
 
@@ -262,7 +262,7 @@ export default class Parjson {
 }
 
 Parjson.prototype["@before"] = function (subterm, input) {
-	const fxn = this.opts.fxns[subterm.slice(1,-2)]
+	const fxn = this.opts["="][subterm.slice(1,-2)]
 	if (!fxn) {
 		input.errors.push(["val", "MISSING-@before-FXN"])
 		return this.trueFxn
@@ -271,7 +271,7 @@ Parjson.prototype["@before"] = function (subterm, input) {
 }
 
 Parjson.prototype["@after"] = function (subterm, input) {
-	const fxn = this.opts.fxns[subterm.slice(1,-2)]
+	const fxn = this.opts["="][subterm.slice(1,-2)]
 	if (!fxn) {
 		input.errors.push(["val", "MISSING-@after-FXN"])
 		return this.trueFxn
@@ -283,7 +283,7 @@ Parjson.prototype["@join"] = function (joins, input) {
 	return (row) => {
 		let ok = true
 		for(const alias in joins) {
-			const fxn = this.opts.fxns[joins[alias].slice(1,-2)]
+			const fxn = this.opts["="][joins[alias].slice(1,-2)]
 			if (!fxn) {
 				input.errors.push(["val", "MISSING-@join-FXN"])
 			}
