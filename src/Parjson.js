@@ -127,12 +127,6 @@ export default class Parjson {
 	      	}
 	      }
 	    }
-      if (templateVal) {
-        if (!Array.isArray(templateVal) 
-        	&& typeof templateVal == 'object') {
-          this.parseTemplate(templateVal, input.lineage)
-        }
-      }
     }
     filler.steps = steps.filter(d => d.length)
   }
@@ -230,6 +224,9 @@ export default class Parjson {
   		const value = result[key]
   		if (value instanceof Set) {
   			result[key] = [...result[key]]
+  		}
+  		else if (value instanceof Map) { //console.log(result[key].entries())
+  			result[key] = [...result[key].entries()].map(d => [d[0], d[1][key]])
   		}
   		else if (value) {
   			if (Array.isArray(value)) {

@@ -56,6 +56,9 @@ export default class ValueFiller {
 	      input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE-SYMBOL'])
 	    }
     }
+    else if (Array.isArray(input.templateVal[0])) {
+    	return this["[[,]]"](input.templateVal[0], input)
+    }
     else if (input.templateVal[0] && typeof input.templateVal[0] == 'object') {
       return this["[{}]"](input.templateVal[0], input)
     }
@@ -65,6 +68,7 @@ export default class ValueFiller {
   }
 
   getObjectFiller(input) {
+  	this.Tree.parseTemplate(input.templateVal, input.lineage)
     return (row, key, result) => {
       if (!(key in result)) {
         result[key] = this.Tree.getEmptyResult(key, result)
@@ -268,6 +272,44 @@ ValueFiller.prototype["[{}]"] = function (template, input) {
   }
 }
 
+ValueFiller.prototype["[[,]]"] = function (templates, input) {
+  const fillers = []
+  for(const templateVal of templates) {
+  	const inputCopy = Object.assign({}, input, {templateVal})
+  	fillers.push(this.getFxn(inputCopy))
+  	if (templateVal 
+  		&& !Array.isArray(templateVal) 
+  		&& typeof templateVal == "object") {
+  		this.Tree.parseTemplate(templateVal)
+  	} 
+  }
+  const option = input.templateVal[1] ? input.templateVal[1] : ""
+  if (!option || option != "map") {
+	  return (row, key, result) => {
+	  	if (!(key in result)) result[key] = []
+	  	const items = []
+	  	for(const filler of fillers) {
+	  		const store = Object.create(null)
+	  		filler(row, key, store)
+	  		items.push(...Object.values(store))
+	  	}
+	  	result[key].push(items)
+	  }
+	}
+	else {
+		return (row, key, result) => {
+	  	if (!(key in result)) result[key] = new Map()
+	  	const store0 = Object.create(null)
+	  	fillers[0](row, key, store0)
+	  	const mapKey = store0[key]
+	  	const store1 = result[key].has(mapKey) 
+	  		? result[key].get(mapKey) 
+	  		: Object.create(null)
+	  	fillers[1](row, key, store1)
+	  	result[key].set(mapKey, store1)
+	  }
+	}
+}
 
 /* Operator aggregation */
 ValueFiller.prototype["+''"] = function(subsFxn, input) { 

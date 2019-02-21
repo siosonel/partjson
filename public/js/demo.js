@@ -174,9 +174,9 @@ function demo(examples, reveal=false) {
     .replace(/\"\-/g, "\"<span class='parjson-token'>-</span>")
     .replace(/\(\)\"/g, "<span class='parjson-token'>()</span>\"")
     .replace(/\[\]\"/g, "<span class='parjson-token'>[]</span>\"")
-    .replace(/\:\ \[\n/g, ": <span class='parjson-token'>[</span>\n")
-    .replace(/\ \]\n/g, "<span class='parjson-token'>]</span>\n")
-    .replace(/\ \]\,\n/g, "<span class='parjson-token'>]</span>,\n")
+    .replace(/\ \[\n/g, " <span class='parjson-token'>[</span>\n")
+    .replace(/\ \]\n/g, " <span class='parjson-token'>]</span>\n")
+    .replace(/\ \]\,\n/g, " <span class='parjson-token'>]</span>,\n")
     .replace(/\"\#/g, "<span class='parjson-token'>\"#</span>")
   }
 
@@ -230,9 +230,7 @@ function demo(examples, reveal=false) {
         else {
           c[key] = d[j]
         }
-      });
-
-      c.testObj = {}
+      })
       data.push(c)
     }); 
     if (tsvParseErrors.length) {

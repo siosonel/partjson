@@ -162,13 +162,34 @@ demo([{
 	tokenType: "aggr",
 	section: "aggregation",
 	id: "collect-into-a-list",
-	title: `<span class="code-snippet">[ ]</span> collects values into a list`,
+	title: `<span class="code-snippet">[ ]</span>, the JSON array, collects values 
+		into a list, or a set when used with the "distinct" option.`,
 	template: {
 		"distinctPreyType": [
 			"$preytype", "distinct"
 		],
     nonDistinct: [
     	"$preytype"
+    ]
+	}
+},{
+	symbol: "[[ , ]]",
+	tokenType: "aggr",
+	section: "aggregation",
+	id: "collect-into-a-map",
+	title: `<span class="code-snippet">[[ , ]]</span>, represents a JSON array of arrays
+	  and will either (a) collect an array entry per data row
+		or (b) map the first element to values in the format 
+		<span class="code-snippet">[[ key, value ]]</span> when the "map" option
+		is specified. These aggregations are useful when
+		all of the elements in the nested array are objects, such as when
+		using a data row as a map key.`,
+	template: {
+		"mappedToPreyType": [
+			["$preytype", "+1"], "map"
+		],
+    notMappedToPreyType: [
+    	["$preytype", "+1"]
     ]
 	}
 },{
