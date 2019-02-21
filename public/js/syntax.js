@@ -243,4 +243,4 @@ demo([{
   	  "count": "#+1"
   	}
   }
-}])
+}], window.location.search.includes("reveal="))

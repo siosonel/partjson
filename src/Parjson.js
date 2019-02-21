@@ -332,7 +332,7 @@ Parjson.prototype["@after"] = function (subterm, input) {
 	else return fxn
 }
 
-Parjson.prototype["@join"] = function (joins, input) {
+Parjson.prototype["@join"] = function (joins, input, filler) {
 	return (row) => {
 		let ok = true
 		for(const alias in joins) {

@@ -4,6 +4,9 @@ Partition rows of streaming data into a well-defined
 tree structure of aggregated values and collections,
 using a JSON-based template.
 
+## Documentation and Demonstration
+
+https://pecan-test.stjude.org/parjson
 
 ## Getting started
 

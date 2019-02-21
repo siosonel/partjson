@@ -142,8 +142,8 @@ demo([{
 		(b) a function that returns <span class="code-snippet">true</span> when a value
 		is to be ignored, or (c) an object with 
 		<span class="code-snippet">"term": [ value ] || "=filter()"</span> as key-values.
-		Below is an example of an array of an ignored value, which will be used
-		to filter all inputs in the current template.`,
+		An array of ignored values will be applied to all
+		input value terms in the current template.`,
 	template: {
 		"@ignoredVals()": ["mammal"],
   	"okPreyType": [
@@ -161,7 +161,7 @@ demo([{
 		<span class="code-snippet">key</span>, 
 		<span class="code-snippet">row</span>,
 		<span class="code-snippet">context</span>) as arguments. The filter
-		will be used for all inputs in the current template.`,
+		will be applied to all input value terms in the current template.`,
 	template: {
   	"filteredMass": {
   		"@ignoredVals()": "=ignoreTinyMass()",
@@ -177,13 +177,13 @@ demo([{
 		applies term-specific filtering by value.`,
 	template: {
   	"@ignoredVals()": {
-  		"$preytype": ["mammal"],
+  		"$preytype": "=ignoreMammals()",
   		"=preyTypeFxn()": ["fish"]
   	},	
-		"filtered-by-var": [
+		"filtered-property-value": [
 			"$preytype", "distinct"
 		],
-		"filtered-by-fxn": [
+		"filtered-returned-value": [
 			"=preyTypeFxn()", "distinct"
 		]
   }
@@ -239,8 +239,9 @@ demo([{
 	section: "post",
 	id: "dist",
 	title: `The <span class="code-snippet">@dist()</span> function distributes 
-		results from one subtree to another once template branches are filled with final results. 
-		Usually, this would copy deeply nested result objects into one or more root object arrays, 
+		results from one result subtree to another, once template branches are 
+		filled with final results. Usually, this would copy deeply nested result 
+		objects into one or more root object arrays, 
 		for easier access at the end of data processing.
 		<br/><br/>
 	  An array of result branches, supplied as input value to the 
@@ -264,4 +265,4 @@ demo([{
   		}
   	}
   }
-}])
+}], window.location.search.includes("reveal="))

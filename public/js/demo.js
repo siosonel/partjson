@@ -109,6 +109,7 @@ function demo(examples, reveal=false) {
   }
 
   function getRunFxn(dom) {
+  	const fxnSpots = ["inputs", "@ignoredVals"]
     let tracker
     return function() {
       const template = JSON.parse(
@@ -138,11 +139,20 @@ function demo(examples, reveal=false) {
 
       const fxnStr = {}
       for(const templateFiller of tracker.fillers) {
-        const [template, filler] = templateFiller
-        for(const term in filler.inputs) {
-          fxnToStr(tracker, fxnStr, term)
-          fxnToStr(tracker, fxnStr, filler.inputs[term].templateVal)
-        }
+        const [template, filler] = templateFiller;
+
+        for(const spot of fxnSpots) { 
+	        for(const term in filler[spot]) {
+	          fxnToStr(tracker, fxnStr, term)
+	          fxnToStr(tracker, fxnStr, filler[spot][term].templateVal)
+	          if (term=="@join()") {
+	          	const values = Object.values(filler[spot][term].templateVal)
+	          	for(const value of values) {
+	          		fxnToStr(tracker, fxnStr, value)
+	          	}
+	          }
+	        }
+	      }
       }
       return fxnStr
     }
@@ -150,7 +160,7 @@ function demo(examples, reveal=false) {
 
   function fxnToStr(tracker, fxnStr, term) {
     if (typeof term != "string" || term[0] != "=") return
-    const fxnName = term.slice(1,-2); 
+    const fxnName = term.slice(1,-2)
     if (!fxnStr[fxnName] && tracker.opts["="][fxnName]) {
       fxnStr[fxnName] = tracker.opts["="][fxnName].toString()
     }
@@ -282,6 +292,9 @@ ignoreTinyMass(value) {
 },
 preyTypeFxn(row) {
 	return row.preytype
+},
+ignoreMammals(value) { 
+	return value == "mammal"
 }
 },
   
