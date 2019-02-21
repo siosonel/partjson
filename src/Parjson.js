@@ -83,7 +83,7 @@ export default class Parjson {
     
     delete this.tree
     this.tree = this.getEmptyResult()
-    this.parseTemplate(this.opts.template)
+    this.parseTemplate(this.opts.template, {"@": this.falseFxn})
 
     if (this.opts.data) {
     	this.add(this.opts.data, false)
@@ -91,14 +91,17 @@ export default class Parjson {
     this.errors.log(this.fillers)
   }
 
-  parseTemplate(template, lineage=[]) {
+  parseTemplate(template, inheritedIgnored, lineage=[]) {
     const filler = Object.create(null)
     filler.inputs = Object.create(null)
     filler["@before"] = this.trueFxn
     filler["@after"] = this.trueFxn
     filler["__:"] = []
+    filler.errors = []
+    const ignoredVals = this["@ignoredVals"](template, inheritedIgnored, filler)
+    filler["@ignoredVals"] = ignoredVals
     this.fillers.set(template, filler)
-    
+
     const steps = this.steps.map(d => [])
     for(const term in template) {
       const [subterm, symbols, keyTokens, step] = this.parseTerm(term)
@@ -110,10 +113,22 @@ export default class Parjson {
         keyTokens,
         templateVal,
         lineage: [...lineage, term],
+        ignoredVals: typeof templateVal == "string" && templateVal in ignoredVals 
+        	? ignoredVals[templateVal]
+        	: Array.isArray(templateVal) && templateVal[0] in ignoredVals 
+        		? ignoredVals[templateVal[0]]
+        		: ignoredVals["@"],
+        inheritedIgnored: ignoredVals,
         errors: []
       }
-      if (symbols=="@()") {
-      	filler[subterm] = this[subterm](template[term], input)
+
+      if (symbols == "@()") {
+      	if (this[subterm]) {
+      		filler[subterm] = this[subterm](template[term], input, filler)
+      	}
+      	else {
+      		input.errors.push('key', "UNRECOGNIZED-RESERVED-"+term)
+      	}
       }
       else {
 	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input)
@@ -253,9 +268,50 @@ export default class Parjson {
   	return true
   }
 
+  falseFxn() {
+  	return false
+  }
+
   isNumeric(d) {
     return !isNaN(parseFloat(d)) && isFinite(d) && d!==''
   }
+}
+
+Parjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler) {
+	if (!template["@ignoredVals()"]) {
+		return inheritedIgnored
+	}
+	const nonObj = Array.isArray(template["@ignoredVals()"]) 
+		|| typeof template["@ignoredVals()"] == "string"
+	const ignoredVals = nonObj
+		? {"@": template["@ignoredVals()"]}
+		: template["@ignoredVals()"]
+
+	const fxns = {}
+	for(const term in ignoredVals) {
+		const ignoredVal = ignoredVals[term]
+		if (Array.isArray(ignoredVal)) {
+			fxns[term] = (value) => ignoredVal.includes(value)
+		}
+		else if (typeof ignoredVal == 'string' && ignoredVal[0] == "=") {
+			const fxn = this.opts["="][ignoredVal.slice(1,-2)]
+  	  if (!fxn) {
+  	  	filler.errors.push(["val", "MISSING-@ignoredVals()-FXN", ignoredVal])
+  	  	fxns[term] = this.falseFxn
+  	  }
+  	  else {
+  	  	fxns[term] = fxn
+  		}
+		} 
+		else {
+			filler.errors.push(["val", "UNSUPPORTED-@ignoredVals()-VALUE", ignoredVal])
+  	  fxns[term] = this.falseFxn
+		}
+	}
+
+	return nonObj 
+	  ? fxns
+		: Object.assign({}, inheritedIgnored, fxns)
 }
 
 Parjson.prototype["@before"] = function (subterm, input) {

@@ -91,13 +91,15 @@ demo([{
   }
 },{
 	symbol: "@before()",
-	tokenType: "functions",
-	section: "functions",
+	tokenType: "filters",
+	section: "filters",
 	id: "before",
 	title: `
 		The <span class="code-snippet">@before()</span> term is linked to a user supplied function
 		and gets called before a data row is processed by any input functions. An example use case
 		is to clean data row keys and values before input functions are applied to fill a template.
+		The user supplied function MUST return <span class="code-snippet">true</span> 
+		in order for a data row to be processed.
 		<br/><br/>
 		The arguments supplied to this function are defined in the 
 		<a href='./syntax.html#conversion'>conversion</a> section.`,
@@ -108,9 +110,117 @@ demo([{
   	}
   }
 },{
+	symbol: "@join()",
+	tokenType: "filters",
+	section: "filters",
+	id: "join",
+	title: `A <span class="code-snippet">@join()</span> object takes aliases and functions
+	 as key-values. The function will be passed the current data 
+	 <span class="code-snippet">row</span> as argument, and should return an object
+	 with key-values to be referenced later as <span class="code-snippet">&amp;</span>
+	 prefixed terms in template inputs. Or, if 
+	 <span class="code-snippet">null</span> is returned, the data
+	 row will NOT be used to fill the current result.`,
+	template: {
+		"@join()": {
+  		"loc": "=blockInfo()"
+  	},
+  	"$catname": {
+  		count: "+1",
+  		blockName: "&loc.name",
+  		blockPop: "&loc.population"
+  	}
+  }
+},{
+	symbol: "@ignoredVals()",
+	tokenType: "filters",
+	section: "filters",
+	id: "ignore-values-in-array",
+	title: `
+		The <span class="code-snippet">@ignoreVals()</span> term may be 
+		(a) an array of ignored values, 
+		(b) a function that returns <span class="code-snippet">true</span> when a value
+		is to be ignored, or (c) an object with 
+		<span class="code-snippet">"term": [ value ] || "=filter()"</span> as key-values.
+		Below is an example of an array of an ignored value, which will be used
+		to filter all inputs in the current template.`,
+	template: {
+		"@ignoredVals()": ["mammal"],
+  	"okPreyType": [
+  		"$preytype", "distinct"
+  	] 
+  }
+},{
+	tokenType: "filters",
+	section: "filters",
+	id: "ignore-using-function",
+	title: `
+		An <span class="code-snippet">@ignoredVals()</span> function must 
+		return <span class="code-snippet">true</span> when a value
+		is to be ignored, given (<span class="code-snippet">value</span>, 
+		<span class="code-snippet">key</span>, 
+		<span class="code-snippet">row</span>,
+		<span class="code-snippet">context</span>) as arguments. The filter
+		will be used for all inputs in the current template.`,
+	template: {
+  	"filteredMass": {
+  		"@ignoredVals()": "=ignoreTinyMass()",
+  		"minMass": ">$preymass"
+  	}
+  }
+},{
+	tokenType: "filters",
+	section: "filters",
+	id: "ignore-values-by-term",
+	title: `
+		An object of <span class="code-snippet">@ignoredVals()</span> 
+		applies term-specific filtering by value.`,
+	template: {
+  	"@ignoredVals()": {
+  		"$preytype": ["mammal"],
+  		"=preyTypeFxn()": ["fish"]
+  	},	
+		"filtered-by-var": [
+			"$preytype", "distinct"
+		],
+		"filtered-by-fxn": [
+			"=preyTypeFxn()", "distinct"
+		]
+  }
+},{
+	tokenType: "filters",
+	section: "filters",
+	id: "ignore-inheritance",
+	title: `
+		Nested templates inherit its parent template's 
+		<span class="code-snippet">@ignoredVals()</span>,
+		but may override it.`,
+	template: {
+		"@ignoredVals()": {
+			"$preytype": ["mammal"],
+		},
+		"inheritedIgnore": {
+			"nestedResult": {
+				"filteredPreyTypes": [
+					"$preytype", "distinct"
+				]
+			}
+  	},
+  	"overridenIgnore": {
+  		"@ignoredVals()": {
+				"$preytype": [],
+			},
+			"nestedResult": {
+				"filteredPreyTypes": [
+					"$preytype", "distinct"
+				]
+			}
+  	}
+  }
+},{
 	symbol: "@after()",
-	tokenType: "functions",
-	section: "functions",
+	tokenType: "post",
+	section: "post",
 	id: "after",
 	title: `The <span class="code-snippet">@after()</span> term gets called after 
 	  all the input functions have been called.
@@ -119,14 +229,14 @@ demo([{
 		<a href='./syntax.html#conversion'>conversion</a> section.`,
 	template: {
   	"@after()": "=savedTriplePreyMass()",
-  	"shows-before-triple": {
+  	"mass-before-triple": {
   		"$preytype": "+$preymass",
   	}
   }
 },{
 	symbol: "@dist()",
-	tokenType: "functions",
-	section: "functions",
+	tokenType: "post",
+	section: "post",
 	id: "dist",
 	title: `The <span class="code-snippet">@dist()</span> function distributes 
 		results from one subtree to another once template branches are filled with final results. 
@@ -152,29 +262,6 @@ demo([{
   				}
   			}
   		}
-  	}
-  }
-},{
-	symbol: "@join()",
-	tokenType: "functions",
-	section: "functions",
-	id: "join",
-	title: `A <span class="code-snippet">@join()</span> object takes aliases and functions
-	 as key-values. The function will be passed the current data 
-	 <span class="code-snippet">row</span> as argument, and should return an object
-	 with key-values to be referenced later as <span class="code-snippet">&amp;</span>
-	 prefixed terms in template inputs. Or, if 
-	 <span class="code-snippet">null</span> or 
-	 <span class="code-snippet">undefined</span> is returned, the data
-	 row will not be used to fill in the current result.`,
-	template: {
-		"@join()": {
-  		"loc": "=blockInfo()"
-  	},
-  	"$catname": {
-  		count: "+1",
-  		blockName: "&loc.name",
-  		blockPop: "&loc.population"
   	}
   }
 }])

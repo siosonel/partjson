@@ -276,6 +276,12 @@ blockInfo(row) {
   return row.ownerblock[0] == 'C' 
     ? {name: "Friendly Neighborhood", population: 630}
     : {name: "Sesame Street", population: 950}
+},
+ignoreTinyMass(value) {
+	return value < 0.7
+},
+preyTypeFxn(row) {
+	return row.preytype
 }
 },
   

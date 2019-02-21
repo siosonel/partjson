@@ -60,5 +60,18 @@ export default class Err {
 	      log[key] += 1
   		}
   	}
+
+  	if (context.filler.errors.length) {
+  		if (!result["@errors"]) {
+  			result["@errors"] = {}
+  		}
+  		for(const err of context.filler.errors) {
+  			const key = err[1]
+  			if (!(key in result['@errors'])) {
+  				result['@errors'][key] = []
+  			}
+  			result["@errors"][key].push(err.slice(2))
+  		}
+  	}
   }
 }

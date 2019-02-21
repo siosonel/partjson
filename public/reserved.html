@@ -35,8 +35,11 @@
 			<div class="nav-col" id="nav-col-context">
 				<div class="nav-tab" onmouseenter="expandSymbols()">[context]</div>
 			</div>
-			<div class="nav-col" id="nav-col-functions">
-				<div class="nav-tab" onmouseenter="expandSymbols()">[functions]</div>
+			<div class="nav-col" id="nav-col-filters">
+				<div class="nav-tab" onmouseenter="expandSymbols()">[filters]</div>
+			</div>
+			<div class="nav-col" id="nav-col-post">
+				<div class="nav-tab" onmouseenter="expandSymbols()">[post]</div>
 			</div>
 		</div>
 	</nav>
@@ -58,8 +61,37 @@
 		<h3 class='section-title'>Context</h3>
 	</section>
 
-	<section id='functions'>
-		<h3 class='section-title'>Functions</h3>
+	<section id='filters'>
+		<h3 class='section-title'>Filters</h3>
+		<p>There are three different levels at which a filter 
+			may exclude a data row from being used to fill
+			a result:</p>
+		<br/>
+		<ul>
+			<li>
+				Prior to entering a template: use a 
+				<span class="code-snippet">@before</span> or a
+				<span class="code-snippet">@join</span> function as
+				described below.
+			</li>
+			<li>
+				For a given set of computed input keys: a user-supplied 
+				input key function should return an empty array to
+				ignore a data row for the current input, as described in the
+				<a href="syntax.html#conversion">conversion syntax section</a> 
+				for <span class="code-snippet">()</span> and
+				<span class="code-snippet">[]</span>.
+			</li>
+			<li>
+        For a given set of computed input values: described below in the
+        <span class="code-snippet">ignoredVals</span> examples.
+			</li>
+		</ul>
+		<br/><br/>
+	</section>
+
+	<section id='post'>
+		<h3 class='section-title'>Post-Process</h3>
 	</section>
 </content>
 <script src="./js/demo.js"></script>

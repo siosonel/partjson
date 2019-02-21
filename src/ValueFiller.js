@@ -68,7 +68,7 @@ export default class ValueFiller {
   }
 
   getObjectFiller(input) {
-  	this.Tree.parseTemplate(input.templateVal, input.lineage)
+  	this.Tree.parseTemplate(input.templateVal, input.inheritedIgnored, input.lineage)
     return (row, key, result) => {
       if (!(key in result)) {
         result[key] = this.Tree.getEmptyResult(key, result)
@@ -180,21 +180,15 @@ ValueFiller.prototype["&"] = function(subterm, input) {
 /* No aggregation */
 ValueFiller.prototype["''"] = function(subsFxn, input) {
  	return (row, key, result, context) => {
- 		result[key] = subsFxn(row, context)
+ 		const value = subsFxn(row, context)
+ 		if (input.ignoredVals(value, key, row)) return
+ 		result[key] = value
  	}
 }
 
-ValueFiller.prototype["()"] = function(subsFxn, input) {
- 	return (row, key, result, context) => {
- 		result[key] = subsFxn(row, context)
- 	}
-}
+ValueFiller.prototype["()"] = ValueFiller.prototype["''"]
 
-ValueFiller.prototype["[]"] = function(subsFxn, input) {
- 	return (row, key, result, context) => {
- 		result[key] = subsFxn(row, context)
- 	}
-}
+ValueFiller.prototype["[]"] = ValueFiller.prototype["''"]
 
 /* Aggregation into an array or set collection */
 ValueFiller.prototype["['']"] = function(subsFxn, input) {
@@ -202,32 +196,22 @@ ValueFiller.prototype["['']"] = function(subsFxn, input) {
   if (!option || option != "distinct") {
 		return (row, key, result, context) => {
 	  	if (!(key in result)) result[key] = []
-	  	result[key].push(subsFxn(row, context))
+	  	const value = subsFxn(row, context)
+ 			if (input.ignoredVals(value, key, row, context)) return
+	  	result[key].push(value)
 	  }
 	}
 	else {
 		return (row, key, result, context) => {
 	  	if (!(key in result)) result[key] = new Set()
-	  	result[key].add(subsFxn(row, context))
+	 		const value = subsFxn(row, context)
+	 		if (input.ignoredVals(value, key, row, context)) return
+	  	result[key].add(value)
 	  }
 	}
 }
 
-ValueFiller.prototype["[()]"] = function(subsFxn, input) {
-  const option = input.templateVal[1] ? input.templateVal[1] : ""
-  if (!option || option != "distinct") {
-		return (row, key, result, context) => {
-	  	if (!(key in result)) result[key] = []
-	  	result[key].push(subsFxn(row, context))
-	  }
-	}
-	else {
-		return (row, key, result, context) => {
-	  	if (!(key in result)) result[key] = new Set()
-	  	result[key].add(subsFxn(row, context))
-	  }
-	}
-}
+ValueFiller.prototype["[()]"] = ValueFiller.prototype["['']"]
 
 ValueFiller.prototype["[[]]"] = function(subsFxn, input) {
   const option = input.templateVal[1] ? input.templateVal[1] : ""
@@ -239,7 +223,10 @@ ValueFiller.prototype["[[]]"] = function(subsFxn, input) {
 	    }
 	    else {
 	    	if (!(key in result)) result[key] = []
-	    	result[key].push(...values)
+	    	for(const value of values) {
+			 		if (input.ignoredVals(value, key, row, context)) return
+		    	result[key].push(...values)
+		    }
 	    }
 	  }
 	}
@@ -252,6 +239,7 @@ ValueFiller.prototype["[[]]"] = function(subsFxn, input) {
 	    else {
 	    	if (!(key in result)) result[key] = new Set()
 	    	for(const value of values) {
+			 		if (input.ignoredVals(value, key, row, context)) return
 	    		result[key].add(value)
 	    	}
 	    }
@@ -260,7 +248,7 @@ ValueFiller.prototype["[[]]"] = function(subsFxn, input) {
 }
 
 ValueFiller.prototype["[{}]"] = function (template, input) {
-  this.Tree.parseTemplate(template, input.lineage)
+  this.Tree.parseTemplate(template, input.inheritedIgnored, input.lineage)
   const filler = this.Tree.fillers.get(template);
   return (row, key, result) => {
     if (!(key in result)) {
@@ -307,35 +295,29 @@ ValueFiller.prototype["[[,]]"] = function (templates, input) {
 ValueFiller.prototype["+''"] = function(subsFxn, input) { 
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
-    result[key] += subsFxn(row, context)
+		const value = subsFxn(row, context)
+		if (input.ignoredVals(value, key, row, context)) return
+    result[key] += value
   }
 }
 
-ValueFiller.prototype["+()"] = function(subsFxn) {
+ValueFiller.prototype["+()"] = ValueFiller.prototype["+''"] 
+
+ValueFiller.prototype["-''"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
-    result[key] += -subsFxn(row, context)
+		const value = subsFxn(row, context)
+		if (input.ignoredVals(value, key, row, context)) return
+    result[key] -= value
   }
 }
 
-ValueFiller.prototype["-''"] = function(subsFxn) {
-  return (row, key, result, context) => {
-    if (!(key in result)) result[key] = 0
-    result[key] -= subsFxn(row, context)
-  }
-}
-
-ValueFiller.prototype["-()"] = function(subsFxn) {
-  return (row, key, result, context) => {
-    if (!(key in result)) result[key] = 0
-    result[key] -= subsFxn(row, context)(row)
-  }
-}
+ValueFiller.prototype["-()"] = ValueFiller.prototype["-''"]
 
 ValueFiller.prototype["<''"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     const value = +subsFxn(row, context)
-    if (this.ignoredVals.includes(value)) return
+		if (input.ignoredVals(value, key, row, context)) return
     if (!this.isNumeric(value)) {
       context.errors.push([input, "NON-NUMERIC-THAN", row])
       return
@@ -349,27 +331,12 @@ ValueFiller.prototype["<''"] = function(subsFxn, input) {
   }
 }
 
-ValueFiller.prototype["<()"] = function(subsFxn, input) {
-  return (row, key, result, context) => {
-    const value = +subsFxn(row, context)(row)
-    if (this.ignoredVals.includes(value)) return
-    if (!this.isNumeric(value)) {
-      context.errors.push([input, "NON-NUMERIC-THAN", row])
-      return
-    }
-    if (!(key in result)) {
-      result[key] = value
-    }
-    else if (result[key] < value) {
-      result[key] = value
-    }
-  }
-}
+ValueFiller.prototype["<()"] = ValueFiller.prototype["<''"]
 
 ValueFiller.prototype[">''"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     const value = +subsFxn(row, context)
-    if (this.ignoredVals.includes(value)) return
+		if (input.ignoredVals(value, key, row, context)) return
     if (!this.isNumeric(value)) {
       context.errors.push([input, "NON-NUMERIC-THAN", row])
       return
@@ -383,19 +350,4 @@ ValueFiller.prototype[">''"] = function(subsFxn, input) {
   }
 }
 
-ValueFiller.prototype[">()"] = function(subsFxn, input) {
-  return (row, key, result, context) => {
-    const value = +subsFxn(row, context)(row)
-    if (this.ignoredVals.includes(value)) return
-    if (!this.isNumeric(value)) {
-      context.errors.push([input, "NON-NUMERIC-THAN", row])
-      return
-    }
-    if (!(key in result)) {
-      result[key] = value
-    }
-    else if (result[key] > value) {
-      result[key] = value
-    }
-  }
-}
+ValueFiller.prototype[">()"] = ValueFiller.prototype[">''"]
