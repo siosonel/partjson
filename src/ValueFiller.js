@@ -277,21 +277,14 @@ ValueFiller.prototype["[[,]]"] = function (templates, input) {
   for(const templateVal of templates) {
   	const inputCopy = Object.assign({}, input, {templateVal})
   	fillers.push(this.getFxn(inputCopy))
-  	if (templateVal 
-  		&& !Array.isArray(templateVal) 
-  		&& typeof templateVal == "object") {
-  		this.Tree.parseTemplate(templateVal)
-  	} 
   }
   const option = input.templateVal[1] ? input.templateVal[1] : ""
   if (!option || option != "map") {
 	  return (row, key, result) => {
 	  	if (!(key in result)) result[key] = []
 	  	const items = []
-	  	for(const filler of fillers) {
-	  		const store = Object.create(null)
-	  		filler(row, key, store)
-	  		items.push(...Object.values(store))
+	  	for(const i in fillers) {
+	  		fillers[+i](row, +i, items)
 	  	}
 	  	result[key].push(items)
 	  }
@@ -299,14 +292,13 @@ ValueFiller.prototype["[[,]]"] = function (templates, input) {
 	else {
 		return (row, key, result) => {
 	  	if (!(key in result)) result[key] = new Map()
-	  	const store0 = Object.create(null)
-	  	fillers[0](row, key, store0)
-	  	const mapKey = store0[key]
-	  	const store1 = result[key].has(mapKey) 
-	  		? result[key].get(mapKey) 
-	  		: Object.create(null)
-	  	fillers[1](row, key, store1)
-	  	result[key].set(mapKey, store1)
+	  	const temp = []
+	  	fillers[0](row, 0, temp)
+	  	if (result[key].has(temp[0])) {
+	  		temp[1] = result[key].get(temp[0])
+	  	}
+	  	fillers[1](row, 1, temp)
+	  	result[key].set(temp[0], temp[1])
 	  }
 	}
 }

@@ -221,14 +221,14 @@ export default class Parjson {
 	  }
 
   	for(const key in result) {
-  		const value = result[key]
-  		if (value instanceof Set) {
+  		if (result[key] instanceof Set) {
   			result[key] = [...result[key]]
   		}
-  		else if (value instanceof Map) { //console.log(result[key].entries())
-  			result[key] = [...result[key].entries()].map(d => [d[0], d[1][key]])
+  		else if (result[key] instanceof Map) {
+  			result[key] = [...result[key].entries()]
   		}
-  		else if (value) {
+  		const value = result[key]
+  		if (value) {
   			if (Array.isArray(value)) {
   				// assumes all element values will be the same type
   				if (value[0] && typeof value[0] == "object") {
