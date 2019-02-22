@@ -10,7 +10,7 @@ export default [
 	{
 		input: 'src/Parjson.js',
 		output: {
-			name: 'Parjson',
+			name: 'parjson',
 			file: pkg.browser,
 			format: 'umd'
 		},
