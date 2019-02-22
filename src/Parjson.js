@@ -212,6 +212,7 @@ export default class Parjson {
 	  }
 	  filler["@after"](row, result, context)
 	  if (filler["@dist"]) filler["@dist"](context)
+	  if (filler["@done"]) context.done = filler["@done"]
   }
 
   processResult(result) {
@@ -256,7 +257,10 @@ export default class Parjson {
   			}
   		}
   	}
-  	this.errors.markErrors(result, context)
+  	this.errors.markErrors(result, context);
+  	if (context && context.done) {
+  		context.done(result)
+  	}
   }
 
   trueFxn() {
@@ -327,6 +331,14 @@ Parjson.prototype["@dist"] = function (_subterm, input) {
   }
 }
 
+Parjson.prototype["@done"] = function (subterm, input) {
+	const fxn = this.opts["="][subterm.slice(1,-2)]
+	if (!fxn) {
+		input.errors.push(["val", "MISSING-@before-FXN"])
+		return this.trueFxn
+	}
+	else return fxn
+}
 
 Parjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler) {
 	if (!template["@ignoredVals()"]) {

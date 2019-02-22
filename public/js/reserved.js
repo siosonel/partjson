@@ -265,4 +265,25 @@ demo([{
   		}
   	}
   }
+},{
+	symbol: "@done()",
+	tokenType: "post",
+	section: "post",
+	id: "done",
+	title: `A <span class="code-snippet">@done()</span> callback gets called after 
+	  the final results are filled and distributed. This function will receive
+	  as argument the final result of the template or subtemplate that it is defined in.`,
+	template: {
+		"byCat": {
+			"$catname": {
+				"total": "+1",
+				"rows": [
+					"$"
+				],
+				"@dist()": ["@root.results"]
+			}
+		},
+		"results": [],
+  	"@done()": "=logResultsToDevConsole()"
+  }
 }], window.location.search.includes("reveal="))

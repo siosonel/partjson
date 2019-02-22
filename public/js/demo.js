@@ -296,6 +296,9 @@ preyTypeFxn(row) {
 },
 ignoreMammals(value) { 
 	return value == "mammal"
+},
+logResultsToDevConsole(tree) {
+	console.log(tree)
 }
 },
   
