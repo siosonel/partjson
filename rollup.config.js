@@ -3,6 +3,11 @@ import commonjs from 'rollup-plugin-commonjs';
 import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
+const production = !process.env.ROLLUP_WATCH
+const terserOpts = {
+	mangle: {}
+}
+
 export default [
 	// browser-friendly UMD build
 	{
@@ -15,7 +20,7 @@ export default [
 		plugins: [
 			resolve(), 
 			commonjs(),
-			//terser()
+			production && terser(terserOpts)
 		]
 	},
 
@@ -32,7 +37,7 @@ export default [
 			{ file: pkg.module, format: 'es' }
 		],
 		plugins: [
-			terser()
+			terser(terserOpts)
 		]
 	}
 ];

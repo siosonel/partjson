@@ -374,3 +374,5 @@ Parjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler
 
 	return nonObj ? fxns : Object.assign({}, inheritedIgnored, fxns)
 }
+
+window["Parjson"] = Parjson
