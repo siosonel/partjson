@@ -113,11 +113,6 @@ export default class Parjson {
         keyTokens,
         templateVal,
         lineage: [...lineage, term],
-        ignoredVals: typeof templateVal == "string" && templateVal in ignoredVals 
-        	? ignoredVals[templateVal]
-        	: Array.isArray(templateVal) && templateVal[0] in ignoredVals 
-        		? ignoredVals[templateVal[0]]
-        		: ignoredVals["@"],
         inheritedIgnored: ignoredVals,
         errors: []
       }
@@ -133,7 +128,7 @@ export default class Parjson {
       else {
 	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input)
 	      if (input.keyFxn) {
-	        input.valFxn = this.valueFiller.getFxn(input)
+	        input.valFxn = this.valueFiller.getFxn(input, ignoredVals)
 	      	if (keyTokens.time == "__:") {
 		      	filler["__:"].push(term)
 		      }
@@ -277,43 +272,6 @@ export default class Parjson {
   }
 }
 
-Parjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler) {
-	if (!template["@ignoredVals()"]) {
-		return inheritedIgnored
-	}
-	const nonObj = Array.isArray(template["@ignoredVals()"]) 
-		|| typeof template["@ignoredVals()"] == "string"
-	const ignoredVals = nonObj
-		? {"@": template["@ignoredVals()"]}
-		: template["@ignoredVals()"]
-
-	const fxns = {}
-	for(const term in ignoredVals) {
-		const ignoredVal = ignoredVals[term]
-		if (Array.isArray(ignoredVal)) {
-			fxns[term] = (value) => ignoredVal.includes(value)
-		}
-		else if (typeof ignoredVal == 'string' && ignoredVal[0] == "=") {
-			const fxn = this.opts["="][ignoredVal.slice(1,-2)]
-  	  if (!fxn) {
-  	  	filler.errors.push(["val", "MISSING-@ignoredVals()-FXN", ignoredVal])
-  	  	fxns[term] = this.falseFxn
-  	  }
-  	  else {
-  	  	fxns[term] = fxn
-  		}
-		} 
-		else {
-			filler.errors.push(["val", "UNSUPPORTED-@ignoredVals()-VALUE", ignoredVal])
-  	  fxns[term] = this.falseFxn
-		}
-	}
-
-	return nonObj 
-	  ? fxns
-		: Object.assign({}, inheritedIgnored, fxns)
-}
-
 Parjson.prototype["@before"] = function (subterm, input) {
 	const fxn = this.opts["="][subterm.slice(1,-2)]
 	if (!fxn) {
@@ -367,4 +325,40 @@ Parjson.prototype["@dist"] = function (_subterm, input) {
 	    }
 	  }
   }
+}
+
+
+Parjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler) {
+	if (!template["@ignoredVals()"]) {
+		return inheritedIgnored
+	}
+	const nonObj = Array.isArray(template["@ignoredVals()"]) 
+		|| typeof template["@ignoredVals()"] == "string"
+	const ignoredVals = nonObj
+		? {"@": template["@ignoredVals()"]}
+		: template["@ignoredVals()"]
+
+	const fxns = {}
+	for(const term in ignoredVals) {
+		const ignoredVal = ignoredVals[term]
+		if (Array.isArray(ignoredVal)) {
+			fxns[term] = (value) => ignoredVal.includes(value)
+		}
+		else if (typeof ignoredVal == 'string' && ignoredVal[0] == "=") {
+			const fxn = this.opts["="][ignoredVal.slice(1,-2)]
+  	  if (!fxn) {
+  	  	filler.errors.push(["val", "MISSING-@ignoredVals()-FXN", ignoredVal])
+  	  	fxns[term] = this.falseFxn
+  	  }
+  	  else {
+  	  	fxns[term] = fxn
+  		}
+		} 
+		else {
+			filler.errors.push(["val", "UNSUPPORTED-@ignoredVals()-VALUE", ignoredVal])
+  	  fxns[term] = this.falseFxn
+		}
+	}
+
+	return nonObj ? fxns : Object.assign({}, inheritedIgnored, fxns)
 }

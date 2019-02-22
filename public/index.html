@@ -114,6 +114,26 @@ demo([{
     	["$preytype", {total:"+1"}], "map"
     ]
   }
+},{
+	section: "quick-examples",
+	id: "filter-by-value",
+	title: "Filter by data value",
+	template: {
+		"@ignoredVals()": {
+			"$preymass": "=ignoreTinyMass()",
+			"$preytype": ["mammal"],
+		},
+  	"okPreyType": [
+  		"$preytype", "distinct"
+  	],
+  	"overrideParentFilter": {
+  		"@ignoredVals()": ["fish","bird"],
+  		"okPreyType": [
+	  		"$preytype", "distinct"
+	  	]
+  	},
+  	"minimumMass": ">$preymass"
+  }
 }], true);
 </script>
 </body>

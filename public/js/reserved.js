@@ -98,8 +98,8 @@ demo([{
 		The <span class="code-snippet">@before()</span> term is linked to a user supplied function
 		and gets called before a data row is processed by any input functions. An example use case
 		is to clean data row keys and values before input functions are applied to fill a template.
-		The user supplied function MUST return <span class="code-snippet">true</span> 
-		in order for a data row to be processed.
+		The user supplied function MUST return a value that evaluates to 
+		<span class="code-snippet">true</span> in order for a data row to be processed.
 		<br/><br/>
 		The arguments supplied to this function are defined in the 
 		<a href='./syntax.html#conversion'>conversion</a> section.`,

@@ -1,1 +1,889 @@
-!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):e.Parjson=t()}(this,function(){"use strict";class e{constructor(e){this.Tree=e,this.ignoredVals=e.opts.ignoredVals,this.allowedKeyTypes=new Set(["string","number","undefined"])}getFxn(e,t,s){if(!this.Tree.reservedOpts.includes(e))if(s.keyTokens.skip)this["#"](e,s);else{if(s.keyTokens.subs in this.Tree.valueFiller){const t=this.Tree.valueFiller[s.keyTokens.subs](e,s);if(!t)return void s.errors.push(["key","UNSUPPORTED-KEY-SUBSTITUTION"]);const r=s.keyTokens.conv?s.keyTokens.conv:"''";return this[r]?this[r](t,s):void s.errors.push(["key","UNSUPPORTED-KEY-CONVERSION"])}if(t in this)return this[t](e,s);s.errors.push(["key","UNSUPPORTED-KEY-SYMBOL"])}}getAllowedKeys(e,t,s,r){if(!Array.isArray(e))return r.errors.push(["key","ERR-NON-ARRAY-KEYS",t]),[];const i=[];for(const o of e)this.ignoredVals.includes(o)||(this.allowedKeyTypes.has(typeof o)?i.push(o):r.errors.push([s,"INVALID-RESULT-KEY",t]));return i}}e.prototype["''"]=function(e,t){return(s,r)=>this.getAllowedKeys([e(s,r)],s,t,r)},e.prototype["()"]=function(e,t){return(s,r)=>this.getAllowedKeys([e(s,r)],s,t,r)},e.prototype["[]"]=function(e,t){return(s,r)=>this.getAllowedKeys(e(s,r),s,t,r)},e.prototype["#"]=function(e,t){this.Tree.commentedTerms.has(t)||this.Tree.commentedTerms.set(t,{keys:new Set,values:new Set}),this.Tree.commentedTerms.get(t).keys.add(e)};class t{constructor(e){this.Tree=e,this.ignoredVals=this.Tree.opts.ignoredVals}getFxn(e){return"string"==typeof e.templateVal?this.getStringFiller(e):Array.isArray(e.templateVal)?this.getArrayFiller(e):e.templateVal&&"object"==typeof e.templateVal?this.getObjectFiller(e):(t,s,r)=>{r[s]=e.templateVal}}getStringFiller(e){const[t,s,r]=this.Tree.parseTerm(e.templateVal),i=r.skip?s:r.subs;if(i in this){const s=this[i](t,e);if(s){const t=r.conv?r.conv:"''";return this[r.aggr+t]?this[r.aggr+t](s,e):null}}else e.errors.push(["val","UNSUPPORTED-TEMPLATE-VALUE-SYMBOL"])}getArrayFiller(e){if(!e.templateVal[0])return(t,s,r)=>{r[s]=e.templateVal};if("string"==typeof e.templateVal[0]){const[t,s,r]=this.Tree.parseTerm(e.templateVal[0]),i=r.skip?s:r.subs;if(i in this){const s=this[i](t,e);if(s){return this["["+(r.conv?r.conv:"''")+"]"](s,e)}}else e.errors.push(["val","UNSUPPORTED-TEMPLATE-VALUE-SYMBOL"])}else{if(Array.isArray(e.templateVal[0]))return this["[[,]]"](e.templateVal[0],e);if(e.templateVal[0]&&"object"==typeof e.templateVal[0])return this["[{}]"](e.templateVal[0],e);e.errors.push("val","UNSUPPORTED-TEMPLATE-VALUE")}}getObjectFiller(e){return this.Tree.parseTemplate(e.templateVal,e.inheritedIgnored,e.lineage),(t,s,r)=>{s in r||(r[s]=this.Tree.getEmptyResult(s,r));this.Tree.contexts.get(r[s]);this.Tree.processRow(t,e.templateVal,r[s])}}isNumeric(e){return!isNaN(parseFloat(e))&&isFinite(e)&&""!==e}}t.prototype["#"]=function(e,t){this.Tree.commentedTerms.has(t)||this.Tree.commentedTerms.set(t,{keys:new Set,values:new Set}),this.Tree.commentedTerms.get(t).values.add(e)},t.prototype[""]=function(e,t){return this.isNumeric(e)?()=>+e:()=>e},t.prototype.$=function(e,t){if("$"==e||e=="$"+this.Tree.userDelimit)return e=>e;if(e.includes(this.Tree.userDelimit)){const t=e.slice(1).split(this.Tree.userDelimit);""==t[0]&&t.shift();const s=(e,t)=>e?e[t]:null;return e=>t.reduce(s,e)}{const t=e.slice(1);return e=>e[t]}},t.prototype["="]=function(e,t){const s=e.slice(1).split(this.Tree.treeDelimit).reduce((e,t)=>e&&t in e?e[t]:null,this.Tree.opts["="]);if(s)return s;t.errors.push(["val","ERR-MISSING-FXN"])},t.prototype["@"]=function(e,t){if(!this.Tree.reservedOpts.includes(e)){if("@"==e||e=="@"+this.Tree.treeDelimit)return(e,t)=>t.self;if(e.includes(this.Tree.treeDelimit)){const t=e.split(this.Tree.treeDelimit),s=(e,t)=>{const[s,r]=e;return s&&t?"@"==t?[r.self,r]:"@"==t[0]?[r[t.slice(1)],this.Tree.contexts.get(r[t.slice(1)])]:s?[s[t],this.Tree.contexts.get(s[t])]:[null,null]:null};return(e,r)=>t.reduce(s,[r.self,r])[0]}{const t=e.slice(1);return(e,s)=>s[t]}}},t.prototype["&"]=function(e,t){const s=e.slice(1).split(this.Tree.userDelimit),r=s.shift();if(s.length){if(1==s.length){const e=s[0];return()=>{const t=this.Tree.joins.get(r);return t?t[e]:null}}{const e=(e,t)=>e?e[t]:null;this.Tree.joins.get(r);return t=>s.reduce(e,this.Tree.joins.get(r))}}return()=>this.Tree.joins.get(r)},t.prototype["''"]=function(e,t){return(s,r,i,o)=>{const n=e(s,o);t.ignoredVals(n,r,s)||(i[r]=n)}},t.prototype["()"]=t.prototype["''"],t.prototype["[]"]=t.prototype["''"],t.prototype["['']"]=function(e,t){const s=t.templateVal[1]?t.templateVal[1]:"";return s&&"distinct"==s?(s,r,i,o)=>{r in i||(i[r]=new Set);const n=e(s,o);t.ignoredVals(n,r,s,o)||i[r].add(n)}:(s,r,i,o)=>{r in i||(i[r]=[]);const n=e(s,o);t.ignoredVals(n,r,s,o)||i[r].push(n)}},t.prototype["[()]"]=t.prototype["['']"],t.prototype["[[]]"]=function(e,t){const s=t.templateVal[1]?t.templateVal[1]:"";return s&&"distinct"==s?(s,r,i,o)=>{const n=e(s,o);if(Array.isArray(n)){r in i||(i[r]=new Set);for(const e of n){if(t.ignoredVals(e,r,s,o))return;i[r].add(e)}}else o.errors.push([t,"ERR-NON-ARRAY-VALS",s])}:(s,r,i,o)=>{const n=e(s,o);if(Array.isArray(n)){r in i||(i[r]=[]);for(const e of n){if(t.ignoredVals(e,r,s,o))return;i[r].push(...n)}}else o.errors.push([t,"ERR-NON-ARRAY-VALS",s])}},t.prototype["[{}]"]=function(e,t){this.Tree.parseTemplate(e,t.inheritedIgnored,t.lineage);this.Tree.fillers.get(e);return(t,s,r)=>{s in r||(r[s]=this.Tree.getEmptyResult(s,r,!0));const i=this.Tree.getEmptyResult(r[s].length,r);this.Tree.processRow(t,e,i),r[s].push(i)}},t.prototype["[[,]]"]=function(e,t){const s=[];for(const r of e){const e=Object.assign({},t,{templateVal:r});s.push(this.getFxn(e))}const r=t.templateVal[1]?t.templateVal[1]:"";return r&&"map"==r?(e,t,r)=>{t in r||(r[t]=new Map);const i=[];s[0](e,0,i),r[t].has(i[0])&&(i[1]=r[t].get(i[0])),s[1](e,1,i),r[t].set(i[0],i[1])}:(e,t,r)=>{t in r||(r[t]=[]);const i=[];for(const t in s)s[+t](e,+t,i);r[t].push(i)}},t.prototype["+''"]=function(e,t){return(s,r,i,o)=>{r in i||(i[r]=0);const n=e(s,o);t.ignoredVals(n,r,s,o)||(i[r]+=n)}},t.prototype["+()"]=t.prototype["+''"],t.prototype["-''"]=function(e,t){return(s,r,i,o)=>{r in i||(i[r]=0);const n=e(s,o);t.ignoredVals(n,r,s,o)||(i[r]-=n)}},t.prototype["-()"]=t.prototype["-''"],t.prototype["<''"]=function(e,t){return(s,r,i,o)=>{const n=+e(s,o);t.ignoredVals(n,r,s,o)||(this.isNumeric(n)?r in i?i[r]<n&&(i[r]=n):i[r]=n:o.errors.push([t,"NON-NUMERIC-THAN",s]))}},t.prototype["<()"]=t.prototype["<''"],t.prototype[">''"]=function(e,t){return(s,r,i,o)=>{const n=+e(s,o);t.ignoredVals(n,r,s,o)||(this.isNumeric(n)?r in i?i[r]>n&&(i[r]=n):i[r]=n:o.errors.push([t,"NON-NUMERIC-THAN",s]))}},t.prototype[">()"]=t.prototype[">''"];class s{constructor(){this.errors=new Set,this.resultLog=Object.create(null),this.quiet=!1}clear(){this.errors.clear(),this.resultLog=Object.create(null)}log(e){Object.keys(this.resultLog).length&&console.log(this.resultLog)}markErrors(e,t){if(!t)return;const s=this.resultLog;for(const r in t.filler.inputs){const i=t.filler.inputs[r];for(const t of i.errors){const[r,o,n]=t;o in s||(s[o]=Object.create(null));const l=JSON.stringify(i.lineage);l in s[o]||(s[o][l]=n?[]:0),n?s[o][l].push(n):s[o][l]+=1,"key"==r?e["{{ "+o+" }} "+i.term]=i.templateVal:"val"==r&&(Array.isArray(i.templateVal)?e[i.term]=["{{ "+o+" }} ",...i.templateVal]:"string"==typeof i.templateVal?e[i.term]="{{ "+o+" }} "+i.templateVal:e[i.term]="{{ "+o+" }} ")}}if(t.errors.length){const s={};e["@errors"]=s;for(const e of t.errors){const[t,r,i]=e,o="{{ "+r+" }} "+t.term;o in s||(s[o]=0),s[o]+=1}}if(t.filler.errors.length){e["@errors"]||(e["@errors"]={});for(const s of t.filler.errors){const t=s[1];t in e["@errors"]||(e["@errors"][t]=[]),e["@errors"][t].push(s.slice(2))}}}}class r{constructor(r={}){this.defaultOpts={template:{},"=":{},ignoredVals:[]},this.opts=Object.assign(this.defaultOpts,r),this.userDelimit=".",this.treeDelimit=".",this.subsSymbols=["$","=","@","&"],this.convSymbols=["()","[]"],this.aggrSymbols=["+","-","<",">"],this.timeSymbols=[":__","_:_","__:"],this.skipSymbols=["#"],this.reservedOpts=["@userDelimit","@treeDelimit"],this.reservedFxns=["@before()","@after()","@dist()","@join()"],this.reservedContexts=["@branch","@parent","@root","@self"],this.reservedTerms=[...this.reservedOpts,...this.reservedFxns,...this.reservedContexts],this.steps=[":__","","_:_"],this.errors=new s(this),this.keyFiller=new e(this),this.valueFiller=new t(this),this.refresh()}refresh(e={}){this.errors.clear(),Object.assign(this.opts,e),this.opts.template["@userDelimit"]&&(this.userDelimit=this.opts.template["@userDelimit"]),this.opts.template["@treeDelimit"]&&(this.treeDelimit=this.opts.template["@treeDelimit"]),delete this.commentedTerms,this.commentedTerms=new WeakMap,delete this.joins,this.joins=new Map,delete this.fillers,this.fillers=new Map,delete this.context,this.contexts=new WeakMap,delete this.tree,this.tree=this.getEmptyResult(),this.parseTemplate(this.opts.template,{"@":this.falseFxn}),this.opts.data&&this.add(this.opts.data,!1),this.errors.log(this.fillers)}parseTemplate(e,t,s=[]){const r=Object.create(null);r.inputs=Object.create(null),r["@before"]=this.trueFxn,r["@after"]=this.trueFxn,r["__:"]=[],r.errors=[];const i=this["@ignoredVals"](e,t,r);r["@ignoredVals"]=i,this.fillers.set(e,r);const o=this.steps.map(e=>[]);for(const t in e){const[n,l,p,a]=this.parseTerm(t),c=e[t],h=r.inputs[t]={term:t,subterm:n,symbols:l,keyTokens:p,templateVal:c,lineage:[...s,t],ignoredVals:"string"==typeof c&&c in i?i[c]:Array.isArray(c)&&c[0]in i?i[c[0]]:i["@"],inheritedIgnored:i,errors:[]};"@()"==l?this[n]?r[n]=this[n](e[t],h,r):h.errors.push("key","UNRECOGNIZED-RESERVED-"+t):(h.keyFxn=this.keyFiller.getFxn(n,l,h),h.keyFxn&&(h.valFxn=this.valueFiller.getFxn(h),"__:"==p.time?r["__:"].push(t):o[a].push(t)))}r.steps=o.filter(e=>e.length)}parseTerm(e){const t=this.skipSymbols.includes(e[0])?"#":"",s=e.slice(0,3),r=this.timeSymbols.includes(s)?s:"",i=t.length+r.length,o=e[i],n=e.slice(-2),l=this.aggrSymbols.includes(o)?o:"",p=this.convSymbols.includes(n)?n:"",a=l&&p?e.slice(i+1,-2):l?e.slice(i+1):p?e.slice(i,-2):r?e.slice(i):e,c=this.subsSymbols.includes(a[0])?a[0]:"",h=t||l+c+p,u=c?a.slice(1):a;return[a,h,{skip:t,time:r,aggr:l,subs:c,stem:u,conv:p,subterm:a},this.steps.indexOf(r)]}getEmptyResult(e=null,t=null,s=!1){const r=s?[]:Object.create(null),i={branch:e,parent:t,self:r,root:this.tree?this.tree:r,errors:[]};return this.contexts.set(r,i),r}add(e,t=!0){t&&error.clear(),this.joins.clear();for(const t of e)this.processRow(t,this.opts.template,this.tree),this.joins.clear();this.processResult(this.tree),t&&this.errors.log()}processRow(e,t,s){const r=this.contexts.get(s),i=this.fillers.get(t);if(r.filler=i,i["@before"](e,s,r)&&(!i["@join"]||i["@join"](e))){for(const t of i.steps)for(const o of t){const t=i.inputs[o];if(t.keyFxn&&t.valFxn){const i=t.keyFxn(e,r);for(const o of i)t.valFxn&&t.valFxn(e,o,s,r)}}i["@after"](e,s,r),i["@dist"]&&i["@dist"](r)}}processResult(e){const t=this.contexts.get(e);if(t)for(const s of t.filler["__:"]){const r=t.filler.inputs[s];if(r.keyFxn&&r.valFxn){const s=r.keyFxn(null,t);for(const i of s)r.valFxn&&r.valFxn(null,i,e,t)}}for(const t in e){e[t]instanceof Set?e[t]=[...e[t]]:e[t]instanceof Map&&(e[t]=[...e[t].entries()]);const s=e[t];if(s)if(Array.isArray(s)){if(s[0]&&"object"==typeof s[0])for(const e of s)this.processResult(e)}else if("object"==typeof s){const e=this.contexts.get(s);e&&e["@dist"]&&e["@dist"](s),this.processResult(s)}}this.errors.markErrors(e,t)}trueFxn(){return!0}falseFxn(){return!1}isNumeric(e){return!isNaN(parseFloat(e))&&isFinite(e)&&""!==e}}return r.prototype["@ignoredVals"]=function(e,t,s){if(!e["@ignoredVals()"])return t;const r=Array.isArray(e["@ignoredVals()"])||"string"==typeof e["@ignoredVals()"],i=r?{"@":e["@ignoredVals()"]}:e["@ignoredVals()"],o={};for(const e in i){const t=i[e];if(Array.isArray(t))o[e]=(e=>t.includes(e));else if("string"==typeof t&&"="==t[0]){const r=this.opts["="][t.slice(1,-2)];r?o[e]=r:(s.errors.push(["val","MISSING-@ignoredVals()-FXN",t]),o[e]=this.falseFxn)}else s.errors.push(["val","UNSUPPORTED-@ignoredVals()-VALUE",t]),o[e]=this.falseFxn}return r?o:Object.assign({},t,o)},r.prototype["@before"]=function(e,t){const s=this.opts["="][e.slice(1,-2)];return s||(t.errors.push(["val","MISSING-@before-FXN"]),this.trueFxn)},r.prototype["@after"]=function(e,t){const s=this.opts["="][e.slice(1,-2)];return s||(t.errors.push(["val","MISSING-@after-FXN"]),this.trueFxn)},r.prototype["@join"]=function(e,t,s){return s=>{let r=!0;for(const i in e){const o=this.opts["="][e[i].slice(1,-2)];if(o){const e=o(s);e?this.joins.set(i,e):r=!1}else t.errors.push(["val","MISSING-@join-FXN"])}return r}},r.prototype["@dist"]=function(e,t){const s=Array.isArray(e)?e[0]:e,r=this.valueFiller["@"](s);return e=>{e["@dist"]=(i=>{const o=r(null,e);o?Array.isArray(o)?o.push(i):o[s]=i:e.errors.push([t,"MISSING-DIST-TARGET"])})}},r});
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global.Parjson = factory());
+}(this, (function () { 'use strict';
+
+  class KeyFiller { 
+    constructor(Tree) {
+      this.Tree = Tree;
+      this.ignoredVals = Tree.opts.ignoredVals;
+      this.allowedKeyTypes = new Set(["string", "number", "undefined"]);
+    }
+
+    getFxn(subterm, symbols, input) {
+  		if (this.Tree.reservedOpts.includes(subterm)) return
+      if (input.keyTokens.skip) {
+      	this["#"](subterm, input);
+      }
+      else if (input.keyTokens.subs in this.Tree.valueFiller) {
+  	  	const subsFxn = this.Tree.valueFiller[input.keyTokens.subs](subterm, input);
+  	  	if (!subsFxn) {
+  	  		input.errors.push(["key", "UNSUPPORTED-KEY-SUBSTITUTION"]);
+  	  		return
+  	  	}
+  	  	const conv = input.keyTokens.conv ? input.keyTokens.conv : "''";
+  	  	if (this[conv]) {
+  	  		return this[conv](subsFxn, input)
+  	  	}
+  	  	else {
+  	  		input.errors.push(["key", "UNSUPPORTED-KEY-CONVERSION"]);
+  	  		return
+  	  	}
+  	  }
+      else if (symbols in this) {
+        return this[symbols](subterm, input)
+      }
+      else {
+        input.errors.push(["key", "UNSUPPORTED-KEY-SYMBOL"]);
+      } 
+    }
+
+    getAllowedKeys(keys, row, input, context) {
+    	if (!Array.isArray(keys)) {
+    		context.errors.push(["key", "ERR-NON-ARRAY-KEYS", row]);
+    		return []
+      }
+    	const allowed = [];
+  		for(const key of keys) {
+    		if (!this.ignoredVals.includes(key)) {
+    			if (!this.allowedKeyTypes.has(typeof key)) {
+  	      	context.errors.push([input, "INVALID-RESULT-KEY", row]);
+  	    	}
+  	    	else {
+  	   			allowed.push(key);
+  	   		}
+  	   	}
+  	  }
+  		return allowed
+  	}
+  }
+
+  KeyFiller.prototype["''"] = function(subsFxn, input) {
+    return (row, context) => {
+    	return this.getAllowedKeys([subsFxn(row, context)], row, input, context)
+    }
+  };
+      
+  KeyFiller.prototype["()"] = function(subsFxn, input) {
+  	return (row, context) => {
+    	return this.getAllowedKeys([subsFxn(row, context)], row, input, context)
+    }
+  };
+
+  KeyFiller.prototype["[]"] = function(subsFxn, input) {
+  	return (row, context) => {
+    	return this.getAllowedKeys(subsFxn(row, context), row, input, context)
+    }
+  };
+
+  KeyFiller.prototype["#"] = function(subterm, input) {
+  	if (!this.Tree.commentedTerms.has(input)) {
+  		this.Tree.commentedTerms.set(input, {
+  			keys: new Set(),
+  			values: new Set()
+  		});
+  	}
+    this.Tree.commentedTerms.get(input).keys.add(subterm);
+  };
+
+  class ValueFiller {
+    constructor(Tree) {
+      this.Tree = Tree;
+      this.ignoredVals = this.Tree.opts.ignoredVals;
+    }
+
+    getFxn(input, ignoredVals) {
+    	if (typeof input.templateVal=='string') {
+        return this.getStringFiller(input, ignoredVals)
+      }
+      else if (Array.isArray(input.templateVal)) {
+        return this.getArrayFiller(input, ignoredVals)
+      }
+      else if (input.templateVal && typeof input.templateVal == 'object') {
+        return this.getObjectFiller(input)
+      }
+      else {
+        return (row, key, result) => {
+        	result[key] = input.templateVal;
+        }
+      }
+    }
+
+    getStringFiller(input, ignoredVals) {
+      const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal);
+      const subconv = subterm + tokens.conv;
+      input.ignoredVals = subconv in ignoredVals ? ignoredVals[subconv] : ignoredVals["@"];
+      const subsToken = tokens.skip ? symbols : tokens.subs;
+      if (subsToken in this) {
+      	const subsFxn = this[subsToken](subterm, input);
+      	if (subsFxn) {
+        	const conv = tokens.conv ? tokens.conv : "''";
+        	return this[tokens.aggr + conv] ? this[tokens.aggr + conv](subsFxn, input) : null
+        }
+      }
+      else {
+        input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE-SYMBOL']);
+      }
+    }
+
+    getArrayFiller(input, ignoredVals) { 
+      if (!input.templateVal[0]) {
+      	return (row, key, result) => {
+      		result[key] = input.templateVal;
+      	}
+      }
+      else if (typeof input.templateVal[0] == 'string') {
+        const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal[0]);
+      	const subconv = subterm + tokens.conv;
+      	input.ignoredVals = subconv in ignoredVals ? ignoredVals[subconv] : ignoredVals["@"];
+        const subsToken = tokens.skip ? symbols : tokens.subs;
+        if (subsToken in this) {
+        	const subsFxn = this[subsToken](subterm, input);
+        	if (subsFxn) {
+        		const conv = tokens.conv ? tokens.conv : "''";
+        		return this["["+ conv +"]"](subsFxn, input)
+        	}
+        }
+  	    else {
+  	      input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE-SYMBOL']);
+  	    }
+      }
+      else if (Array.isArray(input.templateVal[0])) {
+      	return this["[[,]]"](input.templateVal[0], input)
+      }
+      else if (input.templateVal[0] && typeof input.templateVal[0] == 'object') {
+        return this["[{}]"](input.templateVal[0], input)
+      }
+      else {
+      	input.errors.push("val", "UNSUPPORTED-TEMPLATE-VALUE");
+      }
+    }
+
+    getObjectFiller(input) {
+    	this.Tree.parseTemplate(input.templateVal, input.inheritedIgnored, input.lineage);
+      return (row, key, result) => {
+        if (!(key in result)) {
+          result[key] = this.Tree.getEmptyResult(key, result);
+        }
+        const context = this.Tree.contexts.get(result[key]);
+        this.Tree.processRow(row, input.templateVal, result[key]);
+      }
+    }
+
+    isNumeric(d) {
+      return !isNaN(parseFloat(d)) && isFinite(d) && d!==''
+    }
+  }
+
+  ValueFiller.prototype["#"] = function(subterm, input) {
+  	if (!this.Tree.commentedTerms.has(input)) {
+  		this.Tree.commentedTerms.set(input, {
+  			keys: new Set(),
+  			values: new Set()
+  		});
+  	}
+    this.Tree.commentedTerms.get(input).values.add(subterm);
+  };
+
+  /* Substitution Functions */
+  ValueFiller.prototype[""] = function(subterm, input) {
+    return this.isNumeric(subterm) 
+      ? () => +subterm
+      : () => subterm
+  };
+
+  ValueFiller.prototype["$"] = function(subterm, input) {
+    if (subterm == "$" || subterm == "$" + this.Tree.userDelimit) {
+    	return (row) => row
+    }
+    else if (subterm.includes(this.Tree.userDelimit)) {
+    	const nestedProps = subterm.slice(1).split(this.Tree.userDelimit);
+    	if (nestedProps[0] == "") nestedProps.shift();
+      const reducer = (d,k) => d ? d[k] : null;
+      return (row) => nestedProps.reduce(reducer, row)
+    }
+    else {
+  	  const prop = subterm.slice(1);
+  	  return (row) => row[prop]
+  	}
+  };
+
+  ValueFiller.prototype["="] = function(subterm, input) {
+    const nestedProps = subterm.slice(1).split(this.Tree.treeDelimit);
+    const reducer = (d,k) => d && k in d ? d[k] : null;
+    const fxn = nestedProps.reduce(reducer, this.Tree.opts["="]);
+    if (!fxn) {
+    	input.errors.push(["val", "ERR-MISSING-FXN"]);
+    }
+    else {
+    	return fxn //do not call yet
+    }
+  };
+
+  ValueFiller.prototype["@"] = function(subterm, input) {
+  	if (this.Tree.reservedOpts.includes(subterm)) return
+    if (subterm == "@" || subterm == "@" + this.Tree.treeDelimit) {
+    	return (row, context) => context.self
+    }
+    else if (subterm.includes(this.Tree.treeDelimit)) {
+    	const nestedProps = subterm.split(this.Tree.treeDelimit);
+      const reducer = (resultContext, d) => {
+      	const [result, context] = resultContext;
+       	return !result || !d 
+      		? null
+      		: d == "@"
+      			? [context.self, context]
+      			: d[0] == "@"
+      				? [context[d.slice(1)], this.Tree.contexts.get(context[d.slice(1)])]
+      				: !result
+      					? [null, null]
+      					: [result[d], this.Tree.contexts.get(result[d])]
+      };
+      return (row, context) => {
+      	return nestedProps.reduce(reducer, [context.self, context])[0]
+      }
+    }
+    else {
+  	  const prop = subterm.slice(1);
+  	  return (row, context) => context[prop]
+  	}
+  };
+
+  ValueFiller.prototype["&"] = function(subterm, input) {
+    const nestedProps = subterm.slice(1).split(this.Tree.userDelimit);
+    const alias = nestedProps.shift();
+    if (!nestedProps.length) {
+    	return () => this.Tree.joins.get(alias)
+    }
+    else if (nestedProps.length == 1) {
+    	const prop = nestedProps[0];
+  	  return () => {
+  	  	const join = this.Tree.joins.get(alias);
+  	  	return join ? join[prop] : null
+  	  }
+    }
+    else {
+    	const reducer = (d,k) => d ? d[k] : null;
+    	const join = this.Tree.joins.get(alias);
+      return (row) => nestedProps.reduce(reducer, this.Tree.joins.get(alias))	 
+    }
+  };
+
+  /* No aggregation */
+  ValueFiller.prototype["''"] = function(subsFxn, input) {
+   	return (row, key, result, context) => {
+   		const value = subsFxn(row, context);
+   		if (input.ignoredVals(value, key, row)) return
+   		result[key] = value;
+   	}
+  };
+
+  ValueFiller.prototype["()"] = ValueFiller.prototype["''"];
+
+  ValueFiller.prototype["[]"] = ValueFiller.prototype["''"];
+
+  /* Aggregation into an array or set collection */
+  ValueFiller.prototype["['']"] = function(subsFxn, input) {
+    const option = input.templateVal[1] ? input.templateVal[1] : "";
+    if (!option || option != "distinct") {
+  		return (row, key, result, context) => {
+  	  	if (!(key in result)) result[key] = [];
+  	  	const value = subsFxn(row, context);
+   			if (input.ignoredVals(value, key, row, context)) return
+  	  	result[key].push(value);
+  	  }
+  	}
+  	else {
+  		return (row, key, result, context) => {
+  	  	if (!(key in result)) result[key] = new Set();
+  	 		const value = subsFxn(row, context);
+  	 		if (input.ignoredVals(value, key, row, context)) return
+  	  	result[key].add(value);
+  	  }
+  	}
+  };
+
+  ValueFiller.prototype["[()]"] = ValueFiller.prototype["['']"];
+
+  ValueFiller.prototype["[[]]"] = function(subsFxn, input) {
+    const option = input.templateVal[1] ? input.templateVal[1] : "";
+    if (!option || option != "distinct") {
+  		return (row, key, result, context) => {
+  	    const values = subsFxn(row, context);
+  	    if (!Array.isArray(values)) {
+  	    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row]);
+  	    }
+  	    else {
+  	    	if (!(key in result)) result[key] = [];
+  	    	for(const value of values) {
+  			 		if (input.ignoredVals(value, key, row, context)) return
+  		    	result[key].push(...values);
+  		    }
+  	    }
+  	  }
+  	}
+  	else {
+  		return (row, key, result, context) => {
+  	    const values = subsFxn(row, context);
+  	    if (!Array.isArray(values)) {
+  	    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row]);
+  	    }
+  	    else {
+  	    	if (!(key in result)) result[key] = new Set();
+  	    	for(const value of values) {
+  			 		if (input.ignoredVals(value, key, row, context)) return
+  	    		result[key].add(value);
+  	    	}
+  	    }
+  	  }
+  	}
+  };
+
+  ValueFiller.prototype["[{}]"] = function (template, input) {
+    this.Tree.parseTemplate(template, input.inheritedIgnored, input.lineage);
+    const filler = this.Tree.fillers.get(template);
+    return (row, key, result) => {
+      if (!(key in result)) {
+      	result[key] = this.Tree.getEmptyResult(key, result, true);
+      }
+      const item = this.Tree.getEmptyResult(result[key].length, result);
+      this.Tree.processRow(row, template, item);
+      result[key].push(item);
+    }
+  };
+
+  ValueFiller.prototype["[[,]]"] = function (templates, input) {
+    const fillers = [];
+    for(const templateVal of templates) {
+    	const inputCopy = Object.assign({}, input, {templateVal});
+    	fillers.push(this.getFxn(inputCopy, input.inheritedIgnored));
+    }
+    const option = input.templateVal[1] ? input.templateVal[1] : "";
+    if (!option || option != "map") {
+  	  return (row, key, result) => {
+  	  	if (!(key in result)) result[key] = [];
+  	  	const items = [];
+  	  	for(const i in fillers) {
+  	  		fillers[+i](row, +i, items);
+  	  	}
+  	  	result[key].push(items);
+  	  }
+  	}
+  	else {
+  		return (row, key, result) => {
+  	  	if (!(key in result)) result[key] = new Map();
+  	  	const temp = [];
+  	  	fillers[0](row, 0, temp);
+  	  	if (result[key].has(temp[0])) {
+  	  		temp[1] = result[key].get(temp[0]);
+  	  	}
+  	  	fillers[1](row, 1, temp);
+  	  	result[key].set(temp[0], temp[1]);
+  	  }
+  	}
+  };
+
+  /* Operator aggregation */
+  ValueFiller.prototype["+''"] = function(subsFxn, input) { 
+    return (row, key, result, context) => {
+      if (!(key in result)) result[key] = 0;
+  		const value = subsFxn(row, context);
+  		if (input.ignoredVals(value, key, row, context)) return
+      result[key] += value;
+    }
+  };
+
+  ValueFiller.prototype["+()"] = ValueFiller.prototype["+''"]; 
+
+  ValueFiller.prototype["-''"] = function(subsFxn, input) {
+    return (row, key, result, context) => {
+      if (!(key in result)) result[key] = 0;
+  		const value = subsFxn(row, context);
+  		if (input.ignoredVals(value, key, row, context)) return
+      result[key] -= value;
+    }
+  };
+
+  ValueFiller.prototype["-()"] = ValueFiller.prototype["-''"];
+
+  ValueFiller.prototype["<''"] = function(subsFxn, input) {
+    return (row, key, result, context) => {
+      const value = +subsFxn(row, context);
+  		if (input.ignoredVals(value, key, row, context)) return
+      if (!this.isNumeric(value)) {
+        context.errors.push([input, "NON-NUMERIC-THAN", row]);
+        return
+      }
+      if (!(key in result)) {
+        result[key] = value;
+      }
+      else if (result[key] < value) {
+        result[key] = value;
+      }
+    }
+  };
+
+  ValueFiller.prototype["<()"] = ValueFiller.prototype["<''"];
+
+  ValueFiller.prototype[">''"] = function(subsFxn, input) {
+    return (row, key, result, context) => {
+      const value = +subsFxn(row, context);
+  		if (input.ignoredVals(value, key, row, context)) return
+      if (!this.isNumeric(value)) {
+        context.errors.push([input, "NON-NUMERIC-THAN", row]);
+        return
+      }
+      if (!(key in result)) {
+        result[key] = value;
+      }
+      else if (result[key] > value) {
+        result[key] = value;
+      }
+    }
+  };
+
+  ValueFiller.prototype[">()"] = ValueFiller.prototype[">''"];
+
+  class Err {
+  	constructor() {
+      this.errors = new Set();
+      this.resultLog = Object.create(null);
+      this.quiet = false;
+    }
+
+    clear() {
+    	this.errors.clear();
+      this.resultLog = Object.create(null);
+    }
+
+    log(fillers) {
+    	if (Object.keys(this.resultLog).length) {
+        console.log(this.resultLog);
+      }
+    }
+
+    markErrors(result, context) { 
+    	if (!context) return;
+    	const log = this.resultLog;
+    	for(const term in context.filler.inputs) {
+    		const input = context.filler.inputs[term];
+  			for(const err of input.errors) {
+  				const [type, message, row] = err;
+  				if (!(message in log)) {
+  	        log[message] = Object.create(null);
+  	      }
+  	      const key = JSON.stringify(input.lineage);
+  	      if (!(key in log[message])) {
+  	        log[message][key] = row ? [] : 0;
+  	      }
+  	      if (row) log[message][key].push(row);
+  	      else log[message][key] += 1;
+
+  	      if (type == "key") {
+  	      	result["{{ " + message + " }} " + input.term] = input.templateVal;
+  	      }
+  	      else if (type == "val") {
+  	      	if (Array.isArray(input.templateVal)) {
+  	      		result[input.term] = ["{{ " + message + " }} ", ...input.templateVal];
+  	      	}
+  	      	else if (typeof input.templateVal == "string")  {
+  	      		result[input.term] = "{{ " + message + " }} " + input.templateVal;
+  	      	}
+  	      	else {
+  	      		result[input.term] = "{{ " + message + " }} ";
+  	      	}
+  	      }
+  			}
+    	}
+
+    	if (context.errors.length) {
+    		const log = {};
+    		result["@errors"] = log;  		
+    		for(const err of context.errors) {
+    			const [input, message, row] = err;
+    			const key = "{{ " + message + " }} " + input.term;
+    			if (!(key in log)) log[key] = 0;
+  	      log[key] += 1;
+    		}
+    	}
+
+    	if (context.filler.errors.length) {
+    		if (!result["@errors"]) {
+    			result["@errors"] = {};
+    		}
+    		for(const err of context.filler.errors) {
+    			const key = err[1];
+    			if (!(key in result['@errors'])) {
+    				result['@errors'][key] = [];
+    			}
+    			result["@errors"][key].push(err.slice(2));
+    		}
+    	}
+    }
+  }
+
+  /*
+  -------
+  Parjson
+  -------
+  This is a ParJSON template filler. It processes
+  rows of data into a well-defined tree of 
+  data collections and aggregated results
+  that matches the shape of the input template.
+
+  This implementation passes once over all data 
+  rows. It is thus suitable for partitioning and 
+  aggregating streaming data. It may also be used
+  to parallelize data processing. 
+
+  See parjson.html for an example template.
+
+  See parjson.readme.txt for more information
+  */
+
+  class Parjson {
+    constructor(opts={}) {
+      this.defaultOpts = {
+        template: {},
+        "=": {},
+        ignoredVals: []
+      };
+
+      this.opts = Object.assign(
+        this.defaultOpts,
+        opts 
+      );
+
+      this.userDelimit = ".";
+      this.treeDelimit = ".";
+      this.subsSymbols = ["$", "=", "@", "&"];
+      this.convSymbols = ["()", "[]"]; //, "{}"]
+      this.aggrSymbols = ["+", "-", "<", ">"];
+      this.timeSymbols = [":__", "_:_", "__:"];
+      this.skipSymbols = ["#"];
+      this.reservedOpts = ["@userDelimit", "@treeDelimit"];
+      this.reservedFxns = ["@before()", "@after()", "@dist()", "@join()"];
+      this.reservedContexts = ["@branch", "@parent", "@root", "@self"];
+      this.reservedTerms = [
+        ...this.reservedOpts,
+        ...this.reservedFxns,
+      	...this.reservedContexts
+      ];
+      this.steps = [":__", "", "_:_"];
+      this.errors = new Err(this);
+      this.keyFiller = new KeyFiller(this);
+      this.valueFiller = new ValueFiller(this);
+      this.refresh();
+    }
+
+    refresh(opts={}) {
+      this.errors.clear();
+    	Object.assign(this.opts,opts);
+    	if (this.opts.template['@userDelimit']) {
+    		this.userDelimit = this.opts.template['@userDelimit'];
+    	}
+    	if (this.opts.template['@treeDelimit']) {
+    		this.treeDelimit = this.opts.template['@treeDelimit'];
+    	}
+    	
+    	//console.clear()
+    	delete this.commentedTerms;
+    	this.commentedTerms = new WeakMap();
+
+    	delete this.joins;
+    	this.joins = new Map();
+    	
+    	// fillers will track template parsing metadata
+    	delete this.fillers;
+      this.fillers = new Map();
+      
+      // contexts will track results object metadata
+      delete this.context;
+      this.contexts = new WeakMap(); 
+      
+      delete this.tree;
+      this.tree = this.getEmptyResult();
+      this.parseTemplate(this.opts.template, {"@": this.falseFxn});
+
+      if (this.opts.data) {
+      	this.add(this.opts.data, false);
+      }
+      this.errors.log(this.fillers);
+    }
+
+    parseTemplate(template, inheritedIgnored, lineage=[]) {
+      const filler = Object.create(null);
+      filler.inputs = Object.create(null);
+      filler["@before"] = this.trueFxn;
+      filler["@after"] = this.trueFxn;
+      filler["__:"] = [];
+      filler.errors = [];
+      const ignoredVals = this["@ignoredVals"](template, inheritedIgnored, filler);
+      filler["@ignoredVals"] = ignoredVals;
+      this.fillers.set(template, filler);
+
+      const steps = this.steps.map(d => []);
+      for(const term in template) {
+        const [subterm, symbols, keyTokens, step] = this.parseTerm(term);
+        const templateVal = template[term];
+        const input = filler.inputs[term] = {
+          term,
+          subterm,
+          symbols,
+          keyTokens,
+          templateVal,
+          lineage: [...lineage, term],
+          inheritedIgnored: ignoredVals,
+          errors: []
+        };
+
+        if (symbols == "@()") {
+        	if (this[subterm]) {
+        		filler[subterm] = this[subterm](template[term], input, filler);
+        	}
+        	else {
+        		input.errors.push('key', "UNRECOGNIZED-RESERVED-"+term);
+        	}
+        }
+        else {
+  	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input);
+  	      if (input.keyFxn) {
+  	        input.valFxn = this.valueFiller.getFxn(input, ignoredVals);
+  	      	if (keyTokens.time == "__:") {
+  		      	filler["__:"].push(term);
+  		      }
+  	      	else {
+  	      		steps[step].push(term);
+  	      	}
+  	      }
+  	    }
+      }
+      filler.steps = steps.filter(d => d.length);
+    }
+
+    /*** the heart of the code ***/
+    parseTerm(term) {
+    	const skip = this.skipSymbols.includes(term[0]) ? "#" : "";
+    	const colons = term.slice(0,3);
+    	const time = this.timeSymbols.includes(colons) ? colons : "";
+    	const start = skip.length + time.length;
+      const prefix = term[start];
+      const suffix = term.slice(-2);
+      const aggr = this.aggrSymbols.includes(prefix) ? prefix : "";
+      const conv = this.convSymbols.includes(suffix) ? suffix : "";
+      const subterm = aggr && conv 
+        ? term.slice(start + 1, -2)
+        : aggr 
+          ? term.slice(start + 1)
+          : conv 
+            ? term.slice(start, -2)
+            : time 
+            	? term.slice(start)
+            	: term;
+      const subs = this.subsSymbols.includes(subterm[0]) ? subterm[0] : "";
+      const symbols = skip ? skip : aggr + subs + conv;
+      const stem = subs ? subterm.slice(1) : subterm;
+      const tokens = {skip, time, aggr, subs, stem, conv, subterm};
+      return [subterm, symbols, tokens, this.steps.indexOf(time)]
+    }
+
+    getEmptyResult(branch=null, parent=null, isArray = false) {
+    	const result = isArray ? [] : Object.create(null);
+    	const context = {
+    		branch, // string name where this result will be mounted to the tree
+    		parent, 
+    		self: result,
+    		root: this.tree ? this.tree : result,
+    		errors: []
+    	};
+    	this.contexts.set(result, context);
+      return result
+    }
+
+    add(rows, refreshErrors = true) {
+    	if (refreshErrors) error.clear();
+    	this.joins.clear();
+      for(const row of rows) {
+        this.processRow(row, this.opts.template, this.tree);
+        this.joins.clear();
+      }
+      this.processResult(this.tree);
+      if (refreshErrors) this.errors.log();
+    }
+
+    processRow(row, template, result) {
+    	const context = this.contexts.get(result);
+    	const filler = this.fillers.get(template);
+    	context.filler = filler;
+    	if (!filler["@before"](row, result, context)) return
+    	if (filler["@join"] && !filler["@join"](row)) return
+    	for(const step of filler.steps) {
+  	    for(const term of step) { 
+  	      const input = filler.inputs[term]; 
+  	      if (input.keyFxn && input.valFxn) {
+  	        const keys = input.keyFxn(row, context);
+  	        for(const key of keys) {
+  	          if (input.valFxn) {
+  	          	input.valFxn(row, key, result, context);
+  	          }
+  	        }
+  	      }
+  	    }
+  	  }
+  	  filler["@after"](row, result, context);
+  	  if (filler["@dist"]) filler["@dist"](context);
+    }
+
+    processResult(result) {
+    	const context = this.contexts.get(result);
+    	if (context) {
+  	  	for(const term of context.filler["__:"]) { 
+  	  		const input = context.filler.inputs[term];
+  	  		if (input.keyFxn && input.valFxn) {
+  	        const keys = input.keyFxn(null, context);
+  	        for(const key of keys) {
+  	          if (input.valFxn) {
+  	          	input.valFxn(null, key, result, context);
+  	          }
+  	        }
+  	      }
+  	  	}
+  	  }
+
+    	for(const key in result) {
+    		if (result[key] instanceof Set) {
+    			result[key] = [...result[key]];
+    		}
+    		else if (result[key] instanceof Map) {
+    			result[key] = [...result[key].entries()];
+    		}
+    		const value = result[key];
+    		if (value) {
+    			if (Array.isArray(value)) {
+    				// assumes all element values will be the same type
+    				if (value[0] && typeof value[0] == "object") {
+    					for(const v of value) {
+    						this.processResult(v);
+    					}
+    				}
+    			}  
+    			else if (typeof value == 'object') {
+    				const context = this.contexts.get(value);
+    				if (context && context["@dist"]) {
+    					context["@dist"](value);
+    				}
+    				this.processResult(value);
+    			}
+    		}
+    	}
+    	this.errors.markErrors(result, context);
+    }
+
+    trueFxn() {
+    	return true
+    }
+
+    falseFxn() {
+    	return false
+    }
+
+    isNumeric(d) {
+      return !isNaN(parseFloat(d)) && isFinite(d) && d!==''
+    }
+  }
+
+  Parjson.prototype["@before"] = function (subterm, input) {
+  	const fxn = this.opts["="][subterm.slice(1,-2)];
+  	if (!fxn) {
+  		input.errors.push(["val", "MISSING-@before-FXN"]);
+  		return this.trueFxn
+  	}
+  	else return fxn
+  };
+
+  Parjson.prototype["@after"] = function (subterm, input) {
+  	const fxn = this.opts["="][subterm.slice(1,-2)];
+  	if (!fxn) {
+  		input.errors.push(["val", "MISSING-@after-FXN"]);
+  		return this.trueFxn
+  	}
+  	else return fxn
+  };
+
+  Parjson.prototype["@join"] = function (joins, input, filler) {
+  	return (row) => {
+  		let ok = true;
+  		for(const alias in joins) {
+  			const fxn = this.opts["="][joins[alias].slice(1,-2)];
+  			if (!fxn) {
+  				input.errors.push(["val", "MISSING-@join-FXN"]);
+  			}
+  			else {
+  				const keyVals = fxn(row);
+  				if (keyVals) this.joins.set(alias, keyVals);
+  				else ok = false;
+  			}
+  		}
+  		return ok
+  	}
+  };
+
+  Parjson.prototype["@dist"] = function (_subterm, input) {
+  	const subterm = Array.isArray(_subterm) ? _subterm[0] : _subterm;
+  	const subsFxn = this.valueFiller["@"](subterm);
+  	return (context) => {
+  	  context["@dist"] = (result) => {
+  	  	const target = subsFxn(null, context);
+  	  	if (!target) {
+  	  		context.errors.push([input, "MISSING-DIST-TARGET"]);
+  	  	}
+  	  	else if (Array.isArray(target)) {
+  	  		target.push(result);
+  	  	}
+  	    else {
+  	    	target[subterm] = result;
+  	    }
+  	  };
+    }
+  };
+
+
+  Parjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler) {
+  	if (!template["@ignoredVals()"]) {
+  		return inheritedIgnored
+  	}
+  	const nonObj = Array.isArray(template["@ignoredVals()"]) 
+  		|| typeof template["@ignoredVals()"] == "string";
+  	const ignoredVals = nonObj
+  		? {"@": template["@ignoredVals()"]}
+  		: template["@ignoredVals()"];
+
+  	const fxns = {};
+  	for(const term in ignoredVals) {
+  		const ignoredVal = ignoredVals[term];
+  		if (Array.isArray(ignoredVal)) {
+  			fxns[term] = (value) => ignoredVal.includes(value);
+  		}
+  		else if (typeof ignoredVal == 'string' && ignoredVal[0] == "=") {
+  			const fxn = this.opts["="][ignoredVal.slice(1,-2)];
+    	  if (!fxn) {
+    	  	filler.errors.push(["val", "MISSING-@ignoredVals()-FXN", ignoredVal]);
+    	  	fxns[term] = this.falseFxn;
+    	  }
+    	  else {
+    	  	fxns[term] = fxn;
+    		}
+  		} 
+  		else {
+  			filler.errors.push(["val", "UNSUPPORTED-@ignoredVals()-VALUE", ignoredVal]);
+    	  fxns[term] = this.falseFxn;
+  		}
+  	}
+
+  	return nonObj ? fxns : Object.assign({}, inheritedIgnored, fxns)
+  };
+
+  return Parjson;
+
+})));

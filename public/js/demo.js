@@ -109,7 +109,6 @@ function demo(examples, reveal=false) {
   }
 
   function getRunFxn(dom) {
-  	const fxnSpots = ["inputs", "@ignoredVals"]
     let tracker
     return function() {
       const template = JSON.parse(
@@ -139,20 +138,22 @@ function demo(examples, reveal=false) {
 
       const fxnStr = {}
       for(const templateFiller of tracker.fillers) {
-        const [template, filler] = templateFiller;
-
-        for(const spot of fxnSpots) { 
-	        for(const term in filler[spot]) {
-	          fxnToStr(tracker, fxnStr, term)
-	          fxnToStr(tracker, fxnStr, filler[spot][term].templateVal)
-	          if (term=="@join()") {
-	          	const values = Object.values(filler[spot][term].templateVal)
-	          	for(const value of values) {
-	          		fxnToStr(tracker, fxnStr, value)
-	          	}
-	          }
-	        }
-	      }
+        const [template, filler] = templateFiller
+        for(const term in filler.inputs) {
+          fxnToStr(tracker, fxnStr, term)
+          fxnToStr(tracker, fxnStr, filler.inputs[term].templateVal)
+          if (term=="@join()") {
+          	const values = Object.values(filler.inputs[term].templateVal)
+          	for(const value of values) {
+          		fxnToStr(tracker, fxnStr, value)
+          	}
+          }
+        }
+        for(const term in filler["@ignoredVals"].templateVal) {
+        	if (term != "@" && fxnStr[term] != tracker.falseFxn && !fxnStr[term]) {
+        		fxnToStr(tracker, fxnStr, filler["@ignoredVals"].templateVal[term])
+        	}
+        }
       }
       return fxnStr
     }

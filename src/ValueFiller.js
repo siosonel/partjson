@@ -4,12 +4,12 @@ export default class ValueFiller {
     this.ignoredVals = this.Tree.opts.ignoredVals
   }
 
-  getFxn(input) {
+  getFxn(input, ignoredVals) {
   	if (typeof input.templateVal=='string') {
-      return this.getStringFiller(input)
+      return this.getStringFiller(input, ignoredVals)
     }
     else if (Array.isArray(input.templateVal)) {
-      return this.getArrayFiller(input)
+      return this.getArrayFiller(input, ignoredVals)
     }
     else if (input.templateVal && typeof input.templateVal == 'object') {
       return this.getObjectFiller(input)
@@ -21,8 +21,10 @@ export default class ValueFiller {
     }
   }
 
-  getStringFiller(input) {
+  getStringFiller(input, ignoredVals) {
     const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal)
+    const subconv = subterm + tokens.conv
+    input.ignoredVals = subconv in ignoredVals ? ignoredVals[subconv] : ignoredVals["@"]
     const subsToken = tokens.skip ? symbols : tokens.subs
     if (subsToken in this) {
     	const subsFxn = this[subsToken](subterm, input)
@@ -36,7 +38,7 @@ export default class ValueFiller {
     }
   }
 
-  getArrayFiller(input) { 
+  getArrayFiller(input, ignoredVals) { 
     if (!input.templateVal[0]) {
     	return (row, key, result) => {
     		result[key] = input.templateVal
@@ -44,6 +46,8 @@ export default class ValueFiller {
     }
     else if (typeof input.templateVal[0] == 'string') {
       const [subterm, symbols, tokens] = this.Tree.parseTerm(input.templateVal[0])
+    	const subconv = subterm + tokens.conv
+    	input.ignoredVals = subconv in ignoredVals ? ignoredVals[subconv] : ignoredVals["@"]
       const subsToken = tokens.skip ? symbols : tokens.subs
       if (subsToken in this) {
       	const subsFxn = this[subsToken](subterm, input)
@@ -264,7 +268,7 @@ ValueFiller.prototype["[[,]]"] = function (templates, input) {
   const fillers = []
   for(const templateVal of templates) {
   	const inputCopy = Object.assign({}, input, {templateVal})
-  	fillers.push(this.getFxn(inputCopy))
+  	fillers.push(this.getFxn(inputCopy, input.inheritedIgnored))
   }
   const option = input.templateVal[1] ? input.templateVal[1] : ""
   if (!option || option != "map") {
