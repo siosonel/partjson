@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Parjson</title>
+	<title>Partjson</title>
 	<meta charset="utf-8">
 	<link rel="shortcut icon" href="">
 	<style>
@@ -35,7 +35,7 @@
 </head>
 <body>
 <div style='width:100%; height:100%; margin-bottom: 20px;'>
-	<h1>Parjson</h1>
+	<h1>Partjson</h1>
 	<div style="text-align: center">
 		<div class='jsondiv'>
 			<h3 class='inputlabel' onclick='run()'>
@@ -62,7 +62,7 @@ Princess	female	Alice,Mike	C2	C3	2019-01-09 09:45	amphibian	frog	0.7
 </textarea>
 </div>
 <script src="./js/legacy.js" charset="utf-8"></script>
-<script src="/parjson/dist/parjson.umd.js" charset="utf-8"></script>
+<script src="/partjson/dist/partjson.umd.js" charset="utf-8"></script>
 <script>
 window.onload = run
 
@@ -95,7 +95,7 @@ function run() {
 		})
 	}
 	else {
-		tracker = new Parjson({
+		tracker = new Partjson({
 			template,
 			data,
 			fxns: {

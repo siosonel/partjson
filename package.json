@@ -1,9 +1,9 @@
 {
-  "name": "parjson",
+  "name": "partjson",
   "version": "0.5.0",
-  "main": "dist/parjson.cjs.js",
-  "module": "dist/parjson.esm.js",
-  "browser": "dist/parjson.umd.js",
+  "main": "dist/partjson.cjs.js",
+  "module": "dist/partjson.esm.js",
+  "browser": "dist/partjson.umd.js",
   "dependencies": {},
   "devDependencies": {
     "rollup": "^1.2.2",

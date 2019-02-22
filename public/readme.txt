@@ -1,9 +1,9 @@
-Parjson
+Partjson
 
-ParJSON is a JSON-based template for partitioning 
+Partjson is a JSON-based template for partitioning 
 rows of data into a well-defined tree of 
 shaped data collections and aggregated results. 
-A ParJSON filler will produce a data structure that
+A Partjson filler will produce a data structure that
 matches the shape of the input template.
 
 For non-data oriented programming languages such as
@@ -12,7 +12,7 @@ removes the need for multiple loops and if-else branches
 in data preparation.
 
 For data oriented programming languages such as R or
-SQL RDBMS, ParJSON may be supported as an alternative 
+SQL RDBMS, Partjson may be supported as an alternative 
 window partitioning and aggregation syntax. 
 
 
@@ -21,7 +21,7 @@ USAGE
 -----
 
 *** Instantiate ***
-const tracker = Parjson(opts)
+const tracker = Partjson(opts)
 
 *** Add data ***
 // Refresh data
@@ -66,9 +66,9 @@ Reserved Terms
           another result tree branch. This is useful for 
           flattening result leaves into one or more 
           collections, to make it easier for an application 
-          to reference the ParJSON results.
+          to reference the Partjson results.
 
-NOTE:     Parjson reserves all terms that are prefixed by "@"
+NOTE:     Partjson reserves all terms that are prefixed by "@"
 
 
 -------

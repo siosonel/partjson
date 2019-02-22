@@ -127,7 +127,7 @@ function demo(examples, reveal=false) {
         })
       }
       else {
-        tracker = new Parjson({
+        tracker = new Partjson({
           template,
           data,
           "=": opts["="]
@@ -171,24 +171,24 @@ function demo(examples, reveal=false) {
     return JSON.stringify(str, null, "  ")
     .replace(/\"\</g, "\"&lt;")
     .replace(/\"\>/g, "\"&gt;")
-    .replace(/\"\&lt\;\$/g, "\"<span class='parjson-token'>&lt;$</span>")
-    .replace(/\"\&gt\;\$/g, "\"<span class='parjson-token'>&gt;$</span>")
-    .replace(/\"\&lt\;/g, "\"<span class='parjson-token'>&lt;</span>")
-    .replace(/\"\&gt\;/g, "\"<span class='parjson-token'>&gt;</span>")
-    .replace(/\"\=/g, "\"<span class='parjson-token'>=</span>")
-    .replace(/\"\$/g, "\"<span class='parjson-token'>$</span>")
-    .replace(/\"\+\$/g, "\"<span class='parjson-token'>+$</span>")
-    .replace(/\"\-\$/g, "\"<span class='parjson-token'>-$</span>")
-    .replace(/\"\&/g, "\"<span class='parjson-token'>&</span>")
-    .replace(/\"\@/g, "\"<span class='parjson-token'>@</span>")
-    .replace(/\"\+/g, "\"<span class='parjson-token'>+</span>")
-    .replace(/\"\-/g, "\"<span class='parjson-token'>-</span>")
-    .replace(/\(\)\"/g, "<span class='parjson-token'>()</span>\"")
-    .replace(/\[\]\"/g, "<span class='parjson-token'>[]</span>\"")
-    .replace(/\ \[\n/g, " <span class='parjson-token'>[</span>\n")
-    .replace(/\ \]\n/g, " <span class='parjson-token'>]</span>\n")
-    .replace(/\ \]\,\n/g, " <span class='parjson-token'>]</span>,\n")
-    .replace(/\"\#/g, "<span class='parjson-token'>\"#</span>")
+    .replace(/\"\&lt\;\$/g, "\"<span class='partjson-token'>&lt;$</span>")
+    .replace(/\"\&gt\;\$/g, "\"<span class='partjson-token'>&gt;$</span>")
+    .replace(/\"\&lt\;/g, "\"<span class='partjson-token'>&lt;</span>")
+    .replace(/\"\&gt\;/g, "\"<span class='partjson-token'>&gt;</span>")
+    .replace(/\"\=/g, "\"<span class='partjson-token'>=</span>")
+    .replace(/\"\$/g, "\"<span class='partjson-token'>$</span>")
+    .replace(/\"\+\$/g, "\"<span class='partjson-token'>+$</span>")
+    .replace(/\"\-\$/g, "\"<span class='partjson-token'>-$</span>")
+    .replace(/\"\&/g, "\"<span class='partjson-token'>&</span>")
+    .replace(/\"\@/g, "\"<span class='partjson-token'>@</span>")
+    .replace(/\"\+/g, "\"<span class='partjson-token'>+</span>")
+    .replace(/\"\-/g, "\"<span class='partjson-token'>-</span>")
+    .replace(/\(\)\"/g, "<span class='partjson-token'>()</span>\"")
+    .replace(/\[\]\"/g, "<span class='partjson-token'>[]</span>\"")
+    .replace(/\ \[\n/g, " <span class='partjson-token'>[</span>\n")
+    .replace(/\ \]\n/g, " <span class='partjson-token'>]</span>\n")
+    .replace(/\ \]\,\n/g, " <span class='partjson-token'>]</span>,\n")
+    .replace(/\"\#/g, "<span class='partjson-token'>\"#</span>")
   }
 
   function displayFxns(fxnStr, example) {
@@ -350,7 +350,7 @@ setExampleDiv(example) {
       return {
         div,
         title: div.querySelector('p'),
-        // the ParJSON template, not a DOM template
+        // the Partjson template, not a DOM template
         template: div.querySelector(".template"),
         results: div.querySelector(".results"),
         tsv: div.querySelector(".tsv"),

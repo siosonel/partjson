@@ -4,9 +4,9 @@ import Err from "./Err"
 
 /*
 -------
-Parjson
+Partjson
 -------
-This is a ParJSON template filler. It processes
+This is a Partjson template filler. It processes
 rows of data into a well-defined tree of 
 data collections and aggregated results
 that matches the shape of the input template.
@@ -16,12 +16,12 @@ rows. It is thus suitable for partitioning and
 aggregating streaming data. It may also be used
 to parallelize data processing. 
 
-See parjson.html for an example template.
+See partjson.html for an example template.
 
-See parjson.readme.txt for more information
+See partjson.readme.txt for more information
 */
 
-export default class Parjson {
+export default class Partjson {
   constructor(opts={}) {
     this.defaultOpts = {
       template: {},
@@ -276,7 +276,7 @@ export default class Parjson {
   }
 }
 
-Parjson.prototype["@before"] = function (subterm, input) {
+Partjson.prototype["@before"] = function (subterm, input) {
 	const fxn = this.opts["="][subterm.slice(1,-2)]
 	if (!fxn) {
 		input.errors.push(["val", "MISSING-@before-FXN"])
@@ -285,7 +285,7 @@ Parjson.prototype["@before"] = function (subterm, input) {
 	else return fxn
 }
 
-Parjson.prototype["@after"] = function (subterm, input) {
+Partjson.prototype["@after"] = function (subterm, input) {
 	const fxn = this.opts["="][subterm.slice(1,-2)]
 	if (!fxn) {
 		input.errors.push(["val", "MISSING-@after-FXN"])
@@ -294,7 +294,7 @@ Parjson.prototype["@after"] = function (subterm, input) {
 	else return fxn
 }
 
-Parjson.prototype["@join"] = function (joins, input, filler) {
+Partjson.prototype["@join"] = function (joins, input, filler) {
 	return (row) => {
 		let ok = true
 		for(const alias in joins) {
@@ -312,7 +312,7 @@ Parjson.prototype["@join"] = function (joins, input, filler) {
 	}
 }
 
-Parjson.prototype["@dist"] = function (_subterm, input) {
+Partjson.prototype["@dist"] = function (_subterm, input) {
 	const subterm = Array.isArray(_subterm) ? _subterm[0] : _subterm
 	const subsFxn = this.valueFiller["@"](subterm)
 	return (context) => {
@@ -331,7 +331,7 @@ Parjson.prototype["@dist"] = function (_subterm, input) {
   }
 }
 
-Parjson.prototype["@done"] = function (subterm, input) {
+Partjson.prototype["@done"] = function (subterm, input) {
 	const fxn = this.opts["="][subterm.slice(1,-2)]
 	if (!fxn) {
 		input.errors.push(["val", "MISSING-@before-FXN"])
@@ -340,7 +340,7 @@ Parjson.prototype["@done"] = function (subterm, input) {
 	else return fxn
 }
 
-Parjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler) {
+Partjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler) {
 	if (!template["@ignoredVals()"]) {
 		return inheritedIgnored
 	}
@@ -375,4 +375,4 @@ Parjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler
 	return nonObj ? fxns : Object.assign({}, inheritedIgnored, fxns)
 }
 
-window["Parjson"] = Parjson
+window["Partjson"] = Partjson

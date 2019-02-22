@@ -8,9 +8,9 @@ const production = !process.env.ROLLUP_WATCH
 export default [
 	// browser-friendly UMD build
 	{
-		input: 'src/Parjson.js',
+		input: 'src/Partjson.js',
 		output: {
-			name: 'parjson',
+			name: 'partjson',
 			file: pkg.browser,
 			format: 'umd'
 		},
@@ -28,13 +28,13 @@ export default [
 	// an array for the `output` option, where we can specify 
 	// `file` and `format` for each target)
 	{
-		input: 'src/Parjson.js',
+		input: 'src/Partjson.js',
 		output: [
 			{ file: pkg.main, format: 'cjs' },
 			{ file: pkg.module, format: 'es' }
 		],
 		plugins: [
-			//terser()
+			terser()
 		]
 	}
 ];

@@ -57,7 +57,7 @@ fi
 # CONTEXTUAL CONFIG
 #####################
 
-APP=parjson # might be overridden below
+APP=partjson # might be overridden below
 
 if [[ "$ENV" == "pecan-int-test" || "$ENV" == "internal-stage" || "$ENV" == "internal-test" ]]; then
 	DEPLOYER=genomeuser
