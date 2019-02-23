@@ -42,12 +42,14 @@ export default class Partjson {
     this.timeSymbols = [":__", "_:_", "__:"]
     this.skipSymbols = ["#"]
     this.reservedOpts = ["@userDelimit", "@treeDelimit"]
-    this.reservedFxns = ["@before()", "@after()", "@dist()", "@join()"]
     this.reservedContexts = ["@branch", "@parent", "@root", "@self"]
+    this.reservedFilters = ["@before()", "@join()", "@ignore()"]
+    this.reservedPost = ["@after()", "@dist()", "@end()"]
     this.reservedTerms = [
       ...this.reservedOpts,
-      ...this.reservedFxns,
-    	...this.reservedContexts
+      ...this.reservedContexts,
+      ...this.reservedFilters,
+      ...this.reservedPost
     ]
     this.steps = [":__", "", "_:_"]
     this.errors = new Err(this)

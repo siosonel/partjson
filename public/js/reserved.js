@@ -276,6 +276,7 @@ demo([{
 	  the final results are filled and distributed. This function will receive
 	  as argument the final result of the template or subtemplate that it is defined in.`,
 	template: {
+  	"@done()": "=logResultsToDevConsole()",
 		"byCat": {
 			"$catname": {
 				"total": "+1",
@@ -285,7 +286,6 @@ demo([{
 				"@dist()": ["@root.results"]
 			}
 		},
-		"results": [],
-  	"@done()": "=logResultsToDevConsole()"
+		"results": []
   }
 }], window.location.search.includes("reveal="))

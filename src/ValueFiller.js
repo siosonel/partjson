@@ -140,6 +140,10 @@ ValueFiller.prototype["@"] = function(subterm, input) {
   else if (subterm.includes(this.Tree.treeDelimit)) {
   	const nestedProps = subterm.split(this.Tree.treeDelimit)
     const reducer = (resultContext, d) => {
+    	if (d[0] == "@" && d.length > 1 && !this.Tree.reservedContexts.includes(d)) {
+    		input.errors.push(["val", "UNRECOGNIZED-CONTEXT"])
+    		return [null, null]
+    	}
     	const [result, context] = resultContext
      	return !result || !d 
     		? null
@@ -152,10 +156,14 @@ ValueFiller.prototype["@"] = function(subterm, input) {
     					: [result[d], this.Tree.contexts.get(result[d])]
     }
     return (row, context) => {
-    	return nestedProps.reduce(reducer, [context.self, context])[0]
+    	const value = nestedProps.reduce(reducer, [context.self, context])
+    	return Array.isArray(value) ? value[0] : null
     }
   }
-  else {
+  else if (!this.Tree.reservedContexts.includes(subterm)) {
+  	input.errors.push(["val", "UNRECOGNIZED-CONTEXT"])
+  }
+  else { 
 	  const prop = subterm.slice(1)
 	  return (row, context) => context[prop]
 	}
