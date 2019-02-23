@@ -40,6 +40,16 @@ button {
 
 .nodecor {
 	text-decoration: none;
+	color: #fff;
+	cursor: pointer;
+}
+
+.nodecor:visited {
+	color: #fff;
+}
+
+.nodecor:hover {
+	color: #fff;
 }
 
 .nav-top {

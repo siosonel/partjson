@@ -224,7 +224,7 @@ demo([{
 	section: "post",
 	id: "after",
 	title: `The <span class="code-snippet">@after()</span> term gets called after 
-	  all the input functions have been called.
+	  all the input functions have been called for a data row.
 		<br/><br/>
 		The arguments supplied to this function are defined in the 
 		<a href='./syntax.html#conversion'>conversion</a> section.`,
@@ -240,8 +240,9 @@ demo([{
 	section: "post",
 	id: "dist",
 	title: `The <span class="code-snippet">@dist()</span> function distributes 
-		results from one result subtree to another, once template branches are 
-		filled with final results. Usually, this would copy deeply nested result 
+		results from one result subtree to another, once all data rows have been
+		processed and template branches are filled with final results. 
+		Usually, this would copy deeply nested result 
 		objects into one or more root object arrays, 
 		for easier access at the end of data processing.
 		<br/><br/>
