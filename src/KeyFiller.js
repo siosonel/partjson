@@ -1,16 +1,18 @@
 export default class KeyFiller { 
   constructor(Tree) {
     this.Tree = Tree
-    this.ignoredVals = Tree.opts.ignoredVals
     this.allowedKeyTypes = new Set(["string", "number", "undefined"])
   }
 
-  getFxn(subterm, symbols, input) {
+  getFxn(subterm, symbols, input, ignore) {
 		if (this.Tree.reservedOpts.includes(subterm)) return
     if (input.keyTokens.skip) {
     	this["#"](subterm, input)
     }
     else if (input.keyTokens.subs in this.Tree.valueFiller) {
+    	const subconv = subterm + input.keyTokens.conv
+	  	input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
+
 	  	const subsFxn = this.Tree.valueFiller[input.keyTokens.subs](subterm, input)
 	  	if (!subsFxn) {
 	  		input.errors.push(["key", "UNSUPPORTED-KEY-SUBSTITUTION"])
@@ -40,7 +42,7 @@ export default class KeyFiller {
     }
   	const allowed = []
 		for(const key of keys) {
-  		if (!this.ignoredVals.includes(key)) {
+  		if (!input.ignore(key)) {
   			if (!this.allowedKeyTypes.has(typeof key)) {
 	      	context.errors.push([input, "INVALID-RESULT-KEY", row])
 	    	}

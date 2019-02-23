@@ -132,20 +132,21 @@ demo([{
   	}
   }
 },{
-	symbol: "@ignoredVals()",
+	symbol: "@ignore()",
 	tokenType: "filters",
 	section: "filters",
 	id: "ignore-values-in-array",
 	title: `
-		The <span class="code-snippet">@ignoreVals()</span> term may be 
+		The <span class="code-snippet">@ignore()</span> term may be 
 		(a) an array of ignored values, 
 		(b) a function that returns <span class="code-snippet">true</span> when a value
 		is to be ignored, or (c) an object with 
 		<span class="code-snippet">"term": [ value ] || "=filter()"</span> as key-values.
 		An array of ignored values will be applied to all
-		input value terms in the current template.`,
+		inputs in the current template. An ignored value is determined after substitution
+		and conversion, where applicable to an input term.`,
 	template: {
-		"@ignoredVals()": ["mammal"],
+		"@ignore()": ["mammal"],
   	"okPreyType": [
   		"$preytype", "distinct"
   	] 
@@ -155,16 +156,16 @@ demo([{
 	section: "filters",
 	id: "ignore-using-function",
 	title: `
-		An <span class="code-snippet">@ignoredVals()</span> function must 
+		An <span class="code-snippet">@ignore()</span> function must 
 		return <span class="code-snippet">true</span> when a value
 		is to be ignored, given (<span class="code-snippet">value</span>, 
 		<span class="code-snippet">key</span>, 
 		<span class="code-snippet">row</span>,
 		<span class="code-snippet">context</span>) as arguments. The filter
-		will be applied to all input value terms in the current template.`,
+		will be applied to all inputs in the current template.`,
 	template: {
   	"filteredMass": {
-  		"@ignoredVals()": "=ignoreTinyMass()",
+  		"@ignore()": "=ignoreTinyMass()",
   		"minMass": ">$preymass"
   	}
   }
@@ -173,10 +174,10 @@ demo([{
 	section: "filters",
 	id: "ignore-values-by-term",
 	title: `
-		An object of <span class="code-snippet">@ignoredVals()</span> 
-		applies term-specific filtering by value.`,
+		An object of <span class="code-snippet">@ignore()</span> 
+		key-value terms applies term-specific filtering by value.`,
 	template: {
-  	"@ignoredVals()": {
+  	"@ignore()": {
   		"$preytype": "=ignoreMammals()",
   		"=preyTypeFxn()": ["fish"]
   	},	
@@ -193,10 +194,10 @@ demo([{
 	id: "ignore-inheritance",
 	title: `
 		Nested templates inherit its parent template's 
-		<span class="code-snippet">@ignoredVals()</span>,
+		<span class="code-snippet">@ignore()</span>,
 		but may override it.`,
 	template: {
-		"@ignoredVals()": {
+		"@ignore()": {
 			"$preytype": ["mammal"],
 		},
 		"inheritedIgnore": {
@@ -207,7 +208,7 @@ demo([{
 			}
   	},
   	"overridenIgnore": {
-  		"@ignoredVals()": {
+  		"@ignore()": {
 				"$preytype": [],
 			},
 			"nestedResult": {

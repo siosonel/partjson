@@ -132,12 +132,9 @@ if [[ "$ENV" != "scp-prod" ]]; then
 	cd tmpbuild
 	# save some time by reusing parent folder's node_modules
 	# but making sure to update to committed package.json
-	# ln -s ../node_modules node_modules
+	ln -s ../node_modules node_modules
 	# npm update
-
-	# create webpack bundle
-	# webpack --config=build/webpack.config.build.js --env.subdomain=$SUBDOMAIN
-
+	npm run build
 
 	# create dirs to put extracted files
 	rm -rf $APP

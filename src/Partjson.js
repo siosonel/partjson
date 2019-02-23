@@ -26,7 +26,7 @@ export default class Partjson {
     this.defaultOpts = {
       template: {},
       "=": {},
-      ignoredVals: []
+      ignore: []
     }
 
     this.opts = Object.assign(
@@ -91,15 +91,15 @@ export default class Partjson {
     this.errors.log(this.fillers)
   }
 
-  parseTemplate(template, inheritedIgnored, lineage=[]) {
+  parseTemplate(template, inheritedIgnore, lineage=[]) {
     const filler = Object.create(null)
     filler.inputs = Object.create(null)
     filler["@before"] = this.trueFxn
     filler["@after"] = this.trueFxn
     filler["__:"] = []
     filler.errors = []
-    const ignoredVals = this["@ignoredVals"](template, inheritedIgnored, filler)
-    filler["@ignoredVals"] = ignoredVals
+    const ignore = this["@ignore"](template, inheritedIgnore, filler)
+    filler["@ignore"] = ignore
     this.fillers.set(template, filler)
 
     const steps = this.steps.map(d => [])
@@ -113,7 +113,7 @@ export default class Partjson {
         keyTokens,
         templateVal,
         lineage: [...lineage, term],
-        inheritedIgnored: ignoredVals,
+        inheritedIgnore: ignore,
         errors: []
       }
 
@@ -126,9 +126,9 @@ export default class Partjson {
       	}
       }
       else {
-	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input)
+	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input, ignore)
 	      if (input.keyFxn) {
-	        input.valFxn = this.valueFiller.getFxn(input, ignoredVals)
+	        input.valFxn = this.valueFiller.getFxn(input, ignore)
 	      	if (keyTokens.time == "__:") {
 		      	filler["__:"].push(term)
 		      }
@@ -340,26 +340,26 @@ Partjson.prototype["@done"] = function (subterm, input) {
 	else return fxn
 }
 
-Partjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, filler) {
-	if (!template["@ignoredVals()"]) {
-		return inheritedIgnored
+Partjson.prototype["@ignore"] = function (template, inheritedIgnore, filler) {
+	if (!template["@ignore()"]) {
+		return inheritedIgnore
 	}
-	const nonObj = Array.isArray(template["@ignoredVals()"]) 
-		|| typeof template["@ignoredVals()"] == "string"
-	const ignoredVals = nonObj
-		? {"@": template["@ignoredVals()"]}
-		: template["@ignoredVals()"]
+	const nonObj = Array.isArray(template["@ignore()"]) 
+		|| typeof template["@ignore()"] == "string"
+	const ignore = nonObj
+		? {"@": template["@ignore()"]}
+		: template["@ignore()"]
 
 	const fxns = {}
-	for(const term in ignoredVals) {
-		const ignoredVal = ignoredVals[term]
-		if (Array.isArray(ignoredVal)) {
-			fxns[term] = (value) => ignoredVal.includes(value)
+	for(const term in ignore) {
+		const ignoreVal = ignore[term]
+		if (Array.isArray(ignoreVal)) {
+			fxns[term] = (value) => ignoreVal.includes(value)
 		}
-		else if (typeof ignoredVal == 'string' && ignoredVal[0] == "=") {
-			const fxn = this.opts["="][ignoredVal.slice(1,-2)]
+		else if (typeof ignoreVal == 'string' && ignoreVal[0] == "=") {
+			const fxn = this.opts["="][ignoreVal.slice(1,-2)]
   	  if (!fxn) {
-  	  	filler.errors.push(["val", "MISSING-@ignoredVals()-FXN", ignoredVal])
+  	  	filler.errors.push(["val", "MISSING-@ignore()-FXN", ignoreVal])
   	  	fxns[term] = this.falseFxn
   	  }
   	  else {
@@ -367,12 +367,12 @@ Partjson.prototype["@ignoredVals"] = function (template, inheritedIgnored, fille
   		}
 		} 
 		else {
-			filler.errors.push(["val", "UNSUPPORTED-@ignoredVals()-VALUE", ignoredVal])
+			filler.errors.push(["val", "UNSUPPORTED-@ignore()-VALUE", ignoreVal])
   	  fxns[term] = this.falseFxn
 		}
 	}
 
-	return nonObj ? fxns : Object.assign({}, inheritedIgnored, fxns)
+	return nonObj ? fxns : Object.assign({}, inheritedIgnore, fxns)
 }
 
 window["Partjson"] = Partjson

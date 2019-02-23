@@ -149,9 +149,9 @@ function demo(examples, reveal=false) {
           	}
           }
         }
-        for(const term in filler["@ignoredVals"].templateVal) {
+        for(const term in filler["@ignore"].templateVal) {
         	if (term != "@" && fxnStr[term] != tracker.falseFxn && !fxnStr[term]) {
-        		fxnToStr(tracker, fxnStr, filler["@ignoredVals"].templateVal[term])
+        		fxnToStr(tracker, fxnStr, filler["@ignore"].templateVal[term])
         	}
         }
       }

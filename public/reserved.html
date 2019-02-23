@@ -8,7 +8,7 @@
 	<link rel="stylesheet" href="./css/partjson.css">
 	<style>
 		.nav-tab {
-			min-width: 100px;
+			min-width: 75px;
 		}
 	</style>
 	<style>
@@ -29,7 +29,7 @@
 	<nav class="nav-bar" 
 		onmouseleave="collapseSymbols()">
 		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
-			<div class="nav-col" id="nav-col-options">
+			<div class="nav-col" id="nav-col-options" style="min-width: 95px">
 				<div class="nav-tab" onmouseenter="expandSymbols()">[options]</div>
 			</div>
 			<div class="nav-col" id="nav-col-context">
@@ -80,11 +80,13 @@
 				ignore a data row for the current input, as described in the
 				<a href="syntax.html#conversion">conversion syntax section</a> 
 				for <span class="code-snippet">()</span> and
-				<span class="code-snippet">[]</span>.
+				<span class="code-snippet">[]</span>. Keys that match an 
+				<span class="code-snippet">@ignore</span> value, as 
+				described below, will also be skipped.
 			</li>
 			<li>
-        For a given set of computed input values: described below in the
-        <span class="code-snippet">ignoredVals</span> examples.
+        For a given set of computed inputs: described in the
+        <span class="code-snippet">@ignore</span> examples below.
 			</li>
 		</ul>
 		<br/><br/>
