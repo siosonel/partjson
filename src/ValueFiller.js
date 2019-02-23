@@ -407,13 +407,13 @@ ValueFiller.prototype["+[]"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
 		const values = subsFxn(row, context)
-		if (Array.isArray(values)) {
-			input.errors(["val", "NON-ARRAY-VALS", row])
+		if (!Array.isArray(values)) { console.log(values)
+			input.errors.push(["val", "NON-ARRAY-VALS", row])
 			return
 		}
 		for(const value in values) {
 			if (input.ignore(value, key, row, context)) continue
-	    result[key] += value
+	    result[key] += this.isNumeric(value) ? +value : value
 		}
   }
 }
@@ -435,7 +435,7 @@ ValueFiller.prototype["-[]"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
 		const values = subsFxn(row, context)
-		if (Array.isArray(values)) {
+		if (!Array.isArray(values)) {
 			input.errors(["val", "NON-ARRAY-VALS", row])
 			return
 		}
@@ -470,7 +470,7 @@ ValueFiller.prototype["<()"] = ValueFiller.prototype["<''"]
 ValueFiller.prototype["<[]"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     const values = subsFxn(row, context)
-    if (Array.isArray(values)) {
+    if (!Array.isArray(values)) {
 			input.errors(["val", "NON-ARRAY-VALS", row])
 			return
 		}
@@ -515,7 +515,7 @@ ValueFiller.prototype[">()"] = ValueFiller.prototype[">''"]
 ValueFiller.prototype[">[]"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     const values = subsFxn(row, context)
-    if (Array.isArray(values)) {
+    if (!Array.isArray(values)) {
 			input.errors(["val", "NON-ARRAY-VALS", row])
 			return
 		}

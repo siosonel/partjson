@@ -304,7 +304,8 @@ ignoreMammals(value) {
 },
 logResultsToDevConsole(tree) {
 	console.log(tree)
-}
+},
+wholeNums: [1,2,3]
 },
   
   tsvText: `catname	catsex	owners	ownerblock	huntblock	huntdate	preytype	preysubtype	preymass	nested-json

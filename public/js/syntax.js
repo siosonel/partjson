@@ -143,7 +143,7 @@ demo([{
 	title: `<span class="code-snippet">-</span> subtracts the computed value from a running count`,
 	template: {
 		lostmass: {
-    	"$catname": "-$preymass"
+    	"$catname": "-=wholeNums[]"
    	}}
 },{
 	symbol: "<",
