@@ -139,6 +139,7 @@ if [[ "$ENV" != "scp-prod" ]]; then
 	# create dirs to put extracted files
 	rm -rf $APP
 	mkdir $APP
+	rm public/dist
 	mv public/* $APP/
 	mv dist $APP
 
