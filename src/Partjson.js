@@ -197,7 +197,7 @@ export default class Partjson {
   	const context = this.contexts.get(result)
   	const filler = this.fillers.get(template)
   	context.filler = filler
-  	if (!filler["@before"](row, result, context)) return
+  	if (!filler["@before"](row, context)) return
   	if (filler["@join"] && !filler["@join"](row)) return
   	for(const step of filler.steps) {
 	    for(const term of step) { 
@@ -212,7 +212,7 @@ export default class Partjson {
 	      }
 	    }
 	  }
-	  filler["@after"](row, result, context)
+	  filler["@after"](row, context)
 	  if (filler["@dist"]) filler["@dist"](context)
 	  if (filler["@done"]) context.done = filler["@done"]
   }

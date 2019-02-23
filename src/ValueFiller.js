@@ -155,7 +155,7 @@ ValueFiller.prototype["="] = function(subterm, input, callAsFxn) {
   	return () => propOrFxn
   }
   else if (typeof propOrFxn !== "function") {
-  	input.errors(["val", "NOT-A-FUNCTION"])
+  	input.errors.push(["val", "NOT-A-FUNCTION"])
   }
   else {
   	return propOrFxn
@@ -196,7 +196,7 @@ ValueFiller.prototype["@"] = function(subterm, input, callAsFxn) {
     		const value = nestedProps.reduce(reducer, [context.self, context])
     		const fxn = Array.isArray(value) ? value[0] : null
     		if (typeof fxn !== "function") {
-			  	input.errors(["val", "NOT-A-FUNCTION", row])
+			  	input.errors.push(["val", "NOT-A-FUNCTION", row])
 			  	return
 			  }
 			  return fxn(row, context)
@@ -213,7 +213,7 @@ ValueFiller.prototype["@"] = function(subterm, input, callAsFxn) {
 	  	: (row, context) => {
 	  		const fxn = context[prop]
     		if (typeof fxn !== "function") {
-			  	input.errors(["val", "NOT-A-FUNCTION", row])
+			  	input.errors.push(["val", "NOT-A-FUNCTION", row])
 			  	return
 			  }
 			  return fxn(row, context)
@@ -230,7 +230,7 @@ ValueFiller.prototype["&"] = function(subterm, input, callAsFxn) {
   		: (row, context) => {
   			const fxn = this.Tree.joins.get(alias)
   			if (typeof fxn != "function") {
-  				input.errors(["val", "NOT-A-FUNCTION", row])
+  				input.errors.push(["val", "NOT-A-FUNCTION", row])
 			  	return
   			}
 			  return fxn(row, context)
@@ -249,7 +249,7 @@ ValueFiller.prototype["&"] = function(subterm, input, callAsFxn) {
 		  	const join = this.Tree.joins.get(alias)
 		  	const fxn = join ? join[prop] : null
 		  	if (typeof fxn != "function") {
-  				input.errors(["val", "NOT-A-FUNCTION", row])
+  				input.errors.push(["val", "NOT-A-FUNCTION", row])
 			  	return
   			}
 			  return fxn(row, context)
@@ -266,7 +266,7 @@ ValueFiller.prototype["&"] = function(subterm, input, callAsFxn) {
     	return (row, context) => {
     		const fxn = nestedProps.reduce(reducer, this.Tree.joins.get(alias))
 		  	if (typeof fxn != "function") {
-  				input.errors(["val", "NOT-A-FUNCTION", row])
+  				input.errors.push(["val", "NOT-A-FUNCTION", row])
 			  	return
   			}
 			  return fxn(row, context)
@@ -397,7 +397,7 @@ ValueFiller.prototype["+''"] = function(subsFxn, input) {
     if (!(key in result)) result[key] = 0
 		const value = subsFxn(row, context)
 		if (input.ignore(value, key, row, context)) return
-    result[key] += value
+    result[key] += +value
   }
 }
 
@@ -407,11 +407,11 @@ ValueFiller.prototype["+[]"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
 		const values = subsFxn(row, context)
-		if (!Array.isArray(values)) { console.log(values)
+		if (!Array.isArray(values)) {
 			input.errors.push(["val", "NON-ARRAY-VALS", row])
 			return
 		}
-		for(const value in values) {
+		for(const value of values) {
 			if (input.ignore(value, key, row, context)) continue
 	    result[key] += this.isNumeric(value) ? +value : value
 		}
@@ -425,7 +425,7 @@ ValueFiller.prototype["-''"] = function(subsFxn, input) {
     if (!(key in result)) result[key] = 0
 		const value = subsFxn(row, context)
 		if (input.ignore(value, key, row, context)) return
-    result[key] -= value
+    result[key] += -value
   }
 }
 
@@ -433,15 +433,15 @@ ValueFiller.prototype["-()"] = ValueFiller.prototype["-''"]
 
 ValueFiller.prototype["-[]"] = function(subsFxn, input) { 
   return (row, key, result, context) => {
-    if (!(key in result)) result[key] = 0
 		const values = subsFxn(row, context)
 		if (!Array.isArray(values)) {
-			input.errors(["val", "NON-ARRAY-VALS", row])
+			input.errors.push(["val", "NON-ARRAY-VALS", row])
 			return
 		}
-		for(const value in values) {
+    if (!(key in result)) result[key] = 0
+		for(const value of values) {
 			if (input.ignore(value, key, row, context)) continue
-	    result[key] -= value
+	    result[key] += -value
 		}
   }
 }
@@ -471,10 +471,10 @@ ValueFiller.prototype["<[]"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     const values = subsFxn(row, context)
     if (!Array.isArray(values)) {
-			input.errors(["val", "NON-ARRAY-VALS", row])
+			input.errors.push(["val", "NON-ARRAY-VALS", row])
 			return
 		}
-		for(const value in values) {
+		for(const value of values) {
 			if (input.ignore(value, key, row, context)) return
 	    if (!this.isNumeric(value)) {
 	      context.errors.push([input, "NON-NUMERIC-THAN", row])
@@ -516,10 +516,10 @@ ValueFiller.prototype[">[]"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     const values = subsFxn(row, context)
     if (!Array.isArray(values)) {
-			input.errors(["val", "NON-ARRAY-VALS", row])
+			input.errors.push(["val", "NON-ARRAY-VALS", row])
 			return
 		}
-		for(const value in values) {
+		for(const value of values) {
 			if (input.ignore(value, key, row, context)) return
 	    if (!this.isNumeric(value)) {
 	      context.errors.push([input, "NON-NUMERIC-THAN", row])

@@ -41,7 +41,6 @@ function isNumeric(d) {
 }
 
 function demo(examples, reveal=false) {
-  const opts = getOpts()
   const renderedBySymbol = {}
   go()
   document.querySelector(".nav-bar").style.opacity = 1
@@ -51,12 +50,13 @@ function demo(examples, reveal=false) {
   }
 
   function renderExample(example,i) {
+  	const opts = getOpts()
     const dom = opts.setExampleDiv(example)
     dom.template.innerHTML = highlightTokens(example.template)
     dom.tsv.innerHTML = opts.tsvText
     dom.title.innerHTML = example.title
 
-    const run = getRunFxn(dom)
+    const run = getRunFxn(dom, opts)
 
     dom.updateBtn.onclick = run
     for(const label of dom.inputLabels) {
@@ -65,21 +65,19 @@ function demo(examples, reveal=false) {
 
     dom.tsvBtn.onclick = ()=>{
       dom.tsv.style.display = dom.tsv.style.display == "block" ? "none" : "block"
-      dom.fxns.style.display = "none"
+      dom.exts.style.display = "none"
     }
 
     dom.tryBtn.onclick = () => {
       const display = dom.tryDiv.style.display != "block" ? "block" : "none"
       dom.tryDiv.style.display = display
       if (display == "none") return
-      const fxnStr = run()
-      displayFxns(fxnStr, example)
+      run()
     }
 
     if (reveal) {
       dom.tryDiv.style.display = "block"
-      const fxnStr = run()
-      displayFxns(fxnStr, example)
+      run()
     }
 
     if (window.location.hash == '#' + example.id) { 
@@ -108,62 +106,38 @@ function demo(examples, reveal=false) {
     }
   }
 
-  function getRunFxn(dom) {
+  function getRunFxn(dom, opts) {
     let tracker
-    return function() {
-      const template = JSON.parse(
-        dom.template.innerText
+    return function(exampleDiv) {
+    	const templateStr = dom.template.innerText
           .trim()
           .replace("&lt;","<")
           .replace("&gt;",">")
-      )
-
+      const template = JSON.parse(templateStr)
       const data = parseTsv(dom.tsv.value.trim())
+      const externalsStr = dom.exts.innerText
+      		.trim()
+          .replace("&lt;","<")
+          .replace("&gt;",">")
+      const externals = externalsStr ? eval("("+externalsStr+")") : opts["="]
 
       if (tracker) {
         tracker.refresh({
           template,
           data,
+          "=": externals
         })
       }
       else {
         tracker = new Partjson({
           template,
           data,
-          "=": opts["="]
+          "=": externals
         })
       }
 
       dom.results.innerHTML = JSON.stringify(tracker.tree, null, "  ")
-
-      const fxnStr = {}
-      for(const templateFiller of tracker.fillers) {
-        const [template, filler] = templateFiller
-        for(const term in filler.inputs) {
-          fxnToStr(tracker, fxnStr, term)
-          fxnToStr(tracker, fxnStr, filler.inputs[term].templateVal)
-          if (term=="@join()") {
-          	const values = Object.values(filler.inputs[term].templateVal)
-          	for(const value of values) {
-          		fxnToStr(tracker, fxnStr, value)
-          	}
-          }
-        }
-        for(const term in filler["@ignore"].templateVal) {
-        	if (term != "@" && fxnStr[term] != tracker.notDefined && !fxnStr[term]) {
-        		fxnToStr(tracker, fxnStr, filler["@ignore"].templateVal[term])
-        	}
-        }
-      }
-      return fxnStr
-    }
-  }
-
-  function fxnToStr(tracker, fxnStr, term) {
-    if (typeof term != "string" || term[0] != "=") return
-    const fxnName = term.slice(1,-2)
-    if (!fxnStr[fxnName] && tracker.opts["="][fxnName]) {
-      fxnStr[fxnName] = tracker.opts["="][fxnName].toString()
+      displayExternals(externals, templateStr, dom.div)
     }
   }
 
@@ -192,25 +166,33 @@ function demo(examples, reveal=false) {
     .replace(/\"\#/g, "<span class='partjson-token'>\"#</span>")
   }
 
-  function displayFxns(fxnStr, example) {
-    if (!Object.keys(fxnStr).length) return; 
-    const div = document.querySelector('#'+example.id)
-    if (!div) return
-    let str = ""
-    for(const fxnName in fxnStr) {
-      str += "<i class='fxn-keyword'>function&nbsp;</i>"
-          + fxnStr[fxnName]
-            .replace(fxnName, "<span class='fxn-name'>"+ fxnName + "</span>")
-            .replace(/row/g, "<span class='fxn-arg'>row</span>")
-            .replace(/context/g, "<span class='fxn-arg'>context</span>") 
-            .replace(/return\ /g, "<span class='fxn-return'>return </span>")
-          +  "\n\n"
+  function displayExternals(ext, templateStr, div) {
+  	const externals = {}
+    for(const key in ext) {
+    	if (templateStr.includes("=" + key)) {
+    		const value = ext[key]
+    		externals[key] = typeof value == "function" ? key + "_PLACEHOLDER_" : value
+    	}
     }
-    div.querySelector(".fxns").innerHTML = str
-    div.querySelector(".fxns-btn").style.display = "inline"
-    div.querySelector(".fxns-btn").onclick = ()=>{
-      const currDisplay = div.querySelector(".fxns").style.display
-      div.querySelector(".fxns").style.display = currDisplay != "block" ? "block" : "none"
+    if (!Object.keys(externals).length) return
+    let str = JSON.stringify(externals, null, "  ")
+    for(const key in externals) {
+    	if (typeof ext[key] == "function") {
+    		const fxnStr = ext[key].toString()
+    			.replace(key, "<i class='fxn-keyword'>function&nbsp;</i>")
+    			.replace(/row/g, "<span class='fxn-arg'>row</span>")
+          .replace(/context/g, "<span class='fxn-arg'>context</span>") 
+          .replace(/return\ /, "<span class='fxn-return'>return </span>")
+          .replace(/value/g, "<span class='fxn-arg'>value</span>") 
+          .replace(/\n\}/, "\n   }")
+    		str = str.replace('"' + key + '_PLACEHOLDER_"', fxnStr)
+    	}
+    }
+    div.querySelector(".exts").innerHTML = str
+    div.querySelector(".exts-btn").style.display = "inline"
+    div.querySelector(".exts-btn").onclick = ()=>{
+      const currDisplay = div.querySelector(".exts").style.display
+      div.querySelector(".exts").style.display = currDisplay != "block" ? "block" : "none"
       div.querySelector(".tsv").style.display = "none"
     }
   }
@@ -259,52 +241,52 @@ function getOpts() {
   return {
     "=": {
 totalMassOverCount(row, context) {
-  return context.self.totalPreyMass / context.self.count
-},
-roundedPreyMass(row, context) {
-  return isNumeric(row.preymass) 
-  ? +row.preymass.toPrecision(2) 
-  : null
-},
+    return context.self.totalPreyMass / context.self.count
+  },
+roundedPreyMass(row) {
+    return isNumeric(row.preymass) 
+      ? +row.preymass.toPrecision(2) 
+      : null
+  },
 savedDoublePreyMass(row) {
-  row.preymass = isNumeric(row.preymass) 
-    ? 2 * +row.preymass 
-    : 0
-  return row.preymass
-},
+    row.preymass = isNumeric(row.preymass) 
+      ? 2 * +row.preymass 
+      : 0
+    return row.preymass
+  },
 savedTriplePreyMass(row) {
-  row.preymass = isNumeric(row.preymass) 
-    ? 3 * +row.preymass 
-    : 0
-  return row.preymass
-},
+    row.preymass = isNumeric(row.preymass) 
+      ? 3 * +row.preymass 
+      : 0
+    return row.preymass
+  },
 adjustPreyMass(row) {
-  return row.preymass*0.8
-},
+    return row.preymass*0.8
+  },
 splitOwners(row) {
-  return row.owners.split(",")
-},
+    return row.owners.split(",")
+  },
 saveSplitOwners(row) {
-  row.owners = row.owners.split(",")
-  return true
-},
+    row.owners = row.owners.split(",")
+    return true
+  },
 blockInfo(row) {
-  return row.ownerblock[0] == 'C' 
-    ? {name: "Friendly Neighborhood", population: 630}
-    : {name: "Sesame Street", population: 950}
-},
+    return row.ownerblock[0] == 'C' 
+      ? {name: "Friendly Neighborhood", population: 630}
+      : {name: "Sesame Street", population: 950}
+  },
 ignoreTinyMass(value) {
-	return value < 0.7
-},
+    return value < 0.7
+  },
 preyTypeFxn(row) {
-	return row.preytype
-},
+    return row.preytype
+  },
 ignoreMammals(value) { 
-	return value == "mammal"
-},
+    return value == "mammal"
+  },
 logResultsToDevConsole(tree) {
-	console.log(tree)
-},
+    console.log(tree)
+  },
 wholeNums: [1,2,3]
 },
   
@@ -344,10 +326,10 @@ setExampleDiv(example) {
     <div class='btn-div'>
       <button class='tsv-btn'>Data</button>
       <button class='update-btn'>Update</button>
-      <button class='fxns-btn' style="display:none">Functions</button>
+      <button class='exts-btn' style="display:none">Externals</button>
     </div>
-    <code class='fxns'>
-    </code>
+    <pre class='exts' contenteditable="true">
+    </pre>
     <textarea class='tsv'>
     </textarea>
   </div>`;
@@ -360,7 +342,7 @@ setExampleDiv(example) {
         template: div.querySelector(".template"),
         results: div.querySelector(".results"),
         tsv: div.querySelector(".tsv"),
-        fxns: div.querySelector(".fxns"),
+        exts: div.querySelector(".exts"),
         inputLabels: div.querySelectorAll('.inputlabel'),
         updateBtn: div.querySelector('.update-btn'),
         tsvBtn: div.querySelector('.tsv-btn'),

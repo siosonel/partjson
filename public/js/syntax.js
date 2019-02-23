@@ -104,8 +104,8 @@ demo([{
 	tokenType: "conv",
 	section: "conversion",
 	id: "distribute-array-values",
-	title: `<span class="code-snippet">[]</span> distributes the values
-		of an array as substituted property.`,
+	title: `<span class="code-snippet">[]</span> expects an array
+	  as a substituted property and distributes its values.`,
 	template: {
 		"@before()": "=saveSplitOwners()",
 		"byOwner": {
@@ -117,8 +117,8 @@ demo([{
 	tokenType: "conv",
 	section: "conversion",
 	id: "distribute-returned-array-values",
-	title: `<span class="code-snippet">(]</span> distributes the  values 
-	 of an array as returned by a substituted function.`,
+	title: `<span class="code-snippet">(]</span> calls a substituted 
+	 property as a function and distributes its returned value.`,
 	template: {
 		"byOwner": {
 			"=splitOwners(]": "+$preymass"
@@ -131,8 +131,8 @@ demo([{
 	id: "add-a-value",
 	title: `<span class="code-snippet">+</span> adds the computed value from a running count`,
 	template: {
-		byCat: {
-    	"$catname": "+1"
+		consumedMass: {
+    	"$catname": "+$preymass"
    	}
   }
 },{
@@ -143,7 +143,7 @@ demo([{
 	title: `<span class="code-snippet">-</span> subtracts the computed value from a running count`,
 	template: {
 		lostmass: {
-    	"$catname": "-=wholeNums[]"
+    	"lost": "-=wholeNums[]"
    	}}
 },{
 	symbol: "<",
