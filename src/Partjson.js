@@ -37,7 +37,7 @@ export default class Partjson {
     this.userDelimit = "."
     this.treeDelimit = "."
     this.subsSymbols = ["$", "=", "@", "&"]
-    this.convSymbols = ["()", "[]"] //, "{}"]
+    this.convSymbols = ["()", "[]", "(]"] //, "{}"]
     this.aggrSymbols = ["+", "-", "<", ">"]
     this.timeSymbols = [":__", "_:_", "__:"]
     this.skipSymbols = ["#"]
@@ -85,7 +85,7 @@ export default class Partjson {
     
     delete this.tree
     this.tree = this.getEmptyResult()
-    this.parseTemplate(this.opts.template, {"@": this.falseFxn})
+    this.parseTemplate(this.opts.template, {"@": this.notDefined})
 
     if (this.opts.data) {
     	this.add(this.opts.data, false)
@@ -269,8 +269,8 @@ export default class Partjson {
   	return true
   }
 
-  falseFxn() {
-  	return false
+  notDefined(value) {
+  	return typeof value === "undefined"
   }
 
   isNumeric(d) {
@@ -362,7 +362,7 @@ Partjson.prototype["@ignore"] = function (template, inheritedIgnore, filler) {
 			const fxn = this.opts["="][ignoreVal.slice(1,-2)]
   	  if (!fxn) {
   	  	filler.errors.push(["val", "MISSING-@ignore()-FXN", ignoreVal])
-  	  	fxns[term] = this.falseFxn
+  	  	fxns[term] = this.notDefined
   	  }
   	  else {
   	  	fxns[term] = fxn
@@ -370,7 +370,7 @@ Partjson.prototype["@ignore"] = function (template, inheritedIgnore, filler) {
 		} 
 		else {
 			filler.errors.push(["val", "UNSUPPORTED-@ignore()-VALUE", ignoreVal])
-  	  fxns[term] = this.falseFxn
+  	  fxns[term] = this.notDefined
 		}
 	}
 

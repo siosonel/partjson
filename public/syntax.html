@@ -96,11 +96,16 @@
 
 	<section id='substitution'>
 		<h3 class='section-title'>Substitution</h3>
+		<p>A substitution prefix indicates where the substituted property or function
+		comes from.</p>
+		<br/>
 	</section>
 
 	<section id='conversion'>
 		<h3 class='section-title'>Conversion</h3>
-		<p>A function will be passed the following arguments in order:</p>
+		<p>A conversion suffix will cause a substituted value to be
+		called as a function and may apply additional rules to the returned value. 
+		A function will be passed the following arguments in order:</p>
 		<ul>
 			<li><span class="code-snippet">row</span>: 
 				the current data row, or <span class='code-snippet'>null</span> when called post-loop</li>

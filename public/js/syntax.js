@@ -94,7 +94,7 @@ demo([{
 	symbol: "()",
 	tokenType: "conv",
 	section: "conversion",
-	id: "convert-via-function",
+	id: "call-as-function",
 	title: `<span class="code-snippet">()</span> calls a substituted value as a function`,
 	template: {
 		"$preytype": "=roundedPreyMass()"
@@ -103,17 +103,25 @@ demo([{
 	symbol: "[]",
 	tokenType: "conv",
 	section: "conversion",
-	id: "convert-array",
-	title: `<span class="code-snippet">[]</span> distributes the returned 
-	  value of a function call.`,
+	id: "distribute-array-values",
+	title: `<span class="code-snippet">[]</span> distributes the values
+		of an array as substituted property.`,
+	template: {
+		"@before()": "=saveSplitOwners()",
+		"byOwner": {
+			"$owners[]": "+$preymass"
+		}
+	}
+},{
+	symbol: "(]",
+	tokenType: "conv",
+	section: "conversion",
+	id: "distribute-returned-array-values",
+	title: `<span class="code-snippet">(]</span> distributes the  values 
+	 of an array as returned by a substituted function.`,
 	template: {
 		"byOwner": {
-			"=splitOwners[]": "+$preymass"
-		},
-		"byPreyType": {
-			"$preytype": [
-				"=splitOwners[]", "distinct"
-			]
+			"=splitOwners(]": "+$preymass"
 		}
 	}
 },{

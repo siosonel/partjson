@@ -150,7 +150,7 @@ function demo(examples, reveal=false) {
           }
         }
         for(const term in filler["@ignore"].templateVal) {
-        	if (term != "@" && fxnStr[term] != tracker.falseFxn && !fxnStr[term]) {
+        	if (term != "@" && fxnStr[term] != tracker.notDefined && !fxnStr[term]) {
         		fxnToStr(tracker, fxnStr, filler["@ignore"].templateVal[term])
         	}
         }
@@ -185,6 +185,7 @@ function demo(examples, reveal=false) {
     .replace(/\"\-/g, "\"<span class='partjson-token'>-</span>")
     .replace(/\(\)\"/g, "<span class='partjson-token'>()</span>\"")
     .replace(/\[\]\"/g, "<span class='partjson-token'>[]</span>\"")
+    .replace(/\(\]\"/g, "<span class='partjson-token'>(]</span>\"")
     .replace(/\ \[\n/g, " <span class='partjson-token'>[</span>\n")
     .replace(/\ \]\n/g, " <span class='partjson-token'>]</span>\n")
     .replace(/\ \]\,\n/g, " <span class='partjson-token'>]</span>,\n")
@@ -282,6 +283,10 @@ adjustPreyMass(row) {
 },
 splitOwners(row) {
   return row.owners.split(",")
+},
+saveSplitOwners(row) {
+  row.owners = row.owners.split(",")
+  return true
 },
 blockInfo(row) {
   return row.ownerblock[0] == 'C' 

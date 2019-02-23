@@ -26,8 +26,9 @@ export default class ValueFiller {
     const subconv = subterm + tokens.conv
     input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
     const subsToken = tokens.skip ? symbols : tokens.subs
+    const callAsFxn = tokens.conv == "()" || tokens.conv == "(]"
     if (subsToken in this) {
-    	const subsFxn = this[subsToken](subterm, input)
+    	const subsFxn = this[subsToken](subterm, input, callAsFxn)
     	if (subsFxn) {
       	const conv = tokens.conv ? tokens.conv : "''"
       	return this[tokens.aggr + conv] ? this[tokens.aggr + conv](subsFxn, input) : null
@@ -49,8 +50,9 @@ export default class ValueFiller {
     	const subconv = subterm + tokens.conv
     	input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
       const subsToken = tokens.skip ? symbols : tokens.subs
+      const callAsFxn = tokens.conv == "()" || tokens.conv == "(]"
       if (subsToken in this) {
-      	const subsFxn = this[subsToken](subterm, input)
+      	const subsFxn = this[subsToken](subterm, input, callAsFxn)
       	if (subsFxn) {
       		const conv = tokens.conv ? tokens.conv : "''"
       		return this["["+ conv +"]"](subsFxn, input)
@@ -98,13 +100,17 @@ ValueFiller.prototype["#"] = function(subterm, input) {
 }
 
 /* Substitution Functions */
-ValueFiller.prototype[""] = function(subterm, input) {
+ValueFiller.prototype[""] = function(subterm, input, callAsFxn) {
+  if (callAsFxn) {
+  	input.errors.push(["val", "UNSAFE-GLOBAL-FXN"])
+  	return
+  } 
   return this.isNumeric(subterm) 
     ? () => +subterm
     : () => subterm
 }
 
-ValueFiller.prototype["$"] = function(subterm, input) {
+ValueFiller.prototype["$"] = function(subterm, input, callAsFxn) {
   if (subterm == "$" || subterm == "$" + this.Tree.userDelimit) {
   	return (row) => row
   }
@@ -112,27 +118,51 @@ ValueFiller.prototype["$"] = function(subterm, input) {
   	const nestedProps = subterm.slice(1).split(this.Tree.userDelimit)
   	if (nestedProps[0] == "") nestedProps.shift()
     const reducer = (d,k) => d ? d[k] : null
-    return (row) => nestedProps.reduce(reducer, row)
+    return !callAsFxn 
+      ? (row) => nestedProps.reduce(reducer, row)
+    	: (row) => {
+    		const fxn = nestedProps.reduce(reducer, row)
+    		if (typeof fxn != "function") {
+    			input.errors.push(["val", "NOT-A-FUNCTION-" + subterm + "()", row])
+    			return
+    		}
+    		return fxn(row)
+    	} 
   }
   else {
 	  const prop = subterm.slice(1)
-	  return (row) => row[prop]
+	  return !callAsFxn 
+	  	? (row) => row[prop]
+	    : (row) => {
+    		const fxn = row[prop]
+    		if (typeof fxn != "function") {
+    			input.errors.push(["val", "NOT-A-FUNCTION", row])
+    			return
+    		}
+    		return fxn(row)
+    	}   
 	}
 }
 
-ValueFiller.prototype["="] = function(subterm, input) {
+ValueFiller.prototype["="] = function(subterm, input, callAsFxn) {
   const nestedProps = subterm.slice(1).split(this.Tree.treeDelimit)
   const reducer = (d,k) => d && k in d ? d[k] : null
-  const fxn = nestedProps.reduce(reducer, this.Tree.opts["="])
-  if (!fxn) {
-  	input.errors.push(["val", "ERR-MISSING-FXN"])
+  const propOrFxn = nestedProps.reduce(reducer, this.Tree.opts["="])
+  if (!propOrFxn) {
+  	input.errors.push(["val", "MISSING-EXTERNAL-SUBS"])
+  }
+  else if (!callAsFxn) {
+  	return () => propOrFxn
+  }
+  else if (typeof propOrFxn !== "function") {
+  	input.errors(["val", "NOT-A-FUNCTION"])
   }
   else {
-  	return fxn //do not call yet
+  	return propOrFxn
   }
 }
 
-ValueFiller.prototype["@"] = function(subterm, input) {
+ValueFiller.prototype["@"] = function(subterm, input, callAsFxn) {
 	if (this.Tree.reservedOpts.includes(subterm)) return
   if (subterm == "@" || subterm == "@" + this.Tree.treeDelimit) {
   	return (row, context) => context.self
@@ -155,9 +185,22 @@ ValueFiller.prototype["@"] = function(subterm, input) {
     					? [null, null]
     					: [result[d], this.Tree.contexts.get(result[d])]
     }
-    return (row, context) => {
-    	const value = nestedProps.reduce(reducer, [context.self, context])
-    	return Array.isArray(value) ? value[0] : null
+    if (!callAsFxn) {
+    	return (row, context) => {
+    		const value = nestedProps.reduce(reducer, [context.self, context])
+    		return Array.isArray(value) ? value[0] : null
+    	}
+    }
+    else {
+    	return (row, context) => {
+    		const value = nestedProps.reduce(reducer, [context.self, context])
+    		const fxn = Array.isArray(value) ? value[0] : null
+    		if (typeof fxn !== "function") {
+			  	input.errors(["val", "NOT-A-FUNCTION", row])
+			  	return
+			  }
+			  return fxn(row, context)
+    	}
     }
   }
   else if (!this.Tree.reservedContexts.includes(subterm)) {
@@ -165,27 +208,70 @@ ValueFiller.prototype["@"] = function(subterm, input) {
   }
   else { 
 	  const prop = subterm.slice(1)
-	  return (row, context) => context[prop]
+	  return !callAsFxn 
+	  	? (row, context) => context[prop]
+	  	: (row, context) => {
+	  		const fxn = context[prop]
+    		if (typeof fxn !== "function") {
+			  	input.errors(["val", "NOT-A-FUNCTION", row])
+			  	return
+			  }
+			  return fxn(row, context)
+	  	}
 	}
 }
 
-ValueFiller.prototype["&"] = function(subterm, input) {
+ValueFiller.prototype["&"] = function(subterm, input, callAsFxn) {
   const nestedProps = subterm.slice(1).split(this.Tree.userDelimit)
   const alias = nestedProps.shift()
   if (!nestedProps.length) {
-  	return () => this.Tree.joins.get(alias)
+  	return !callAsFxn 
+  		? () => this.Tree.joins.get(alias)
+  		: (row, context) => {
+  			const fxn = this.Tree.joins.get(alias)
+  			if (typeof fxn != "function") {
+  				input.errors(["val", "NOT-A-FUNCTION", row])
+			  	return
+  			}
+			  return fxn(row, context)
+  		}
   }
   else if (nestedProps.length == 1) {
   	const prop = nestedProps[0]
-	  return () => {
-	  	const join = this.Tree.joins.get(alias)
-	  	return join ? join[prop] : null
-	  }
+	  if (!callAsFxn) {
+	  	return () => {
+		  	const join = this.Tree.joins.get(alias)
+		  	return join ? join[prop] : null
+		  }
+		}
+		else {
+			return (row, context) => {
+		  	const join = this.Tree.joins.get(alias)
+		  	const fxn = join ? join[prop] : null
+		  	if (typeof fxn != "function") {
+  				input.errors(["val", "NOT-A-FUNCTION", row])
+			  	return
+  			}
+			  return fxn(row, context)
+		  }
+		}
   }
   else {
   	const reducer = (d,k) => d ? d[k] : null
   	const join = this.Tree.joins.get(alias)
-    return (row) => nestedProps.reduce(reducer, this.Tree.joins.get(alias))	 
+    if (!callAsFxn) {
+    	return (row) => nestedProps.reduce(reducer, this.Tree.joins.get(alias))	 
+    }
+    else {
+    	return (row, context) => {
+    		const fxn = nestedProps.reduce(reducer, this.Tree.joins.get(alias))
+		  	if (typeof fxn != "function") {
+  				input.errors(["val", "NOT-A-FUNCTION", row])
+			  	return
+  			}
+			  return fxn(row, context)
+    	}
+    }
   }
 }
 
@@ -201,6 +287,8 @@ ValueFiller.prototype["''"] = function(subsFxn, input) {
 ValueFiller.prototype["()"] = ValueFiller.prototype["''"]
 
 ValueFiller.prototype["[]"] = ValueFiller.prototype["''"]
+
+ValueFiller.prototype["(]"] = ValueFiller.prototype["[]"]
 
 /* Aggregation into an array or set collection */
 ValueFiller.prototype["['']"] = function(subsFxn, input) {
@@ -231,14 +319,13 @@ ValueFiller.prototype["[[]]"] = function(subsFxn, input) {
 		return (row, key, result, context) => {
 	    const values = subsFxn(row, context)
 	    if (!Array.isArray(values)) {
-	    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
+	    	context.errors.push([input, "NON-ARRAY-VALS", row])
+	    	return
 	    }
-	    else {
-	    	if (!(key in result)) result[key] = []
-	    	for(const value of values) {
-			 		if (input.ignore(value, key, row, context)) return
-		    	result[key].push(...values)
-		    }
+    	if (!(key in result)) result[key] = []
+    	for(const value of values) {
+		 		if (input.ignore(value, key, row, context)) continue
+	    	result[key].push(...values)
 	    }
 	  }
 	}
@@ -246,18 +333,19 @@ ValueFiller.prototype["[[]]"] = function(subsFxn, input) {
 		return (row, key, result, context) => {
 	    const values = subsFxn(row, context)
 	    if (!Array.isArray(values)) {
-	    	context.errors.push([input, "ERR-NON-ARRAY-VALS", row])
+	    	context.errors.push([input, "NON-ARRAY-VALS", row])
+	    	return
 	    }
-	    else {
-	    	if (!(key in result)) result[key] = new Set()
-	    	for(const value of values) {
-			 		if (input.ignore(value, key, row, context)) return
-	    		result[key].add(value)
-	    	}
+    	if (!(key in result)) result[key] = new Set()
+    	for(const value of values) {
+		 		if (input.ignore(value, key, row, context)) continue
+    		result[key].add(value)
 	    }
 	  }
 	}
 }
+
+ValueFiller.prototype["[(]]"] = ValueFiller.prototype["[[]]"]
 
 ValueFiller.prototype["[{}]"] = function (template, input) {
   this.Tree.parseTemplate(template, input.inheritedIgnore, input.lineage)
@@ -315,6 +403,23 @@ ValueFiller.prototype["+''"] = function(subsFxn, input) {
 
 ValueFiller.prototype["+()"] = ValueFiller.prototype["+''"] 
 
+ValueFiller.prototype["+[]"] = function(subsFxn, input) { 
+  return (row, key, result, context) => {
+    if (!(key in result)) result[key] = 0
+		const values = subsFxn(row, context)
+		if (Array.isArray(values)) {
+			input.errors(["val", "NON-ARRAY-VALS", row])
+			return
+		}
+		for(const value in values) {
+			if (input.ignore(value, key, row, context)) continue
+	    result[key] += value
+		}
+  }
+}
+
+ValueFiller.prototype["+(]"] = ValueFiller.prototype["+[]"]
+
 ValueFiller.prototype["-''"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
@@ -325,6 +430,23 @@ ValueFiller.prototype["-''"] = function(subsFxn, input) {
 }
 
 ValueFiller.prototype["-()"] = ValueFiller.prototype["-''"]
+
+ValueFiller.prototype["-[]"] = function(subsFxn, input) { 
+  return (row, key, result, context) => {
+    if (!(key in result)) result[key] = 0
+		const values = subsFxn(row, context)
+		if (Array.isArray(values)) {
+			input.errors(["val", "NON-ARRAY-VALS", row])
+			return
+		}
+		for(const value in values) {
+			if (input.ignore(value, key, row, context)) continue
+	    result[key] -= value
+		}
+  }
+}
+
+ValueFiller.prototype["-(]"] = ValueFiller.prototype["-[]"]
 
 ValueFiller.prototype["<''"] = function(subsFxn, input) {
   return (row, key, result, context) => {
@@ -345,6 +467,32 @@ ValueFiller.prototype["<''"] = function(subsFxn, input) {
 
 ValueFiller.prototype["<()"] = ValueFiller.prototype["<''"]
 
+ValueFiller.prototype["<[]"] = function(subsFxn, input) {
+  return (row, key, result, context) => {
+    const values = subsFxn(row, context)
+    if (Array.isArray(values)) {
+			input.errors(["val", "NON-ARRAY-VALS", row])
+			return
+		}
+		for(const value in values) {
+			if (input.ignore(value, key, row, context)) return
+	    if (!this.isNumeric(value)) {
+	      context.errors.push([input, "NON-NUMERIC-THAN", row])
+	      return
+	    }
+	    const val = +value
+	    if (!(key in result)) {
+	      result[key] = val
+	    }
+	    else if (result[key] < val) {
+	      result[key] = val
+	    }
+	  }
+  }
+}
+
+ValueFiller.prototype["<(]"] = ValueFiller.prototype["<[]"]
+
 ValueFiller.prototype[">''"] = function(subsFxn, input) {
   return (row, key, result, context) => {
     const value = +subsFxn(row, context)
@@ -363,3 +511,30 @@ ValueFiller.prototype[">''"] = function(subsFxn, input) {
 }
 
 ValueFiller.prototype[">()"] = ValueFiller.prototype[">''"]
+
+ValueFiller.prototype[">[]"] = function(subsFxn, input) {
+  return (row, key, result, context) => {
+    const values = subsFxn(row, context)
+    if (Array.isArray(values)) {
+			input.errors(["val", "NON-ARRAY-VALS", row])
+			return
+		}
+		for(const value in values) {
+			if (input.ignore(value, key, row, context)) return
+	    if (!this.isNumeric(value)) {
+	      context.errors.push([input, "NON-NUMERIC-THAN", row])
+	      return
+	    }
+	    const val = +value
+	    if (!(key in result)) {
+	      result[key] = val
+	    }
+	    else if (result[key] > val) {
+	      result[key] = val
+	    }
+	  }
+  }
+}
+
+ValueFiller.prototype[">(]"] = ValueFiller.prototype[">[]"]
+

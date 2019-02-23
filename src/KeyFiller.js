@@ -1,7 +1,7 @@
 export default class KeyFiller { 
   constructor(Tree) {
     this.Tree = Tree
-    this.allowedKeyTypes = new Set(["string", "number", "undefined"])
+    this.allowedKeyTypes = new Set(["string", "number"])
   }
 
   getFxn(subterm, symbols, input, ignore) {
@@ -13,7 +13,8 @@ export default class KeyFiller {
     	const subconv = subterm + input.keyTokens.conv
 	  	input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
 
-	  	const subsFxn = this.Tree.valueFiller[input.keyTokens.subs](subterm, input)
+    	const callAsFxn = input.keyTokens.conv == "()" || input.keyTokens.conv == "(]"	
+	  	const subsFxn = this.Tree.valueFiller[input.keyTokens.subs](subterm, input, callAsFxn)
 	  	if (!subsFxn) {
 	  		input.errors.push(["key", "UNSUPPORTED-KEY-SUBSTITUTION"])
 	  		return
@@ -37,7 +38,7 @@ export default class KeyFiller {
 
   getAllowedKeys(keys, row, input, context) {
   	if (!Array.isArray(keys)) {
-  		context.errors.push(["key", "ERR-NON-ARRAY-KEYS", row])
+  		context.errors.push(["key", "NON-ARRAY-KEYS", row])
   		return []
     }
   	const allowed = []
@@ -61,13 +62,15 @@ KeyFiller.prototype["''"] = function(subsFxn, input) {
   }
 }
     
-KeyFiller.prototype["()"] = function(subsFxn, input) {
+KeyFiller.prototype["()"] = KeyFiller.prototype["''"]
+
+KeyFiller.prototype["[]"] = function(subsFxn, input) {
 	return (row, context) => {
-  	return this.getAllowedKeys([subsFxn(row, context)], row, input, context)
+  	return this.getAllowedKeys(subsFxn(row, context), row, input, context)
   }
 }
 
-KeyFiller.prototype["[]"] = function(subsFxn, input) {
+KeyFiller.prototype["(]"] = function(subsFxn, input) {
 	return (row, context) => {
   	return this.getAllowedKeys(subsFxn(row, context), row, input, context)
   }
