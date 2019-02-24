@@ -171,7 +171,7 @@ ValueFiller.prototype["@"] = function(subterm, input, callAsFxn) {
   	const nestedProps = subterm.split(this.Tree.treeDelimit)
     const reducer = (resultContext, d) => {
     	if (d[0] == "@" && d.length > 1 && !this.Tree.reservedContexts.includes(d)) {
-    		input.errors.push(["val", "UNRECOGNIZED-CONTEXT"])
+    		input.errors.push(["val", "UNRECOGNIZED-CONTEXT", input.lineage.join(".")+"."+d])
     		return [null, null]
     	}
     	const [result, context] = resultContext

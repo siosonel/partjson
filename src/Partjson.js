@@ -41,7 +41,7 @@ export default class Partjson {
     this.aggrSymbols = ["+", "-", "<", ">"]
     this.timeSymbols = [":__", "_:_", "__:"]
     this.skipSymbols = ["#"]
-    this.reservedOpts = ["@userDelimit", "@treeDelimit"]
+    this.reservedOpts = ["@userDelimit", "@treeDelimit", "@errorMode"]
     this.reservedContexts = ["@branch", "@parent", "@root", "@self"]
     this.reservedFilters = ["@before()", "@join()", "@ignore()"]
     this.reservedPost = ["@after()", "@dist()", "@end()"]
@@ -59,15 +59,14 @@ export default class Partjson {
   }
 
   refresh(opts={}) {
-    this.errors.clear()
   	Object.assign(this.opts,opts)
+    this.errors.clear(this.opts.template["@errorMode"])
   	if (this.opts.template['@userDelimit']) {
   		this.userDelimit = this.opts.template['@userDelimit']
   	}
   	if (this.opts.template['@treeDelimit']) {
   		this.treeDelimit = this.opts.template['@treeDelimit']
   	}
-  	
   	//console.clear()
   	delete this.commentedTerms
   	this.commentedTerms = new WeakMap()
@@ -300,9 +299,10 @@ Partjson.prototype["@join"] = function (joins, input, filler) {
 	return (row) => {
 		let ok = true
 		for(const alias in joins) {
-			const fxn = this.opts["="][joins[alias].slice(1,-2)]
+			const fxnName = joins[alias].slice(1,-2)
+			const fxn = this.opts["="][fxnName]
 			if (!fxn) {
-				input.errors.push(["val", "MISSING-@join-FXN"])
+				input.errors.push(["val", "MISSING-@join-FXN", fxnName])
 			}
 			else {
 				const keyVals = fxn(row)
@@ -321,7 +321,7 @@ Partjson.prototype["@dist"] = function (_subterm, input) {
 	  context["@dist"] = (result) => {
 	  	const target = subsFxn(null, context)
 	  	if (!target) {
-	  		context.errors.push([input, "MISSING-DIST-TARGET"])
+	  		context.errors.push([input, "MISSING-DIST-TARGET", subterm])
 	  	}
 	  	else if (Array.isArray(target)) {
 	  		target.push(result)

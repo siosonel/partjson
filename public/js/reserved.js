@@ -28,6 +28,47 @@ demo([{
   	}
   }
 },{
+	symbol: "@errorMode",
+	tokenType: "options",
+	section: "options",
+	id: "error-mode",
+	title: `The <span class="code-snippet">@errorMode</span> 
+		option globally sets where and how errors are displayed.
+		It may be provided as a four item array where the error
+		modes are listed in the order <br/>[
+			<span class="code-snippet">input</span>, 
+			<span class="code-snippet">result</span>, 
+			<span class="code-snippet">root</span>, 
+			<span class="code-snippet">console</span>
+		],<br/>
+		or as an object with any of the above keys to override the
+		default error modes of <br/>
+		<span class="code-snippet">{</span><br/>
+			&nbsp;&nbsp;<span class="code-snippet">"input": "{}",</span>
+			<br/>
+			&nbsp;&nbsp;<span class="code-snippet">"result": "{}-",</span>
+			<br/>
+			&nbsp;&nbsp;<span class="code-snippet">"root": "",</span>
+			<br/>
+			&nbsp;&nbsp;<span class="code-snippet">"console": "{}",</span>
+			<br/>
+		<span class="code-snippet">}</span>.
+		<br/>
+		<ul>The mode symbols: 
+			<li><span class="code-snippet">""</span> silences the error display</li>
+			<li><span class="code-snippet">"{}"</span> display errors as object</li>
+			<li><span class="code-snippet">"[]"</span> display errors in an array</li>
+			<li>and a trailing <span class="code-snippet">-</span> minus
+			character will omit errors that have already been marked on inputs.</li>
+		</ul>`,
+	template: {
+  	"@errorMode": {"root": "{}-"},
+  	"version": 0.1,
+  	"trial": {
+  		"version": "@ppparent.version"
+  	}
+  }
+},{
 	symbol: "@",
 	tokenType: "context",
 	section: "context",

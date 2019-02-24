@@ -121,7 +121,7 @@ function demo(examples, reveal=false) {
           .replace("&gt;",">")
       const externals = externalsStr ? eval("("+externalsStr+")") : opts["="]
 
-      if (tracker) {
+      if (tracker) { console.log(template)
         tracker.refresh({
           template,
           data,
