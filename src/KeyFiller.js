@@ -9,12 +9,12 @@ export default class KeyFiller {
     if (input.keyTokens.skip) {
     	this["#"](subterm, input)
     }
-    else if (input.keyTokens.subs in this.Tree.valueFiller) {
+    else if (input.keyTokens.subs in this.Tree.valFiller) {
     	const subconv = subterm + input.keyTokens.conv
 	  	input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
 
     	const callAsFxn = input.keyTokens.conv == "()" || input.keyTokens.conv == "(]"	
-	  	const subsFxn = this.Tree.valueFiller[input.keyTokens.subs](subterm, input, callAsFxn)
+	  	const subsFxn = this.Tree.valFiller[input.keyTokens.subs](subterm, input, callAsFxn)
 	  	if (!subsFxn) {
 	  		input.errors.push(["key", "UNSUPPORTED-KEY-SUBSTITUTION"])
 	  		return

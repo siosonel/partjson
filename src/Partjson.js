@@ -1,5 +1,5 @@
 import KeyFiller from "./KeyFiller"
-import ValueFiller from "./ValueFiller"
+import ValFiller from "./ValFiller"
 import Err from "./Err"
 
 /*
@@ -54,7 +54,7 @@ export default class Partjson {
     this.steps = [":__", "", "_:_"]
     this.errors = new Err(this)
     this.keyFiller = new KeyFiller(this)
-    this.valueFiller = new ValueFiller(this)
+    this.valFiller = new ValFiller(this)
     this.refresh()
   }
 
@@ -129,7 +129,7 @@ export default class Partjson {
       else {
 	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input, ignore)
 	      if (input.keyFxn) {
-	        input.valFxn = this.valueFiller.getFxn(input, ignore)
+	        input.valFxn = this.valFiller.getFxn(input, ignore)
 	      	if (keyTokens.time == "__:") {
 		      	filler["__:"].push(term)
 		      }
@@ -316,7 +316,7 @@ Partjson.prototype["@join"] = function (joins, input, filler) {
 
 Partjson.prototype["@dist"] = function (_subterm, input) {
 	const subterm = Array.isArray(_subterm) ? _subterm[0] : _subterm
-	const subsFxn = this.valueFiller["@"](subterm)
+	const subsFxn = this.valFiller["@"](subterm)
 	return (context) => {
 	  context["@dist"] = (result) => {
 	  	const target = subsFxn(null, context)
