@@ -31,9 +31,6 @@
 	<nav class="nav-bar" 
 		onmouseleave="collapseSymbols()">
 		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
-			<div class="nav-col" id="nav-col-options" style="min-width: 95px">
-				<div class="nav-tab" onmouseenter="expandSymbols()">[options]</div>
-			</div>
 			<div class="nav-col" id="nav-col-context">
 				<div class="nav-tab" onmouseenter="expandSymbols()">[context]</div>
 			</div>
@@ -42,6 +39,9 @@
 			</div>
 			<div class="nav-col" id="nav-col-post">
 				<div class="nav-tab" onmouseenter="expandSymbols()">[post]</div>
+			</div>
+			<div class="nav-col" id="nav-col-options" style="min-width: 95px">
+				<div class="nav-tab" onmouseenter="expandSymbols()">[options]</div>
 			</div>
 		</div>
 	</nav>
@@ -54,9 +54,6 @@
 			Partjson reserves the use of terms prefixed by the
 			character <span class="code-snippet">@</span>.
     </p>
-	</section>
-	<section id='options'>
-		<h3 class='section-title'>Options</h3>
 	</section>
 
 	<section id='context'>
@@ -96,6 +93,10 @@
 
 	<section id='post'>
 		<h3 class='section-title'>Post-Process</h3>
+	</section>
+	
+	<section id='options'>
+		<h3 class='section-title'>Options</h3>
 	</section>
 </content>
 <script src="./js/demo.js"></script>

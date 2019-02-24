@@ -37,7 +37,7 @@ export default class Partjson {
     this.userDelimit = "."
     this.treeDelimit = "."
     this.subsSymbols = ["$", "=", "@", "&"]
-    this.convSymbols = ["()", "[]", "(]"] //, "{}"]
+    this.convSymbols = ["()", "[]", "(]"] //, "{}", "(}"]
     this.aggrSymbols = ["+", "-", "<", ">"]
     this.timeSymbols = [":__", "_:_", "__:"]
     this.skipSymbols = ["#"]

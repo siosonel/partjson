@@ -53,8 +53,10 @@ demo([{
 			&nbsp;&nbsp;<span class="code-snippet">"console": "{}",</span>
 			<br/>
 		<span class="code-snippet">}</span>.
+		<br/><br/>
+		The mode symbols have the following effect:
 		<br/>
-		<ul>The mode symbols: 
+		<ul>
 			<li><span class="code-snippet">""</span> silences the error display</li>
 			<li><span class="code-snippet">"{}"</span> display errors as object</li>
 			<li><span class="code-snippet">"[]"</span> display errors in an array</li>
@@ -62,7 +64,10 @@ demo([{
 			character will omit errors that have already been marked on inputs.</li>
 		</ul>`,
 	template: {
-  	"@errorMode": {"root": "{}-"},
+  	"@errorMode": {
+  		"root": "[]",
+  		"console": ""
+  	},
   	"version": 0.1,
   	"trial": {
   		"version": "@ppparent.version"

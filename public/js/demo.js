@@ -113,15 +113,17 @@ function demo(examples, reveal=false) {
           .trim()
           .replace("&lt;","<")
           .replace("&gt;",">")
-      const template = JSON.parse(templateStr)
+      const template = tryParse(templateStr, "template")
+      if (!template) return
       const data = parseTsv(dom.tsv.value.trim())
       const externalsStr = dom.exts.innerText
       		.trim()
           .replace("&lt;","<")
           .replace("&gt;",">")
-      const externals = externalsStr ? eval("("+externalsStr+")") : opts["="]
+      const externals = externalsStr ? tryEval(externalsStr, "externals") : opts["="]
+      if (!externals) return
 
-      if (tracker) { console.log(template)
+      if (tracker) {
         tracker.refresh({
           template,
           data,
@@ -232,6 +234,24 @@ function demo(examples, reveal=false) {
     }
     
     return data
+  }
+  
+  function tryParse(templateStr, textName) {
+    try {
+      return JSON.parse(templateStr)
+    }
+    catch {
+      alert("Error parsing the "+ textName)
+    }
+  }
+
+  function tryEval(str, textName) {
+    try {
+      return eval("("+str+")")
+    }
+    catch {
+      alert("Error evaluating "+ textName)
+    }
   }
 }
 
