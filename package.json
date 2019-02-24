@@ -15,7 +15,7 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "test": "node test/test.js",
+    "test": "tape test/*.spec.js",
     "prepare": "rollup -c"
   },
   "files": [

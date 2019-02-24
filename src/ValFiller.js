@@ -59,7 +59,7 @@ export default class ValFiller {
       	}
       }
 	    else {
-	      input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE-SYMBOL'])
+	      input.errors.push(['val', 'UNSUPPORTED-TEMPLATE-VALUE'])
 	    }
     }
     else if (Array.isArray(input.templateVal[0])) {
@@ -132,15 +132,15 @@ ValFiller.prototype["$"] = function(subterm, input, callAsFxn) {
   else {
 	  const prop = subterm.slice(1)
 	  return !callAsFxn 
-	  	? (row) => row[prop]
+	    ? (row) => row[prop]
 	    : (row) => {
-    		const fxn = row[prop]
-    		if (typeof fxn != "function") {
-    			input.errors.push(["val", "NOT-A-FUNCTION", row])
-    			return
-    		}
+    	  const fxn = row[prop]
+    	  if (typeof fxn != "function") {
+    	    input.errors.push(["val", "NOT-A-FUNCTION", row])
+    	    return
+    	  }
     		return fxn(row)
-    	}   
+      } 
 	}
 }
 
