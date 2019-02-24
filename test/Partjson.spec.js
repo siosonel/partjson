@@ -5,7 +5,7 @@ const Partjson = require("../dist/partjson.cjs.js")
 
 function getOpts(template={}, _data=null) {
 	const data = Array.isArray(_data) 
-		? data 
+		? _data 
 		: [
 			{"line #":1,"catname":"Jerry","catsex":"male","owners":"Bob","ownerblock":"A1","huntblock":"B1","huntdate":"2019-01-02 19:25","preytype":"bird","preysubtype":"robin","preymass":0.596,"nested":{"random":{"id":"a10c"}}},
 			{"line #":2,"catname":"Jerry","catsex":"male","owners":"Bob","ownerblock":"A1","huntblock":"B4","huntdate":"2019-01-04 20:45","preytype":"mammal","preysubtype":"rat","preymass":0.601,"nested":{"random":{"id":"bkd0"}}},
@@ -26,6 +26,9 @@ function getOpts(template={}, _data=null) {
 				sub: {
 					sub: "extVal"
 				}
+			},
+			loc(row) {
+				return {city: "Test-City"}
 			}
 		},
 	}
@@ -73,43 +76,55 @@ tape(`valFiller["$"] should substitute a data property`, function(test){
 	const filler = new Partjson(getOpts({data:[]}))
 	const input0 = {errors: []}
 	const fxn0 = filler.valFiller["$"]("$prop", input0, false)
-	test.true(
-		fxn0({prop: "dataVal"}) === "dataVal" && !input0.errors.length, 
+	test.deepEquals(
+		[fxn0({prop: "dataVal"}) === "dataVal", !input0.errors.length],
+		[true, true],
 		"should return a string value"
 	)
 	const propArr = ["a","b"]
-	test.true(
-		fxn0({prop: propArr}) === propArr && !input0.errors.length, 
+	test.deepEquals(
+		[fxn0({prop: propArr}) === propArr, !input0.errors.length],
+		[true, true],
 		"should return an array value"
 	)
 	
 	const propFxn = () => {}
-	test.true(
-		fxn0({prop: propFxn}) === propFxn && !input0.errors.length, 
+	test.deepEquals(
+		[fxn0({prop: propFxn}) === propFxn, !input0.errors.length],
+		[true, true], 
 		"should return a function"
 	)
 	
 	const input1 = {errors: []}
 	const fxn1 = filler.valFiller["$"]("$prop.sub.sub", input1, false)
-	test.true(
-		fxn1({prop:{sub:{sub:"dataVal"}}}) === "dataVal" && !input1.errors.length, 
+	test.deepEquals(
+		[fxn1({prop:{sub:{sub:"dataVal"}}}) === "dataVal", !input1.errors.length],
+		[true, true], 
 		"should return a nested property value"
 	)
 	
 	const input3 = {errors: []}
 	const fxn2 = filler.valFiller["$"]("$fxn", input3, true)
-	test.true(
-		fxn2({
-			prop: "val", 
-			fxn: (row)=>row.prop
-		}) === "val" && !input3.errors.length, 
+	test.deepEquals(
+		[
+			fxn2({
+				prop: "val", 
+				fxn: (row)=>row.prop
+			}) === "val",
+			!input3.errors.length
+		],
+		[true, true],
 	  "should call a data property as a function to get the substituted value"
 	)
-	test.true(
-		fxn2({
-			prop: "dataVal", 
-			fxn: "not a function"
-		}) === undefined && input3.errors.length, 
+	test.deepEquals(
+		[
+			fxn2({
+				prop: "dataVal", 
+				fxn: "not a function"
+			}) === undefined, 
+			input3.errors.length > 0
+		],
+		[true, true], 
 	  "should show an error when a property is expected to be a function but it's not"
 	)
 
@@ -123,43 +138,49 @@ tape(`valFiller["="] should substitute an external property`, function(test){
 	
 	const input0 = {errors: []}
 	const fxn0 = filler.valFiller["="]("=prop", input0, false)
-	test.true(
-		fxn0({}) === ext.prop && !input0.errors.length, 
+	test.deepEquals(
+		[fxn0({}) === ext.prop, !input0.errors.length],
+		[true, true],
 		"should return a string value"
 	)
 
 	const input1 = {errors: []}
 	const fxn1 = filler.valFiller["="]("=arr", input1, false)
-	test.true(
-		fxn1({}) === ext.arr && !input1.errors.length, 
+	test.deepEquals(
+		[fxn1({}) === ext.arr, !input1.errors.length],
+		[true, true], 
 		"should return an array value"
 	)
 	
 	const input2 = {errors: []}
 	const fxn2 = filler.valFiller["="]("=fxn", input2, false)
-	test.true(
-		fxn2({}) === ext.fxn && !input2.errors.length, 
+	test.deepEquals(
+		[fxn2({}) === ext.fxn, !input2.errors.length],
+		[true, true],
 		"should return a function"
 	)
 	
 	const input3 = {errors: []}
 	const fxn3 = filler.valFiller["="]("=nested.sub.sub", input1, false)
-	test.true(
-		fxn3({nested:{sub:{sub:"val"}}}) === ext.nested.sub.sub && !input3.errors.length, 
+	test.deepEquals(
+		[fxn3({nested:{sub:{sub:"val"}}}) === ext.nested.sub.sub, !input3.errors.length],
+		[true, true],
 		"should return a nested property value"
 	)
 	
 	const input4 = {errors: []}
 	const fxn4 = filler.valFiller["="]("=fxn", input4, true)
-	test.true(
-		fxn4({dataProp: "dataVal"}) === "dataVal" && !input4.errors.length, 
+	test.deepEquals(
+		[fxn4({dataProp: "dataVal"}) === "dataVal", !input4.errors.length],
+		[true, true], 
 		"should call an external property as a function to get the substituted value"
 	)
 
 	const input5 = {errors: []}
 	const fxn5 = filler.valFiller["="]("=arr", input5, true)
-	test.true(
-		(typeof fxn5 !== "function" || fxn5({}) === undefined) && input5.errors.length, 
+	test.deepEquals(
+		[(typeof fxn5 !== "function" || fxn5({}) === undefined), input5.errors.length > 0],
+		[true, true], 
 		"should show an error when an external property that is not a function has the () symbol"
 	)
 
@@ -167,16 +188,8 @@ tape(`valFiller["="] should substitute an external property`, function(test){
 })
 
 tape(`valFiller["@"] should substitute a context property`, function(test){
-	const opts = getOpts({
-		template: {
-			version: 0.1
-		},
-		data:[]
-	})
+	const opts = getOpts({data:[]})
 	const filler = new Partjson(opts)
-	
-	const input0 = {errors: []}
-	const fxn0 = filler.valFiller["@"]("@", input0, false)
 	const context = {
 		self: {}, 
 		branch: "test", 
@@ -193,36 +206,44 @@ tape(`valFiller["@"] should substitute a context property`, function(test){
 			errors: []
 		}
 	}
-	test.true(
-		fxn0({}, context) === context.self && !input0.errors.length, 
+	
+	const input0 = {errors: []}
+	const fxn0 = filler.valFiller["@"]("@", input0, false)
+	test.deepEquals(
+		[fxn0({}, context) === context.self, !input0.errors.length],
+		[true, true], 
 		"@ should return the result itself"
 	)
 
 	const input1 = {errors: []}
 	const fxn1 = filler.valFiller["@"]("@branch", input1, false)
-	test.true(
-		fxn1({}, context) === context.branch && !input1.errors.length, 
+	test.deepEquals(
+		[fxn1({}, context) === context.branch, !input1.errors.length],
+		[true, true], 
 		"@branch should return the result's branch"
 	)
 
 	const input2 = {errors: []}
 	const fxn2 = filler.valFiller["@"]("@parent", input2, false)
-	test.true(
-		fxn2({}, context) === context.parent && !input2.errors.length, 
+	test.deepEquals(
+		[fxn2({}, context) === context.parent, !input2.errors.length],
+		[true, true], 
 		"@parent should return the result's parent"
 	)
 	
 	const input3 = {errors: []}
 	const fxn3 = filler.valFiller["@"]("@root", input3, false)
-	test.true(
-		fxn3({}, context) === context.root && !input3.errors.length, 
+	test.deepEquals(
+		[fxn3({}, context) === context.root, !input3.errors.length],
+		[true, true], 
 		"@root should return the result's root"
 	)
 	
 	const input4 = {errors: []}
 	const fxn4 = filler.valFiller["@"]("@parent.nested.val", input4, false)
-	test.true(
-		fxn4({}, context) === context.parent.nested.val && !input4.errors.length, 
+	test.deepEquals(
+		[fxn4({}, context) === context.parent.nested.val, !input4.errors.length],
+		[true, true], 
 		"@parent.nested.val should get a nested context property"
 	)
 
@@ -230,21 +251,74 @@ tape(`valFiller["@"] should substitute a context property`, function(test){
 	filler.contexts.set(context.root, {root: context.root, self: context.root})
 	const input5 = {errors: []}
 	const fxn5 = filler.valFiller["@"]("@root.fxn", input5, true)
-	console.log(fxn5({dataProp: "dataVal"}, context), input5)
-	test.true(
-		fxn5({dataProp: "dataVal"}, context) === "dataVal" && !input5.errors.length, 
+	test.deepEquals(
+		[fxn5({dataProp: "dataVal"}, context) === "dataVal", !input5.errors.length],
+		[true, true], 
 		"@root.fxn should call an external property as a function to get the substituted value"
 	)
 	
 	const input6 = {errors: []}
 	const fxn6 = filler.valFiller["@"]("@parent.nested", input6, true)
-	test.true(
-		(typeof fxn6 !== "function" 
-			|| fxn6({dataProp: "dataVal"}, context) === undefined) 
-		&& input6.errors.length, 
+	test.deepEquals(
+		[
+			(typeof fxn6 !== "function" || fxn6({dataProp: "dataVal"}, context) === undefined),
+			input6.errors.length > 0
+		],
+		[true, true], 
 		"@parent.nested should show an error when a context property that is not a function is called"
 	)
 	
 	test.end()
 })
 
+tape(`valFiller["&"] should substitute a joined property`, function(test){
+	const opts = getOpts()
+	const filler = new Partjson(opts)
+	filler.joins = new Map()
+	const loc = {
+		city: "Test-City",
+		nested: {
+			val: "A1"
+		},
+		fxn(row) {
+			return row.dataProp
+		}
+	}
+	filler.joins.set("loc", loc)
+	const input0 = {errors: []}
+	const fxn0 = filler.valFiller["&"]("&loc.city", input0, false)
+	test.deepEquals(
+		[fxn0({}) === loc.city, !input0.errors.length],
+		[true, true], 
+		"&loc.city should return the joined value"
+	)
+	
+	const input1 = {errors: []}
+	const fxn1 = filler.valFiller["&"]("&loc.nested.val", input1, false)
+	test.deepEquals(
+		[fxn1({}) === loc.nested.val, !input1.errors.length],
+		[true, true], 
+		"&loc.nested.val should get a nested context property"
+	)
+
+	const input2 = {errors: []}
+	const fxn2 = filler.valFiller["&"]("&loc.fxn", input2, true)
+	test.deepEquals(
+		[fxn2({dataProp: "dataVal"}) === "dataVal", !input2.errors.length],
+		[true, true],
+		"&loc.fxn() should call a joined function to get the substituted value"
+	)
+
+	const input3 = {errors: []}
+	const fxn3 = filler.valFiller["&"]("&loc.nested", input3, true)
+	test.deepEquals(
+		[
+			(typeof fxn2 !== "function" || fxn3({dataProp: "dataVal"}) === undefined),
+			input3.errors.length > 0
+		],
+		[true, true], 
+		"&loc.nested() should show an error when a joined property is not a function"
+	)
+	
+	test.end()
+})
