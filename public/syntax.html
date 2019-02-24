@@ -38,7 +38,7 @@
 			<div class="nav-col" id="nav-col-subs">
 				<div class="nav-tab" onmouseenter="expandSymbols()"> [substitution] </div>
 			</div>
-			<div class="nav-col" id="nav-col-stem">
+			<div class="nav-col" id="nav-col-stem" style="min-width: 50px">
 				<div class="nav-tab" onmouseenter="expandSymbols()">  stem  </div>
 			</div>
 			<div class="nav-col" id="nav-col-conv">
@@ -103,9 +103,9 @@
 
 	<section id='conversion'>
 		<h3 class='section-title'>Conversion</h3>
-		<p>A conversion suffix will cause a substituted value to be
-		called as a function and may apply additional rules to the returned value. 
-		A function will be passed the following arguments in order:</p>
+		<p>A conversion suffix will apply additional rules to the 
+		substituted value. In cases where the substituted value is
+		called as a function, it will be passed the following arguments:</p>
 		<ul>
 			<li><span class="code-snippet">row</span>: 
 				the current data row, or <span class='code-snippet'>null</span> when called post-loop</li>
@@ -113,7 +113,7 @@
 			 the <a href='reserved.html#context'>context</a> of the current result object being processed</li>
 		</ul>
 		<p>When used as an input key term, a function
-	  must return an array of string <span class='code-snippet'>key</span> values,
+	  must return an array of string <span class='code-snippet'>keys</span>,
 	  or an empty array if the filler is to ignore the input for the current data row.  
 	  As an input value term, it must return the value for the result[key] input that is 
 	  being filled.  

@@ -58,9 +58,10 @@ demo([{
 		<br/>
 		<ul>
 			<li><span class="code-snippet">""</span> silences the error display</li>
-			<li><span class="code-snippet">"{}"</span> display errors as object</li>
-			<li><span class="code-snippet">"[]"</span> display errors in an array</li>
-			<li>and a trailing <span class="code-snippet">-</span> minus
+			<li><span class="code-snippet">"{}"</span> display errors as object, more succint</li>
+			<li><span class="code-snippet">"[]"</span> display errors in an array, longer but may
+			be easier to handle by an application</li>
+			<li>a trailing <span class="code-snippet">-</span> minus
 			character will omit errors that have already been marked on inputs.</li>
 		</ul>`,
 	template: {
