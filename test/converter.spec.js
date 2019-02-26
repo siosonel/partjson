@@ -209,28 +209,23 @@ tape(`conv["[]"] should be like "." and not convert to a function`, function(tes
 	test.end()
 })
 
-tape(`conv["()"] should convert a substituted property into a function`, function(test){
+tape(`conv["()"] should call a substituted property as a function to return a value`, function(test){
 	const Filler = new Partjson({template: {}, data:[]})
 	const input0 = {errors: []}
 	const fxn0 = conv.subs["$"](Filler, "$fxn", input0)
-	const convFxn0 = conv.conv["()"](fxn0, input0)
+	const convFxn0 = conv.conv["()"](fxn0, input0, {})
 	const fxn = (row) => row.prop
 	const row = {fxn, prop: "dataProp"}
-	const rowFxn = convFxn0(row)
-	test.deepEquals(
-		[rowFxn === fxn, !input0.errors.length],
-		[true, true],
-		`"()" should convert the substituted property into a function`
-	)
-	test.deepEquals(
-		[rowFxn(row) === "dataProp", !input0.errors.length],
-		[true, true],
-		`"()" on $fxn should give a data function that returns the expected result`
-	)
+	const value = convFxn0(row);
 
+	test.deepEquals(
+		[value === "dataProp", !input0.errors.length],
+		[true, true],
+		`"()" should call the substituted property as a function`
+	)
 	const input1 = {errors: []}
 	const fxn1 = conv.subs["$"](Filler, "$prop", input0)
-	const convFxn1 = conv.conv["()"](fxn1, input0)
+	const convFxn1 = conv.conv["()"](fxn1, input0, {})
 	test.deepEquals(
 		[typeof convFxn1 != "function" || convFxn1(row) === undefined, input0.errors.length > 0],
 		[true, true],

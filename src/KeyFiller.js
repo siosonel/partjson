@@ -38,8 +38,8 @@ KeyFiller.prototype[""] = function(fxn, input) {
     
 KeyFiller.prototype["()"] = function(convFxn, input) {
   return (row, context) => {
-  	const fxn = convFxn(row, context)
-  	return this.getAllowedKeys([fxn(row, context)], row, input, context)
+  	const key = convFxn(row, context)
+  	return this.getAllowedKeys([key], row, input, context)
   }
 }
 
@@ -51,7 +51,7 @@ KeyFiller.prototype["[]"] = function(fxn, input) {
 
 KeyFiller.prototype["(]"] = function(convFxn, input) {
   return (row, context) => {
-  	const fxn = convFxn(row, context)
-  	return this.getAllowedKeys(fxn(row, context), row, input, context)
+  	const keys = convFxn(row, context)
+  	return this.getAllowedKeys(keys, row, input, context)
   }
 }

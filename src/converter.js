@@ -6,7 +6,7 @@ export default function converter(Filler, input, ignore, val) {
   input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
   if (tokens.subs in subs) {
   	const subsFxn = subs[tokens.subs](Filler, subterm, input)
-  	const convFxn = conv[tokens.conv](subsFxn, input, tokens.subs)
+  	const convFxn = conv[tokens.conv](subsFxn, input, tokens)
   	return [convFxn, tokens]
   }
   input.errors.push(['val', 'UNSUPPORTED-SYMBOL-'+ token.subs])
@@ -134,17 +134,27 @@ export const subs = {
 }
 
 export const conv = {
-	"": function(subsFxn, input) {
+	"": function(subsFxn, input, tokens) {
 		return subsFxn
 	},
-	"()": function(subsFxn, input, tokenSubs) {
-		return (row, context) => {
-			const fxn = subsFxn(row, context)
+	"()": function(subsFxn, input, tokens) {
+		if (tokens.subs == "=") {
+			const fxn = subsFxn()
 			if (typeof fxn !== "function") {
-				input.errors.push(["val", "NOT-A-FUNCTION", row])
+				input.errors.push(["val", "NOT-A-FUNCTION", token.subs + tokens.term + tokens.conv])
 				return
 			}
 			return fxn
+		}
+		else {
+			return (row, context) => {
+				const fxn = subsFxn(row, context); 
+				if (typeof fxn !== "function") {
+					input.errors.push(["val", "NOT-A-FUNCTION", row])
+					return
+				}
+				return fxn(row, context)
+			}
 		} 
 	}
 }
