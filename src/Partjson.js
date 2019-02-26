@@ -1,6 +1,7 @@
 import KeyFiller from "./KeyFiller"
 import ValFiller from "./ValFiller"
 import Err from "./Err"
+import * as converter from "./converter"
 
 /*
 -------
@@ -103,7 +104,7 @@ export default class Partjson {
 
     const steps = this.steps.map(d => [])
     for(const term in template) {
-      const [subterm, symbols, keyTokens, step] = this.parseTerm(term)
+      const [subterm, symbols, keyTokens, step] = converter.parseTerm(this, term)
       const templateVal = template[term]
       const input = filler.inputs[term] = {
         term,
@@ -138,32 +139,6 @@ export default class Partjson {
 	    }
     }
     filler.steps = steps.filter(d => d.length)
-  }
-
-  /*** the heart of the code ***/
-  parseTerm(term) {
-  	const skip = this.skipSymbols.includes(term[0]) ? "#" : ""
-  	const colons = term.slice(0,3)
-  	const time = this.timeSymbols.includes(colons) ? colons : "";
-  	const start = skip.length + time.length
-    const prefix = term[start]
-    const suffix = term.slice(-2)
-    const aggr = this.aggrSymbols.includes(prefix) ? prefix : ""
-    const conv = this.convSymbols.includes(suffix) ? suffix : ""
-    const subterm = aggr && conv 
-      ? term.slice(start + 1, -2)
-      : aggr 
-        ? term.slice(start + 1)
-        : conv 
-          ? term.slice(start, -2)
-          : time 
-          	? term.slice(start)
-          	: term;
-    const subs = this.subsSymbols.includes(subterm[0]) ? subterm[0] : ""
-    const symbols = skip ? skip : aggr + subs + conv
-    const stem = subs ? subterm.slice(1) : subterm
-    const tokens = {skip, time, aggr, subs, stem, conv, subterm}
-    return [subterm, symbols, tokens, this.steps.indexOf(time)]
   }
 
   getEmptyResult(branch=null, parent=null, isArray = false) {
@@ -277,6 +252,8 @@ export default class Partjson {
   }
 }
 
+Partjson.prototype.converter = converter
+
 Partjson.prototype["@before"] = function (subterm, input) {
 	const fxn = this.opts["="][subterm.slice(1,-2)]
 	if (!fxn) {
@@ -316,7 +293,7 @@ Partjson.prototype["@join"] = function (joins, input, filler) {
 
 Partjson.prototype["@dist"] = function (_subterm, input) {
 	const subterm = Array.isArray(_subterm) ? _subterm[0] : _subterm
-	const subsFxn = this.valFiller["@"](subterm)
+	const subsFxn = converter.subs["@"](this, subterm)
 	return (context) => {
 	  context["@dist"] = (result) => {
 	  	const target = subsFxn(null, context)

@@ -4,28 +4,10 @@ export default class KeyFiller {
     this.allowedKeyTypes = new Set(["string", "number"])
   }
 
-  getFxn(subterm, symbols, input, ignore) {
-		if (this.Tree.reservedOpts.includes(subterm)) return
-    if (input.keyTokens.skip) {
-    	this["#"](subterm, input)
-    }
-    else if (input.keyTokens.subs in this.Tree.valFiller) {
-	  	const conv = input.keyTokens.conv ? input.keyTokens.conv : "''"
-	  	const convFxn = this.Tree.valFiller.strFiller(input, ignore, input.term, "key")
-	  	if (this[conv]) {
-	  		return this[conv](convFxn, input)
-	  	}
-	  	else {
-	  		input.errors.push(["key", "UNSUPPORTED-KEY-CONVERSION"])
-	  		return
-	  	}
-	  }
-    else if (symbols in this) {
-      return this[symbols](subterm, input)
-    }
-    else {
-      input.errors.push(["key", "UNSUPPORTED-KEY-SYMBOL"])
-    } 
+  getFxn(subterm, symbols, input, ignore) {  	
+		const [convFxn, tokens] = this.Tree.converter.default(this.Tree, input, ignore, input.term)
+		if (!convFxn) return
+  	return this[tokens.conv](convFxn, input)
   }
 
   getAllowedKeys(keys, row, input, context) {
@@ -48,7 +30,7 @@ export default class KeyFiller {
 	}
 }
 
-KeyFiller.prototype["''"] = function(fxn, input) {
+KeyFiller.prototype[""] = function(fxn, input) {
   return (row, context) => {
   	return this.getAllowedKeys([fxn(row, context)], row, input, context)
   }
@@ -72,14 +54,4 @@ KeyFiller.prototype["(]"] = function(convFxn, input) {
   	const fxn = convFxn(row, context)
   	return this.getAllowedKeys(fxn(row, context), row, input, context)
   }
-}
-
-KeyFiller.prototype["#"] = function(subterm, input) {
-	if (!this.Tree.commentedTerms.has(input)) {
-		this.Tree.commentedTerms.set(input, {
-			keys: new Set(),
-			values: new Set()
-		})
-	}
-  this.Tree.commentedTerms.get(input).keys.add(subterm)
 }

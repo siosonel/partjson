@@ -5,11 +5,11 @@ export default class ValFiller {
   }
 
   getValType(val) {
-  	return typeof val=='string'
+  	return typeof val == "string"
       ? "str"
       : Array.isArray(val)
         ? "arr"
-        : val && typeof val == 'object'
+        : val && typeof val == "object"
           ? 'obj'
           : 'default'
   }
@@ -19,25 +19,14 @@ export default class ValFiller {
   	return this[type + "Filler"](input, ignore, input.templateVal)
   }
 
-  strFiller(input, ignore, val, _aggr = "") { 
-	  const [subterm, symbols, tokens] = this.Tree.parseTerm(val)
-	  const subconv = subterm + tokens.conv
-	  input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
-	  if (tokens.skip) {
-	  	this[tokens.skip](subterm, input)
-	  	return
-	  }
-	  if (tokens.subs in this) {
-	  	const subsFxn = this[tokens.subs](subterm, input)
-	  	const convFxn = this["." + tokens.conv](subsFxn, input)
-	  	if (_aggr == "key") return convFxn
-	  	const aggr = (_aggr ? _aggr : tokens.aggr) + ',' + tokens.conv
-	  	if (aggr in this) {
-	  		return this[aggr](convFxn, input)
-	  	}
-	  }
-	  input.errors.push(['val', 'UNSUPPORTED-SYMBOL'])
-	}
+  strFiller(input, ignore, val, _aggr) {
+  	const [convFxn, tokens] = this.Tree.converter.default(this.Tree, input, ignore, val)
+  	if (!convFxn) return
+  	const aggr = (_aggr ? _aggr : tokens.aggr) + ',' + tokens.conv
+  	if (aggr in this) {
+  		return this[aggr](convFxn, input)
+  	}
+  }
 
 	arrFiller(input, ignore, val) { 
 	  const type = this.getValType(val[0])
@@ -66,13 +55,15 @@ export default class ValFiller {
     }
   }
 
-  getSeedMethod(val) {
+  getSeed(val) {
 	  const option = val ? val : ""
-	  const seed = option == "distinct" 
-	  	? (result, key) => result[key] = new Set()
-	  	: (result, key) => result[key] = []
-	  const method = option == "distinct" ? "add" : "push"
-	  return [seed, method]
+	  const seed = option != "distinct" 
+	  	? (result, key) => result[key] = []
+	  	: (result, key) => {
+	  		result[key] = new Set()
+	  		result[key].push = result[key].add
+	  	}
+	  return seed
   }
 
   isNumeric(d) {
@@ -80,120 +71,6 @@ export default class ValFiller {
   }
 } 
 
-ValFiller.prototype["#"] = function(subterm, input) {
-	if (!this.Tree.commentedTerms.has(input)) {
-		this.Tree.commentedTerms.set(input, {
-			keys: new Set(),
-			values: new Set()
-		})
-	}
-  this.Tree.commentedTerms.get(input).values.add(subterm)
-}
-/* SUBSTITUTION functions */
-ValFiller.prototype[""] = function(subterm, input) {
-  return this.isNumeric(subterm) 
-    ? () => +subterm
-    : () => subterm
-}
-
-ValFiller.prototype["$"] = function(subterm, input) {
-  if (subterm == "$" || subterm == "$" + this.Tree.userDelimit) {
-  	return (row) => row
-  }
-  else if (subterm.includes(this.Tree.userDelimit)) {
-  	const nestedProps = subterm.slice(1).split(this.Tree.userDelimit)
-  	if (nestedProps[0] == "") nestedProps.shift()
-    const reducer = (d,k) => d ? d[k] : null
-    return (row) => nestedProps.reduce(reducer, row)
-  }
-  else {
-	  const prop = subterm.slice(1)
-	  return (row) => row[prop]
-	}
-}
-
-ValFiller.prototype["="] = function(subterm, input) {
-  const nestedProps = subterm.slice(1).split(this.Tree.treeDelimit)
-  const reducer = (d,k) => d && k in d ? d[k] : null
-  const prop = nestedProps.reduce(reducer, this.Tree.opts["="])
-  if (!prop) {
-  	input.errors.push(["val", "MISSING-EXTERNAL-SUBS"])
-  	return
-  }
-  return (row) => prop
-}
-
-ValFiller.prototype["@"] = function(subterm, input) {
-	if (this.Tree.reservedOpts.includes(subterm)) return
-  if (subterm == "@" || subterm == "@" + this.Tree.treeDelimit) {
-  	return (row, context) => context.self
-  }
-  else if (subterm.includes(this.Tree.treeDelimit)) {
-  	const nestedProps = subterm.split(this.Tree.treeDelimit)
-    const reducer = (resultContext, d) => {
-    	if (d[0] == "@" && d.length > 1 && !this.Tree.reservedContexts.includes(d)) {
-    		input.errors.push(["val", "UNRECOGNIZED-CONTEXT", input.lineage.join(".")+"."+d])
-    		return [null, null]
-    	}
-    	const [result, context] = resultContext
-     	return !result || !d 
-    		? [null, null]
-    		: d == "@"
-    			? [context.self, context]
-    			: d[0] == "@"
-    				? [context[d.slice(1)], this.Tree.contexts.get(context[d.slice(1)])]
-    				: !result
-    					? [null, null]
-    					: [result[d], this.Tree.contexts.get(result[d])]
-    }
-  	return (row, context) => nestedProps.reduce(reducer, [context.self, context])[0]
-  }
-  else if (!this.Tree.reservedContexts.includes(subterm)) {
-  	input.errors.push(["val", "UNRECOGNIZED-CONTEXT"])
-  }
-  else { 
-	  const prop = subterm.slice(1)
-	  return (row, context) => context[prop]
-	}
-}
-
-ValFiller.prototype["&"] = function(subterm, input) {
-  const nestedProps = subterm.slice(1).split(this.Tree.userDelimit)
-  const alias = nestedProps.shift()
-  if (!nestedProps.length) {
-  	return () => this.Tree.joins.get(alias)
-  }
-  else if (nestedProps.length == 1) {
-  	const prop = nestedProps[0]
-  	return () => {
-	  	const join = this.Tree.joins.get(alias)
-	  	return join ? join[prop] : null
-	  }
-  }
-  else {
-  	const reducer = (d,k) => d ? d[k] : null
-  	const join = this.Tree.joins.get(alias)
-    return (row) => nestedProps.reduce(reducer, this.Tree.joins.get(alias))
-  }
-}
-
-/* CONVERSION */
-ValFiller.prototype["."] = function(subsFxn, input) {
-	return subsFxn
-}
-ValFiller.prototype[".[]"] = ValFiller.prototype["."]
-
-ValFiller.prototype[".()"] = function(subsFxn, input) {
-	return (row, context) => {
-		const fxn = subsFxn(row, context)
-		if (typeof fxn !== "function") {
-			input.errors.push(["val", "NOT-A-FUNCTION", row])
-			return
-		}
-		return fxn
-	} 
-}
-ValFiller.prototype[".(]"] = ValFiller.prototype[".()"]
 
 /* NO AGGREGATION */
 // no conversion
@@ -210,19 +87,19 @@ ValFiller.prototype[",(]"] = ValFiller.prototype[","]
 
 /* AGGREGATION into an Array or Set  */
 ValFiller.prototype["[],"] = function(fxn, input) {
-	const [seed, method] = this.getSeedMethod(input.templateVal[1])
+	const seed = this.getSeed(input.templateVal[1])
 	return (row, key, result, context) => {
   	const value = fxn(row, context)
 		if (input.ignore(value, key, row, context)) return
 		if (!(key in result)) seed(result, key)
-  	result[key][method](value)
+  	result[key].push(value)
   }
 }
 
 ValFiller.prototype["[],()"] = ValFiller.prototype["[],"]
 
 ValFiller.prototype["[],[]"] = function(fxn, input) {
-	const [seed, method] = this.getSeedMethod(input.templateVal[1])
+	const seed = this.getSeed(input.templateVal[1])
 	return (row, key, result, context) => {
     const values = fxn(row, context)
     if (!Array.isArray(values)) {
@@ -232,7 +109,7 @@ ValFiller.prototype["[],[]"] = function(fxn, input) {
   	if (!(key in result)) seed(result, key)
   	for(const value of values) {
 	 		if (input.ignore(value, key, row, context)) continue
-    	result[key][method](value)
+    	result[key].push(value)
     }
   }
 }
