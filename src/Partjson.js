@@ -263,14 +263,7 @@ Partjson.prototype["@before"] = function (subterm, input) {
 	else return fxn
 }
 
-Partjson.prototype["@after"] = function (subterm, input) {
-	const fxn = this.opts["="][subterm.slice(1,-2)]
-	if (!fxn) {
-		input.errors.push(["val", "MISSING-@after-FXN"])
-		return this.trueFxn
-	}
-	else return fxn
-}
+Partjson.prototype["@after"] = Partjson.prototype["@before"]
 
 Partjson.prototype["@join"] = function (joins, input, filler) {
 	return (row) => {
@@ -353,5 +346,3 @@ Partjson.prototype["@ignore"] = function (template, inheritedIgnore, filler) {
 
 	return nonObj ? fxns : Object.assign({}, inheritedIgnore, fxns)
 }
-
-window["Partjson"] = Partjson

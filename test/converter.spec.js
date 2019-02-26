@@ -1,7 +1,4 @@
 const tape = require('tape')
-// define a window global, which is used in bundles
-// but not in these tests
-window = Object.create(null)
 const Partjson = require("../dist/partjson.cjs")
 const conv = Partjson.prototype.converter
 

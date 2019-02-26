@@ -10,7 +10,7 @@ export default [
 	{
 		input: 'src/Partjson.js',
 		output: {
-			name: 'partjson',
+			name: 'Partjson',
 			file: pkg.browser,
 			format: 'umd'
 		},
