@@ -33,14 +33,14 @@ export default class Partjson {
       opts 
     )
 
-    this.userDelimit = "."
-    this.treeDelimit = "."
+    this.delimit = "."
+    this.delimit = "."
     this.subsSymbols = ["$", "=", "@", "&"]
     this.convSymbols = ["()", "[]", "(]"] //, "{}", "(}"]
     this.aggrSymbols = ["+", "-", "<", ">"]
     this.timeSymbols = [":__", "_:_", "__:"]
     this.skipSymbols = ["#"]
-    this.reservedOpts = ["@userDelimit", "@treeDelimit", "@errorMode"]
+    this.reservedOpts = ["@delimit", "@errmode"]
     this.reservedContexts = ["@branch", "@parent", "@root", "@self"]
     this.reservedFilters = ["@before()", "@join()", "@ignore()"]
     this.reservedPost = ["@after()", "@dist()", "@end()"]
@@ -59,12 +59,12 @@ export default class Partjson {
 
   refresh(opts={}) {
   	Object.assign(this.opts,opts)
-    this.errors.clear(this.opts.template["@errorMode"])
-  	if (this.opts.template['@userDelimit']) {
-  		this.userDelimit = this.opts.template['@userDelimit']
+    this.errors.clear(this.opts.template["@errmode"])
+  	if (this.opts.template['@delimit']) {
+  		this.delimit = this.opts.template['@delimit']
   	}
-  	if (this.opts.template['@treeDelimit']) {
-  		this.treeDelimit = this.opts.template['@treeDelimit']
+  	if (this.opts.template['@delimit']) {
+  		this.delimit = this.opts.template['@delimit']
   	}
   	//console.clear()
   	delete this.commentedTerms

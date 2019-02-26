@@ -1,38 +1,23 @@
 demo([{
-	symbol: "@userDelimit",
+	symbol: "@delimit",
 	tokenType: "options",
 	section: "options",
-	id: "user-delimit",
-	title: `The <span class="code-snippet">@userDelimit</span> character 
-	 defaults to <span class="code-snippet">.</span>, but may be reset at the template root.`,
+	id: "delimiter",
+	title: `The <span class="code-snippet">@delimit</span> character separates nested
+	 terms. It defaults to <span class="code-snippet">.</span>, but may be 
+	 reset at the template root.`,
 	template: {
-  	"@userDelimit": "_",
+  	"@delimit": "_",
   	"test": {
   		"$nested_random_id": "test"
   	}
   }
 },{
-	symbol: "@treeDelimit",
-	tokenType: "options",
-	section: "options",
-	id: "tree-delimit",
-	title: `The <span class="code-snippet">@treeDelimit</span> 
-		character defaults to <span class="code-snippet">.</span>, but may be reset at the template root.`,
-	template: {
-  	"@treeDelimit": "|",
-  	"version": 0.1,
-  	"trial": {
-  		"child": {
-  			"version": "@parent|@parent|version"
-  		}
-  	}
-  }
-},{
-	symbol: "@errorMode",
+	symbol: "@errmode",
 	tokenType: "options",
 	section: "options",
 	id: "error-mode",
-	title: `The <span class="code-snippet">@errorMode</span> 
+	title: `The <span class="code-snippet">@errmode</span> 
 		option globally sets where and how errors are displayed.
 		It may be provided as a four item array where the error
 		modes are listed in the order <br/>[
@@ -65,7 +50,7 @@ demo([{
 			character will omit errors that have already been marked on inputs.</li>
 		</ul>`,
 	template: {
-  	"@errorMode": {
+  	"@errmode": {
   		"root": "[]",
   		"console": ""
   	},

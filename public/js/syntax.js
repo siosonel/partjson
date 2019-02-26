@@ -35,9 +35,9 @@ demo([{
 	id: "stem-delim",
 	title: `Nested values are indicated by joining multiple stems with a string delimiter.
 	 The delimiter defaults to <span class="code-snippet">.</span>, but 
-	 may be overriden by declaring a @userDelimit value in the template root.`,
+	 may be overriden by declaring a @delimit value in the template root.`,
 	template: {
-		"@userDelimit": "|",
+		"@delimit": "|",
 		"$nested|random|id": ["$catname"]
 	}
 },{

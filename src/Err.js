@@ -46,7 +46,7 @@ export default class Err {
 			for(const err of input.errors) {
 	  		const [type, message, row] = err
 	      if (type == "key") {
-					this.track(currLog, err, input.lineage.join(this.Tree.treeDelimit))
+					this.track(currLog, err, input.lineage.join(this.Tree.delimit))
 	      	if (this.mode.input) {
 	      		result["{{ " + message + " }} " + input.term] = input.templateVal
 	      	}

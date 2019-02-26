@@ -6,7 +6,7 @@ export default function converter(Filler, input, ignore, val) {
   input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
   if (tokens.subs in subs) {
   	const subsFxn = subs[tokens.subs](Filler, subterm, input)
-  	const convFxn = conv[tokens.conv](subsFxn, input)
+  	const convFxn = conv[tokens.conv](subsFxn, input, tokens.subs)
   	return [convFxn, tokens]
   }
   input.errors.push(['val', 'UNSUPPORTED-SYMBOL-'+ token.subs])
@@ -55,11 +55,11 @@ export const subs = {
 	    : () => subterm
 	},
 	"$": function(Filler, subterm, input) {
-	  if (subterm == "$" || subterm == "$" + Filler.userDelimit) {
+	  if (subterm == "$" || subterm == "$" + Filler.delimit) {
 	  	return (row) => row
 	  }
-	  else if (subterm.includes(Filler.userDelimit)) {
-	  	const nestedProps = subterm.slice(1).split(Filler.userDelimit)
+	  else if (subterm.includes(Filler.delimit)) {
+	  	const nestedProps = subterm.slice(1).split(Filler.delimit)
 	  	if (nestedProps[0] == "") nestedProps.shift()
 	    const reducer = (d,k) => d ? d[k] : null
 	    return (row) => nestedProps.reduce(reducer, row)
@@ -70,7 +70,7 @@ export const subs = {
 		}
 	},
 	"=": function(Filler, subterm, input) {
-	  const nestedProps = subterm.slice(1).split(Filler.treeDelimit)
+	  const nestedProps = subterm.slice(1).split(Filler.delimit)
 	  const reducer = (d,k) => d && k in d ? d[k] : null
 	  const prop = nestedProps.reduce(reducer, Filler.opts["="])
 	  if (!prop) {
@@ -81,11 +81,11 @@ export const subs = {
 	},
 	"@": function(Filler, subterm, input) {
 		if (Filler.reservedOpts.includes(subterm)) return
-	  if (subterm == "@" || subterm == "@" + Filler.treeDelimit) {
+	  if (subterm == "@" || subterm == "@" + Filler.delimit) {
 	  	return (row, context) => context.self
 	  }
-	  else if (subterm.includes(Filler.treeDelimit)) {
-	  	const nestedProps = subterm.split(Filler.treeDelimit)
+	  else if (subterm.includes(Filler.delimit)) {
+	  	const nestedProps = subterm.split(Filler.delimit)
 	    const reducer = (resultContext, d) => {
 	    	if (d[0] == "@" && d.length > 1 && !Filler.reservedContexts.includes(d)) {
 	    		input.errors.push(["val", "UNRECOGNIZED-CONTEXT", input.lineage.join(".")+"."+d])
@@ -113,7 +113,7 @@ export const subs = {
 		}
 	},
 	"&": function(Filler, subterm, input) {
-	  const nestedProps = subterm.slice(1).split(Filler.userDelimit)
+	  const nestedProps = subterm.slice(1).split(Filler.delimit)
 	  const alias = nestedProps.shift()
 	  if (!nestedProps.length) {
 	  	return () => Filler.joins.get(alias)
@@ -137,7 +137,7 @@ export const conv = {
 	"": function(subsFxn, input) {
 		return subsFxn
 	},
-	"()": function(subsFxn, input) {
+	"()": function(subsFxn, input, tokenSubs) {
 		return (row, context) => {
 			const fxn = subsFxn(row, context)
 			if (typeof fxn !== "function") {

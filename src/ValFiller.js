@@ -96,7 +96,15 @@ ValFiller.prototype["[],"] = function(fxn, input) {
   }
 }
 
-ValFiller.prototype["[],()"] = ValFiller.prototype["[],"]
+ValFiller.prototype["[],()"] = function(fxn, input) {
+	const seed = this.getSeed(input.templateVal[1])
+	return (row, key, result, context) => {
+  	const value = fxn(row, context)(row, context)
+		if (input.ignore(value, key, row, context)) return
+		if (!(key in result)) seed(result, key)
+  	result[key].push(value)
+  }
+}
 
 ValFiller.prototype["[],[]"] = function(fxn, input) {
 	const seed = this.getSeed(input.templateVal[1])
