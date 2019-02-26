@@ -4,76 +4,70 @@ export default class ValFiller {
     this.ignore = this.Tree.opts.ignore
   }
 
+  getValType(val) {
+  	return typeof val=='string'
+      ? "str"
+      : Array.isArray(val)
+        ? "arr"
+        : val && typeof val == 'object'
+          ? 'obj'
+          : 'default'
+  }
+
   getFxn(input, ignore) {
-  	if (typeof input.templateVal=='string') {
-      return this.getStringFiller(input, ignore, input.templateVal)
-    }
-    else if (Array.isArray(input.templateVal)) {
-      return this.getArrayFiller(input, ignore)
-    }
-    else if (input.templateVal && typeof input.templateVal == 'object') {
-      return this.getObjectFiller(input)
-    }
-    else {
-      return (row, key, result) => {
-      	result[key] = input.templateVal
-      }
-    }
+  	const type = this.getValType(input.templateVal)
+  	return this[type + "Filler"](input, ignore, input.templateVal)
   }
 
-  getStringFiller(input, ignore, templateVal, _aggr = "") { 
-    const [subterm, symbols, tokens] = this.Tree.parseTerm(templateVal)
-    const subconv = subterm + tokens.conv
-    input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
-    if (tokens.skip) {
-    	this[tokens.skip](subterm, input)
-    	return
-    }
-    if (tokens.subs in this) {
-  	  //if (typeof templateVal == "string" && templateVal == "$preytype") console.log(subsToken, subterm)
-    	const subsFxn = this[tokens.subs](subterm, input)
-    	const convFxn = this["." + tokens.conv](subsFxn, input)
-    	if (_aggr == "key") return convFxn
-    	const aggr = (_aggr ? _aggr : tokens.aggr) + ',' + tokens.conv
-    	if (aggr in this) {
-    		return this[aggr](convFxn, input)
-    	}
-    }
-    input.errors.push(['val', 'UNSUPPORTED-SYMBOL'])
-  }
+  strFiller(input, ignore, val, _aggr = "") { 
+	  const [subterm, symbols, tokens] = this.Tree.parseTerm(val)
+	  const subconv = subterm + tokens.conv
+	  input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
+	  if (tokens.skip) {
+	  	this[tokens.skip](subterm, input)
+	  	return
+	  }
+	  if (tokens.subs in this) {
+	  	const subsFxn = this[tokens.subs](subterm, input)
+	  	const convFxn = this["." + tokens.conv](subsFxn, input)
+	  	if (_aggr == "key") return convFxn
+	  	const aggr = (_aggr ? _aggr : tokens.aggr) + ',' + tokens.conv
+	  	if (aggr in this) {
+	  		return this[aggr](convFxn, input)
+	  	}
+	  }
+	  input.errors.push(['val', 'UNSUPPORTED-SYMBOL'])
+	}
 
-  getArrayFiller(input, ignore) { 
-    if (!input.templateVal[0]) {
-    	return (row, key, result) => {
-    		result[key] = input.templateVal
-    	}
-    }
-    else if (typeof input.templateVal[0] == 'string') {
-    	return this.getStringFiller(input, ignore, input.templateVal[0], "[]")
-    }
-    else if (Array.isArray(input.templateVal[0])) {
-    	return this["[[,]]"](input.templateVal[0], input)
-    }
-    else if (input.templateVal[0] && typeof input.templateVal[0] == 'object') {
-      return this["[{}]"](input.templateVal[0], input)
-    }
-    else {
-    	input.errors.push("val", "UNSUPPORTED-TEMPLATE-VALUE")
-    }
-  }
+	arrFiller(input, ignore, val) { 
+	  const type = this.getValType(val[0])
+  	return type == "str"
+  		? this.strFiller(input, ignore, val[0], "[]")
+  		: type == "arr"
+  			? this["[[,]]"](val[0], input)
+  			: type == "obj" 
+  				? this["[{}]"](val[0], input)
+  				: this.defaultFiller(input, ignore, val)
+	}
 
-  getObjectFiller(input) {
-  	this.Tree.parseTemplate(input.templateVal, input.inheritedIgnore, input.lineage)
+  objFiller(input, ignore, val) {
+  	this.Tree.parseTemplate(val, input.inheritedIgnore, input.lineage)
     return (row, key, result) => {
       if (!(key in result)) {
         result[key] = this.Tree.getEmptyResult(key, result)
       }
-      this.Tree.processRow(row, input.templateVal, result[key])
+      this.Tree.processRow(row, val, result[key])
     }
   }
 
-  getListSeedMethod(val) {
-	  const option = val[1] ? val[1] : ""
+  defaultFiller(input, ignore, val) {
+  	return (row, key, result) => {
+    	result[key] = val
+    }
+  }
+
+  getSeedMethod(val) {
+	  const option = val ? val : ""
 	  const seed = option == "distinct" 
 	  	? (result, key) => result[key] = new Set()
 	  	: (result, key) => result[key] = []
@@ -84,7 +78,7 @@ export default class ValFiller {
   isNumeric(d) {
     return !isNaN(parseFloat(d)) && isFinite(d) && d!==''
   }
-}
+} 
 
 ValFiller.prototype["#"] = function(subterm, input) {
 	if (!this.Tree.commentedTerms.has(input)) {
@@ -216,7 +210,7 @@ ValFiller.prototype[",(]"] = ValFiller.prototype[","]
 
 /* AGGREGATION into an Array or Set  */
 ValFiller.prototype["[],"] = function(fxn, input) {
-	const [seed, method] = this.getListSeedMethod(input.templateVal[1])
+	const [seed, method] = this.getSeedMethod(input.templateVal[1])
 	return (row, key, result, context) => {
   	const value = fxn(row, context)
 		if (input.ignore(value, key, row, context)) return
@@ -228,7 +222,7 @@ ValFiller.prototype["[],"] = function(fxn, input) {
 ValFiller.prototype["[],()"] = ValFiller.prototype["[],"]
 
 ValFiller.prototype["[],[]"] = function(fxn, input) {
-	const [seed, method] = this.getListSeedMethod(input.templateVal[1])
+	const [seed, method] = this.getSeedMethod(input.templateVal[1])
 	return (row, key, result, context) => {
     const values = fxn(row, context)
     if (!Array.isArray(values)) {
@@ -290,7 +284,7 @@ ValFiller.prototype["[[,]]"] = function (templates, input) {
 }
 
 /* AGGREGATION by OPERATOR */
-ValFiller.prototype["+,"] = function(fxn, input) { if (typeof fxn != 'function') console.log(input.term)
+ValFiller.prototype["+,"] = function(fxn, input) {
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
 		const value = fxn(row, context)

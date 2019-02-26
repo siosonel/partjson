@@ -11,7 +11,7 @@ export default class KeyFiller {
     }
     else if (input.keyTokens.subs in this.Tree.valFiller) {
 	  	const conv = input.keyTokens.conv ? input.keyTokens.conv : "''"
-	  	const convFxn = this.Tree.valFiller.getStringFiller(input, ignore, input.term, "key")
+	  	const convFxn = this.Tree.valFiller.strFiller(input, ignore, input.term, "key")
 	  	if (this[conv]) {
 	  		return this[conv](convFxn, input)
 	  	}
