@@ -20,7 +20,7 @@ tape("A passing test", function(test){
 });
 
 tape("parseTerm should parse terms correctly", function(test){
-	const filler = new Partjson({template:{}, data:[{}]})
+	const filler = new Partjson({template:{}, data:[]})
 	const [subterm, symbols, tokens, step] = filler.parseTerm("$prop")
 	test.equals(
 		symbols, "$", "symbols from a simple term may have subs"
@@ -44,7 +44,7 @@ tape("parseTerm should parse terms correctly", function(test){
 })
 
 tape(`valFiller[""] should substitute the template input term as-is`, function(test){
-	const filler = new Partjson({template:{}, data:[{}]})
+	const filler = new Partjson({template:{}, data:[]})
 	const fxnStr = filler.valFiller[""]("prop", {}, false)
 	test.equals(fxnStr({prop: "val"}), "prop", "should return a string value")
 	const fxnNum = filler.valFiller[""](1, {}, false)
@@ -53,7 +53,7 @@ tape(`valFiller[""] should substitute the template input term as-is`, function(t
 })
 
 tape(`valFiller["$"] should substitute a data property`, function(test){
-	const filler = new Partjson({template:{}, data:[{}]})
+	const filler = new Partjson({template:{}, data:[]})
 	const input0 = {errors: []}
 	const fxn0 = filler.valFiller["$"]("$prop", input0, false)
 	test.deepEquals(
@@ -140,8 +140,7 @@ tape(`valFiller["="] should substitute an external property`, function(test){
 })
 
 tape(`valFiller["@"] should substitute a context property`, function(test){
-	const opts = ({template: {}, data:[{}]})
-	const filler = new Partjson(opts)
+	const filler = new Partjson({template: {}, data:[]})
 	const context = {
 		self: {}, 
 		branch: "test", 
@@ -203,8 +202,7 @@ tape(`valFiller["@"] should substitute a context property`, function(test){
 })
 
 tape(`valFiller["."] should not convert a substituted property`, function(test){
-	const opts = ({template: {}, data:[{}]})
-	const filler = new Partjson(opts)
+	const filler = new Partjson({template: {}, data:[]})
 	const input0 = {errors: []}
 	const fxn0 = filler.valFiller["$"]("$prop", input0, false)
 	test.deepEquals(
@@ -216,8 +214,7 @@ tape(`valFiller["."] should not convert a substituted property`, function(test){
 })
 
 tape(`valFiller[".[]"] should be like "." and not convert to a function`, function(test){
-	const opts = ({template: {}, data:[{}]})
-	const filler = new Partjson(opts)
+	const filler = new Partjson({template: {}, data:[]})
 	test.equals(
 		filler.valFiller["."],
 		filler.valFiller[".[]"],
@@ -227,8 +224,7 @@ tape(`valFiller[".[]"] should be like "." and not convert to a function`, functi
 })
 
 tape(`valFiller[".()"] should convert a substituted property into a function`, function(test){
-	const opts = ({template: {}, data:[{}]})
-	const filler = new Partjson(opts)
+	const filler = new Partjson({template: {}, data:[]})
 	const input0 = {errors: []}
 	const fxn0 = filler.valFiller["$"]("$fxn", input0, false)
 	const convFxn0 = filler.valFiller[".()"](fxn0, input0)
@@ -245,18 +241,70 @@ tape(`valFiller[".()"] should convert a substituted property into a function`, f
 		[true, true],
 		`".()" on $fxn should give a data function that returns the expected result`
 	)
-	test.end()
-})
 
-tape(`valFiller[".(]"] should convert like .()`, function(test){
-	const opts = ({template: {}, data:[{}]})
-	const filler = new Partjson(opts)
-	test.equals(
-		filler.valFiller[".()"],
-		filler.valFiller[".(]"],
-		`The prototypes for ".()" and ".()" should be the same.`
+	const input1 = {errors: []}
+	const fxn1 = filler.valFiller["$"]("$prop", input0, false)
+	const convFxn1 = filler.valFiller[".()"](fxn1, input0)
+	test.deepEquals(
+		[typeof convFxn1 != "function" || convFxn1(row) === undefined, input0.errors.length > 0],
+		[true, true],
+		`".()" on a non-function $prop should give an error`
 	)
 	test.end()
 })
 
+tape(`valFiller[".(]"] should convert like .()`, function(test){
+	const filler = new Partjson({template: {}, data:[]})
+	test.equals(
+		filler.valFiller[".()"],
+		filler.valFiller[".(]"],
+		`The prototypes for ".(]" and ".()" should be the same.`
+	)
+	test.end()
+})
 
+tape(`valFiller[","] should perform no aggregation`, function(test){
+	const filler = new Partjson({template: {}, data:[]})
+	const input0 = {errors: [], ignore: ()=>false}
+	const fxn0 = (row) => row.prop
+	const aggrFxn0 = filler.valFiller[","](fxn0, input0)
+	const row = {prop: "dataProp"}
+	const result = {}
+	aggrFxn0(row, 'key', result)
+	test.deepEquals(
+		[result.key == "dataProp", !input0.errors.length],
+		[true, true],
+		`"," should update the result with the substituted or converted value`
+	)
+	test.end()
+})
+
+tape(`valFiller[",()"] should be like "," and not aggregate`, function(test){
+	const filler = new Partjson({template: {}, data:[]})
+	test.equals(
+		filler.valFiller[","],
+		filler.valFiller[",()"],
+		`The prototypes for "," and ",()" should be the same.`
+	)
+	test.end()
+})
+
+tape(`valFiller[",[]"] should be like "," and not aggregate`, function(test){
+	const filler = new Partjson({template: {}, data:[]})
+	test.equals(
+		filler.valFiller[","],
+		filler.valFiller[",[]"],
+		`The prototypes for "," and ",[]" should be the same.`
+	)
+	test.end()
+})
+
+tape(`valFiller[",(]"] should be like "," and not aggregate`, function(test){
+	const filler = new Partjson({template: {}, data:[]})
+	test.equals(
+		filler.valFiller[","],
+		filler.valFiller[",(]"],
+		`The prototypes for "," and ",(]" should be the same.`
+	)
+	test.end()
+})

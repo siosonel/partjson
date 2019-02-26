@@ -218,7 +218,7 @@ export default class Partjson {
 
   processResult(result) {
   	const context = this.contexts.get(result)
-  	if (context) {
+  	if (context && context.filler && context.filler["__:"]) {
 	  	for(const term of context.filler["__:"]) { 
 	  		const input = context.filler.inputs[term];
 	  		if (input.keyFxn && input.valFxn) {
@@ -257,8 +257,10 @@ export default class Partjson {
   				this.processResult(value)
   			}
   		}
+  	} 
+  	if (context && context.filler) {
+  		this.errors.markErrors(result, context);
   	}
-  	this.errors.markErrors(result, context);
   	if (context && context.done) {
   		context.done(result)
   	}
