@@ -6,31 +6,11 @@ const Partjson = require("../dist/partjson.cjs.js")
 function getOpts(template={}, _data=null) {
 	const data = Array.isArray(_data) 
 		? _data 
-		: [
-			{"line #":1,"catname":"Jerry","catsex":"male","owners":"Bob","ownerblock":"A1","huntblock":"B1","huntdate":"2019-01-02 19:25","preytype":"bird","preysubtype":"robin","preymass":0.596,"nested":{"random":{"id":"a10c"}}},
-			{"line #":2,"catname":"Jerry","catsex":"male","owners":"Bob","ownerblock":"A1","huntblock":"B4","huntdate":"2019-01-04 20:45","preytype":"mammal","preysubtype":"rat","preymass":0.601,"nested":{"random":{"id":"bkd0"}}},
-			{"line #":3,"catname":"Jerry","catsex":"male","owners":"Bob,Jane","ownerblock":"A1","huntblock":"C3","huntdate":"2019-01-07 06:45","preytype":"mammal","preysubtype":"squirel","preymass":0.8,"nested":{"random":{"id":"jjkl"}}},
-			{"line #":4,"catname":"Princess","catsex":"female","owners":"Alice,Joe","ownerblock":"C2","huntblock":"C3","huntdate":"2019-01-05 09:45","preytype":"fish","preysubtype":"minnow","preymass":0.1,"nested":{"random":{"id":"hgys"}}},
-			{"line #":5,"catname":"Princess","catsex":"female","owners":"Alice,Mike","ownerblock":"C2","huntblock":"C3","huntdate":"2019-01-07 09:45","preytype":"fish","preysubtype":"catfish","preymass":1.6,"nested":{"random":{"id":"irty"}}},
-			{"line #":6,"catname":"Princess","catsex":"female","owners":"Alice,Mike","ownerblock":"C2","huntblock":"C3","huntdate":"2019-01-09 09:45","preytype":"amphibian","preysubtype":"frog","preymass":0.7,"nested":{"random":{"id":"34jd"}}}
-		];
+		: [];
 
 	return {
 		template,
 		data,
-		"=": {
-			prop: "extVal",
-			arr: ["a", "b"],
-			fxn: (row) => row.dataProp,
-			nested: {
-				sub: {
-					sub: "extVal"
-				}
-			},
-			loc(row) {
-				return {city: "Test-City"}
-			}
-		},
 	}
 }
 
@@ -40,7 +20,7 @@ tape("A passing test", function(test){
 });
 
 tape("parseTerm should parse terms correctly", function(test){
-	const filler = new Partjson(getOpts({data:[]}))
+	const filler = new Partjson({template:{}, data:[{}]})
 	const [subterm, symbols, tokens, step] = filler.parseTerm("$prop")
 	test.equals(
 		symbols, "$", "symbols from a simple term may have subs"
@@ -64,7 +44,7 @@ tape("parseTerm should parse terms correctly", function(test){
 })
 
 tape(`valFiller[""] should substitute the template input term as-is`, function(test){
-	const filler = new Partjson(getOpts({data:[]}))
+	const filler = new Partjson({template:{}, data:[{}]})
 	const fxnStr = filler.valFiller[""]("prop", {}, false)
 	test.equals(fxnStr({prop: "val"}), "prop", "should return a string value")
 	const fxnNum = filler.valFiller[""](1, {}, false)
@@ -73,7 +53,7 @@ tape(`valFiller[""] should substitute the template input term as-is`, function(t
 })
 
 tape(`valFiller["$"] should substitute a data property`, function(test){
-	const filler = new Partjson(getOpts({data:[]}))
+	const filler = new Partjson({template:{}, data:[{}]})
 	const input0 = {errors: []}
 	const fxn0 = filler.valFiller["$"]("$prop", input0, false)
 	test.deepEquals(
@@ -81,6 +61,7 @@ tape(`valFiller["$"] should substitute a data property`, function(test){
 		[true, true],
 		"should return a string value"
 	)
+
 	const propArr = ["a","b"]
 	test.deepEquals(
 		[fxn0({prop: propArr}) === propArr, !input0.errors.length],
@@ -102,37 +83,24 @@ tape(`valFiller["$"] should substitute a data property`, function(test){
 		[true, true], 
 		"should return a nested property value"
 	)
-	
-	const input3 = {errors: []}
-	const fxn2 = filler.valFiller["$"]("$fxn", input3, true)
-	test.deepEquals(
-		[
-			fxn2({
-				prop: "val", 
-				fxn: (row)=>row.prop
-			}) === "val",
-			!input3.errors.length
-		],
-		[true, true],
-	  "should call a data property as a function to get the substituted value"
-	)
-	test.deepEquals(
-		[
-			fxn2({
-				prop: "dataVal", 
-				fxn: "not a function"
-			}) === undefined, 
-			input3.errors.length > 0
-		],
-		[true, true], 
-	  "should show an error when a property is expected to be a function but it's not"
-	)
-
 	test.end()
 })
 
 tape(`valFiller["="] should substitute an external property`, function(test){
-	const opts = getOpts({data:[]})
+	const opts = {
+		template:{}, 
+		data:[{}], 
+		"=": {
+			prop: "extVal",
+			arr: ["a", "b"],
+			fxn: (row) => row.dataProp,
+			nested: {
+				sub: {
+					sub: "extVal"
+				}
+			}
+		}
+	}
 	const ext = opts["="]
 	const filler = new Partjson(opts)
 	
@@ -167,28 +135,12 @@ tape(`valFiller["="] should substitute an external property`, function(test){
 		[true, true],
 		"should return a nested property value"
 	)
-	
-	const input4 = {errors: []}
-	const fxn4 = filler.valFiller["="]("=fxn", input4, true)
-	test.deepEquals(
-		[fxn4({dataProp: "dataVal"}) === "dataVal", !input4.errors.length],
-		[true, true], 
-		"should call an external property as a function to get the substituted value"
-	)
-
-	const input5 = {errors: []}
-	const fxn5 = filler.valFiller["="]("=arr", input5, true)
-	test.deepEquals(
-		[(typeof fxn5 !== "function" || fxn5({}) === undefined), input5.errors.length > 0],
-		[true, true], 
-		"should show an error when an external property that is not a function has the () symbol"
-	)
 
 	test.end()
 })
 
 tape(`valFiller["@"] should substitute a context property`, function(test){
-	const opts = getOpts({data:[]})
+	const opts = ({template: {}, data:[{}]})
 	const filler = new Partjson(opts)
 	const context = {
 		self: {}, 
@@ -247,78 +199,64 @@ tape(`valFiller["@"] should substitute a context property`, function(test){
 		"@parent.nested.val should get a nested context property"
 	)
 
-	filler.contexts.set(context.parent, {root: context.root, self: context.parent})
-	filler.contexts.set(context.root, {root: context.root, self: context.root})
-	const input5 = {errors: []}
-	const fxn5 = filler.valFiller["@"]("@root.fxn", input5, true)
-	test.deepEquals(
-		[fxn5({dataProp: "dataVal"}, context) === "dataVal", !input5.errors.length],
-		[true, true], 
-		"@root.fxn should call an external property as a function to get the substituted value"
-	)
-	
-	const input6 = {errors: []}
-	const fxn6 = filler.valFiller["@"]("@parent.nested", input6, true)
-	test.deepEquals(
-		[
-			(typeof fxn6 !== "function" || fxn6({dataProp: "dataVal"}, context) === undefined),
-			input6.errors.length > 0
-		],
-		[true, true], 
-		"@parent.nested should show an error when a context property that is not a function is called"
-	)
-	
 	test.end()
 })
 
-tape(`valFiller["&"] should substitute a joined property`, function(test){
-	const opts = getOpts()
+tape(`valFiller["."] should not convert a substituted property`, function(test){
+	const opts = ({template: {}, data:[{}]})
 	const filler = new Partjson(opts)
-	filler.joins = new Map()
-	const loc = {
-		city: "Test-City",
-		nested: {
-			val: "A1"
-		},
-		fxn(row) {
-			return row.dataProp
-		}
-	}
-	filler.joins.set("loc", loc)
 	const input0 = {errors: []}
-	const fxn0 = filler.valFiller["&"]("&loc.city", input0, false)
+	const fxn0 = filler.valFiller["$"]("$prop", input0, false)
 	test.deepEquals(
-		[fxn0({}) === loc.city, !input0.errors.length],
-		[true, true], 
-		"&loc.city should return the joined value"
-	)
-	
-	const input1 = {errors: []}
-	const fxn1 = filler.valFiller["&"]("&loc.nested.val", input1, false)
-	test.deepEquals(
-		[fxn1({}) === loc.nested.val, !input1.errors.length],
-		[true, true], 
-		"&loc.nested.val should get a nested context property"
-	)
-
-	const input2 = {errors: []}
-	const fxn2 = filler.valFiller["&"]("&loc.fxn", input2, true)
-	test.deepEquals(
-		[fxn2({dataProp: "dataVal"}) === "dataVal", !input2.errors.length],
+		[filler.valFiller["."](fxn0, input0) === fxn0, !input0.errors.length],
 		[true, true],
-		"&loc.fxn() should call a joined function to get the substituted value"
+		`"." on $prop should return the substitution function`
 	)
-
-	const input3 = {errors: []}
-	const fxn3 = filler.valFiller["&"]("&loc.nested", input3, true)
-	test.deepEquals(
-		[
-			(typeof fxn2 !== "function" || fxn3({dataProp: "dataVal"}) === undefined),
-			input3.errors.length > 0
-		],
-		[true, true], 
-		"&loc.nested() should show an error when a joined property is not a function"
-	)
-	
 	test.end()
 })
+
+tape(`valFiller[".[]"] should be like "." and not convert to a function`, function(test){
+	const opts = ({template: {}, data:[{}]})
+	const filler = new Partjson(opts)
+	test.equals(
+		filler.valFiller["."],
+		filler.valFiller[".[]"],
+		`The prototypes for "." and ".[]" should be the same.`
+	)
+	test.end()
+})
+
+tape(`valFiller[".()"] should convert a substituted property into a function`, function(test){
+	const opts = ({template: {}, data:[{}]})
+	const filler = new Partjson(opts)
+	const input0 = {errors: []}
+	const fxn0 = filler.valFiller["$"]("$fxn", input0, false)
+	const convFxn0 = filler.valFiller[".()"](fxn0, input0)
+	const fxn = (row) => row.prop
+	const row = {fxn, prop: "dataProp"}
+	const rowFxn = convFxn0(row)
+	test.deepEquals(
+		[rowFxn === fxn, !input0.errors.length],
+		[true, true],
+		`".()" should convert the substituted property into a function`
+	)
+	test.deepEquals(
+		[rowFxn(row) === "dataProp", !input0.errors.length],
+		[true, true],
+		`".()" on $fxn should give a data function that returns the expected result`
+	)
+	test.end()
+})
+
+tape(`valFiller[".(]"] should convert like .()`, function(test){
+	const opts = ({template: {}, data:[{}]})
+	const filler = new Partjson(opts)
+	test.equals(
+		filler.valFiller[".()"],
+		filler.valFiller[".(]"],
+		`The prototypes for ".()" and ".()" should be the same.`
+	)
+	test.end()
+})
+
+
