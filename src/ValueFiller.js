@@ -21,13 +21,17 @@ export default class ValFiller {
     }
   }
 
-  getStringFiller(input, ignore, templateVal, _aggr = "") {
+  getStringFiller(input, ignore, templateVal, _aggr = "") { 
     const [subterm, symbols, tokens] = this.Tree.parseTerm(templateVal)
     const subconv = subterm + tokens.conv
     input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
-    const subsToken = tokens.skip ? symbols : tokens.subs
-    if (subsToken in this) {
-    	const subsFxn = this[subsToken](subterm, input)
+    if (tokens.skip) {
+    	this[tokens.skip](subterm, input)
+    	return
+    }
+    if (tokens.subs in this) {
+  	  //if (typeof templateVal == "string" && templateVal == "$preytype") console.log(subsToken, subterm)
+    	const subsFxn = this[tokens.subs](subterm, input)
     	const convFxn = this["." + tokens.conv](subsFxn, input)
     	if (_aggr == "key") return convFxn
     	const aggr = (_aggr ? _aggr : tokens.aggr) + ',' + tokens.conv
@@ -45,7 +49,7 @@ export default class ValFiller {
     	}
     }
     else if (typeof input.templateVal[0] == 'string') {
-    	this.getStringFiller(input, ignore, input.templateVal[0], "[]")
+    	return this.getStringFiller(input, ignore, input.templateVal[0], "[]")
     }
     else if (Array.isArray(input.templateVal[0])) {
     	return this["[[,]]"](input.templateVal[0], input)
@@ -82,7 +86,6 @@ ValFiller.prototype["#"] = function(subterm, input) {
 	}
   this.Tree.commentedTerms.get(input).values.add(subterm)
 }
-
 /* SUBSTITUTION functions */
 ValFiller.prototype[""] = function(subterm, input) {
   return this.isNumeric(subterm) 
@@ -292,10 +295,10 @@ ValFiller.prototype["[[,]]"] = function (templates, input) {
 }
 
 /* AGGREGATION by OPERATOR */
-ValFiller.prototype["+,"] = function(fxn, input) { 
+ValFiller.prototype["+,"] = function(fxn, input) { if (typeof fxn != 'function') console.log(input.term)
   return (row, key, result, context) => {
     if (!(key in result)) result[key] = 0
-		const value = fxn(row, context); if (input.templateVal == "+1") console.log(value, fxn)
+		const value = fxn(row, context)
 		if (input.ignore(value, key, row, context)) return
     result[key] += +value
   }
@@ -329,9 +332,9 @@ ValFiller.prototype["-,"] = function(fxn, input) {
   }
 }
 
-ValFiller.prototype["-()"] = ValFiller.prototype["-''"]
+ValFiller.prototype["-,()"] = ValFiller.prototype["-''"]
 
-ValFiller.prototype["-[]"] = function(fxn, input) { 
+ValFiller.prototype["-,[]"] = function(fxn, input) { 
   return (row, key, result, context) => {
 		const values = fxn(row, context)
 		if (!Array.isArray(values)) {
@@ -346,9 +349,9 @@ ValFiller.prototype["-[]"] = function(fxn, input) {
   }
 }
 
-ValFiller.prototype["-(]"] = ValFiller.prototype["-[]"]
+ValFiller.prototype["-,(]"] = ValFiller.prototype["-[]"]
 
-ValFiller.prototype["<''"] = function(fxn, input) {
+ValFiller.prototype["<,"] = function(fxn, input) {
   return (row, key, result, context) => {
     const value = +fxn(row, context)
 		if (input.ignore(value, key, row, context)) return
@@ -365,9 +368,9 @@ ValFiller.prototype["<''"] = function(fxn, input) {
   }
 }
 
-ValFiller.prototype["<()"] = ValFiller.prototype["<''"]
+ValFiller.prototype["<,()"] = ValFiller.prototype["<''"]
 
-ValFiller.prototype["<[]"] = function(fxn, input) {
+ValFiller.prototype["<,[]"] = function(fxn, input) {
   return (row, key, result, context) => {
     const values = fxn(row, context)
     if (!Array.isArray(values)) {
@@ -391,9 +394,9 @@ ValFiller.prototype["<[]"] = function(fxn, input) {
   }
 }
 
-ValFiller.prototype["<(]"] = ValFiller.prototype["<[]"]
+ValFiller.prototype["<,(]"] = ValFiller.prototype["<[]"]
 
-ValFiller.prototype[">''"] = function(fxn, input) {
+ValFiller.prototype[">,"] = function(fxn, input) {
   return (row, key, result, context) => {
     const value = +fxn(row, context)
 		if (input.ignore(value, key, row, context)) return
@@ -410,9 +413,9 @@ ValFiller.prototype[">''"] = function(fxn, input) {
   }
 }
 
-ValFiller.prototype[">()"] = ValFiller.prototype[">''"]
+ValFiller.prototype[">,()"] = ValFiller.prototype[">''"]
 
-ValFiller.prototype[">[]"] = function(fxn, input) {
+ValFiller.prototype[">,[]"] = function(fxn, input) {
   return (row, key, result, context) => {
     const values = fxn(row, context)
     if (!Array.isArray(values)) {
@@ -436,4 +439,4 @@ ValFiller.prototype[">[]"] = function(fxn, input) {
   }
 }
 
-ValFiller.prototype[">(]"] = ValFiller.prototype[">[]"]
+ValFiller.prototype[">,(]"] = ValFiller.prototype[">[]"]

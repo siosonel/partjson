@@ -1,5 +1,5 @@
 import KeyFiller from "./KeyFiller"
-import ValFiller from "./ValueFiller"
+import ValFiller from "./ValFiller"
 import Err from "./Err"
 
 /*
@@ -16,9 +16,7 @@ rows. It is thus suitable for partitioning and
 aggregating streaming data. It may also be used
 to parallelize data processing. 
 
-See partjson.html for an example template.
-
-See partjson.readme.txt for more information
+See public/index.html for examples and documentation.
 */
 
 export default class Partjson {

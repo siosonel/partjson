@@ -10,18 +10,10 @@ export default class KeyFiller {
     	this["#"](subterm, input)
     }
     else if (input.keyTokens.subs in this.Tree.valFiller) {
-    	const subconv = subterm + input.keyTokens.conv
-	  	input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
-
-    	const callAsFxn = input.keyTokens.conv == "()" || input.keyTokens.conv == "(]"	
-	  	const subsFxn = this.Tree.valFiller[input.keyTokens.subs](subterm, input, callAsFxn)
-	  	if (!subsFxn) {
-	  		input.errors.push(["key", "UNSUPPORTED-KEY-SUBSTITUTION"])
-	  		return
-	  	}
 	  	const conv = input.keyTokens.conv ? input.keyTokens.conv : "''"
+	  	const convFxn = this.Tree.valFiller.getStringFiller(input, ignore, input.term, "key")
 	  	if (this[conv]) {
-	  		return this[conv](subsFxn, input)
+	  		return this[conv](convFxn, input)
 	  	}
 	  	else {
 	  		input.errors.push(["key", "UNSUPPORTED-KEY-CONVERSION"])
@@ -44,7 +36,7 @@ export default class KeyFiller {
   	const allowed = []
 		for(const key of keys) {
   		if (!input.ignore(key)) {
-  			if (!this.allowedKeyTypes.has(typeof key)) {
+  			if (!this.allowedKeyTypes.has(typeof key)) { console.log([key])
 	      	context.errors.push([input, "INVALID-RESULT-KEY", row])
 	    	}
 	    	else {
@@ -56,23 +48,29 @@ export default class KeyFiller {
 	}
 }
 
-KeyFiller.prototype["''"] = function(subsFxn, input) {
+KeyFiller.prototype["''"] = function(fxn, input) {
   return (row, context) => {
-  	return this.getAllowedKeys([subsFxn(row, context)], row, input, context)
+  	return this.getAllowedKeys([fxn(row, context)], row, input, context)
   }
 }
     
-KeyFiller.prototype["()"] = KeyFiller.prototype["''"]
-
-KeyFiller.prototype["[]"] = function(subsFxn, input) {
-	return (row, context) => {
-  	return this.getAllowedKeys(subsFxn(row, context), row, input, context)
+KeyFiller.prototype["()"] = function(convFxn, input) {
+  return (row, context) => {
+  	const fxn = convFxn(row, context)
+  	return this.getAllowedKeys([fxn(row, context)], row, input, context)
   }
 }
 
-KeyFiller.prototype["(]"] = function(subsFxn, input) {
+KeyFiller.prototype["[]"] = function(fxn, input) {
 	return (row, context) => {
-  	return this.getAllowedKeys(subsFxn(row, context), row, input, context)
+  	return this.getAllowedKeys(fxn(row, context), row, input, context)
+  }
+}
+
+KeyFiller.prototype["(]"] = function(convFxn, input) {
+  return (row, context) => {
+  	const fxn = convFxn(row, context)
+  	return this.getAllowedKeys(fxn(row, context), row, input, context)
   }
 }
 
