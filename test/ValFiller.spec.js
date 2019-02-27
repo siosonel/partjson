@@ -1,8 +1,8 @@
 const tape = require('tape')
 const Partjson = require("../dist/partjson.cjs.js")
 
-tape("A passing test", function(test){
-	test.pass("This test will pass.")
+tape("\n", function(test){
+	test.pass("-***- ValFiller specs -***-")
 	test.end()
 });
 
@@ -14,11 +14,12 @@ tape(`valFiller[","]`, function(test){
 	const row = {prop: "dataProp"}
 	const result = {}
 	aggrFxn0(row, 'key', result)
-	test.deepEquals(
-		[result.key == row.prop, !input0.errors.length],
-		[true, true],
-		`"," should update the result with the substituted or converted value`
+	test.equals(
+		result.key, 
+		row.prop, 
+		`should update the result with the substituted or converted value`
 	)
+	test.true(!input0.errors.length, "no errors")
 	test.end()
 })
 
@@ -60,11 +61,11 @@ tape(`valFiller["[],"]`, function(test){
 	const row = {prop: "dataProp"}
 	const result = {}
 	aggrFxn0(row, 'key', result)
-	test.deepEquals(
-		[Array.isArray(result.key) && result.key[0] == row.prop, !input0.errors.length],
-		[true, true],
-		`"should update the result with the substituted or converted value`
+	test.true(
+		Array.isArray(result.key) && result.key[0] == row.prop,
+		`should update the result with the substituted or converted value`
 	)
+	test.true(!input0.errors.length)
 
 	const template = {test: ["$type", "distinct"]}
 	const data = [{type: "a"}, {type: "a"}, {type: "b"}, {type: "c"}]
