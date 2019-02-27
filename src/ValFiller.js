@@ -1,7 +1,6 @@
 export default class ValFiller {
   constructor(Tree) {
     this.Tree = Tree
-    this.ignore = this.Tree.opts.ignore
   }
 
   getValType(val) {

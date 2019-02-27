@@ -22,6 +22,15 @@ tape("parseTerm", function(test){
 	test.equal(tokens1.stem, "prop")
 	test.equal(tokens1.conv, "(]")
 	test.equal(symbols1, "<=(]", "should correctly parse a complex term")
+
+	const [subterm2, symbols2, tokens2, step2] = conv.parseTerm(Filler, "_:_=prop()")
+	test.equal(tokens2.aggr, "")
+	test.equal(tokens2.subs, "=")
+	test.equal(tokens2.stem, "prop")
+	test.equal(tokens2.conv, "()")
+	test.equal(tokens2.time, "_:_")
+	test.equal(step2, Filler.steps.indexOf("_:_"))
+	test.equal(symbols2, "=()", "should correctly parse a timed term")
 	test.end()
 })
 
