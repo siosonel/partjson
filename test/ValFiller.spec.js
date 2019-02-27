@@ -27,7 +27,7 @@ tape(`valFiller[",()"]`, function(test){
 	test.equals(
 		filler.valFiller[","],
 		filler.valFiller[",()"],
-		`should be the same as ","`
+		`should equal valFiller[","]`
 	)
 	test.end()
 })
@@ -37,7 +37,7 @@ tape(`valFiller[",[]"]`, function(test){
 	test.equals(
 		filler.valFiller[","],
 		filler.valFiller[",[]"],
-		`should be the same as valFiller[","]`
+		`should equal valFiller[","]`
 	)
 	test.end()
 })
@@ -47,7 +47,7 @@ tape(`valFiller[",(]"]`, function(test){
 	test.equals(
 		filler.valFiller[","],
 		filler.valFiller[",(]"],
-		`should be the same as valFiller[","]`
+		`should equal valFiller[","]`
 	)
 	test.end()
 })
@@ -269,12 +269,12 @@ tape(`valFiller["<,[]"]`, function(test){
 	test.end()
 })
 
-tape(`valFiller["<,(]"] should be like ["<,[]"]`, function(test){
+tape(`valFiller["<,(]"]`, function(test){
 	const filler = new Partjson({template: {}, data:[]})
 	test.equals(
 		filler.valFiller["<,[]"],
 		filler.valFiller["<,(]"],
-		`valFiller["<,(]"] == valFiller["<,[]"]`
+		`should equal valFiller["<,[]"]`
 	)
 	test.end()
 })
@@ -319,12 +319,12 @@ tape(`valFiller[">,[]"]`, function(test){
 	test.end()
 })
 
-tape(`valFiller[">,(]"] should be like [">,[]"]`, function(test){
+tape(`valFiller[">,(]"]`, function(test){
 	const filler = new Partjson({template: {}, data:[]})
 	test.equals(
 		filler.valFiller[">,[]"],
 		filler.valFiller[">,(]"],
-		`valFiller[">,(]"] == valFiller[">,[]"]`
+		`should equal valFiller[">,[]"]`
 	)
 	test.end()
 })

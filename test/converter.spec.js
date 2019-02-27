@@ -7,71 +7,52 @@ tape("A passing test", function(test){
 	test.end()
 })
 
-tape("parseTerm should parse terms correctly", function(test){
+tape("parseTerm", function(test){
   const Filler = new Partjson({template:{}, data:[]})
 	const [subterm, symbols, tokens, step] = conv.parseTerm(Filler, "$prop")
-	test.equals(
-		symbols, "$", "symbols from a simple term may have subs"
-	)
-	test.deepEquals(
-		[tokens.aggr, tokens.subs, tokens.stem, tokens.conv], 
-		["", "$", "prop", ""],
-		"tokens from a simple term may have empty aggr and conv"
-	)
+	test.equal(tokens.aggr, "")
+	test.equal(tokens.subs, "$")
+	test.equal(tokens.stem, "prop")
+	test.equal(tokens.conv, "")
+	test.equal(symbols, "$", "should correctly parse a simple term")
 
 	const [subterm1, symbols1, tokens1, step1] = conv.parseTerm(Filler, "<=prop(]")
-	test.equals(
-		symbols1, "<=(]", "symbols from a complex term may have aggr + subs + conv"
-	)
-	test.deepEquals(
-		[tokens1.aggr, tokens1.subs, tokens1.stem, tokens1.conv], 
-		["<", "=", "prop", "(]"],
-		"tokens  from a complex may have aggr, subs, stem, conv"
-	)
+	test.equal(tokens1.aggr, "<")
+	test.equal(tokens1.subs, "=")
+	test.equal(tokens1.stem, "prop")
+	test.equal(tokens1.conv, "(]")
+	test.equal(symbols1, "<=(]", "should correctly parse a complex term")
 	test.end()
 })
 
-tape(`subs[""] should substitute the template input term as-is`, function(test){
+tape(`subs[""]`, function(test){
 	const Filler = new Partjson({template:{}, data:[]})
 	const fxnStr = conv.subs[""](Filler, "prop", {})
-	test.equals(fxnStr({prop: "val"}), "prop", "should return a string value")
-	
+	test.equal(fxnStr({prop: "val"}), "prop", "should return a string value")
 	const fxnNum = conv.subs[""](Filler, 1, {})
-	test.equals(fxnNum({prop: "1"}), 1, "should return a numeric value")
+	test.equal(fxnNum({prop: "1"}), 1, "should substitute the template input term as-is")
 	test.end()
 })
 
-tape(`subs["$"] should substitute a data property`, function(test){
+tape(`subs["$"]`, function(test){
 	const Filler = new Partjson({template:{}, data:[]})
 	const input0 = {errors: []}
 	const fxn0 = conv.subs["$"](Filler, "$prop", input0)
-	test.deepEquals(
-		[fxn0({prop: "dataVal"}) === "dataVal", !input0.errors.length],
-		[true, true],
-		"should return a string value"
-	)
+	test.true(!input0.errors.length, "no errors")
+	test.equal(fxn0({prop: "dataVal"}), "dataVal", "should substitute a data property")
 
 	const propArr = ["a","b"]
-	test.deepEquals(
-		[fxn0({prop: propArr}) === propArr, !input0.errors.length],
-		[true, true],
-		"should return an array value"
-	)
+	test.true(!input0.errors.length, "no errors")
+	test.equal(fxn0({prop: propArr}), propArr, "should return an array value")
 	
 	const propFxn = () => {}
-	test.deepEquals(
-		[fxn0({prop: propFxn}) === propFxn, !input0.errors.length],
-		[true, true], 
-		"should return a function"
-	)
+	test.true(!input0.errors.length, "no errors")
+	test.equal(fxn0({prop: propFxn}), propFxn, "should return a function")
 	
 	const input1 = {errors: []}
 	const fxn1 = conv.subs["$"](Filler, "$prop.sub.sub", input1)
-	test.deepEquals(
-		[fxn1({prop:{sub:{sub:"dataVal"}}}) === "dataVal", !input1.errors.length],
-		[true, true], 
-		"should return a nested property value"
-	)
+	test.true(!input1.errors.length, "no errors")
+	test.equal(fxn1({prop:{sub:{sub:"val"}}}), "val", "should return a nested property value")
 	test.end()
 })
 
@@ -95,40 +76,27 @@ tape(`subs["="] should substitute an external property`, function(test){
 	
 	const input0 = {errors: []}
 	const fxn0 = conv.subs["="](Filler, "=prop", input0)
-	test.deepEquals(
-		[fxn0({}) === ext.prop, !input0.errors.length],
-		[true, true],
-		"should return a string value"
-	)
+	test.true(!input0.errors.length, "no errors")
+	test.equal(fxn0({}), ext.prop, "should return a string value")
 
 	const input1 = {errors: []}
 	const fxn1 = conv.subs["="](Filler, "=arr", input1)
-	test.deepEquals(
-		[fxn1({}) === ext.arr, !input1.errors.length],
-		[true, true], 
-		"should return an array value"
-	)
+	test.true(!input1.errors.length, "no errors")
+	test.equal(fxn1({}), ext.arr, "should return an array value")
 	
 	const input2 = {errors: []}
 	const fxn2 = conv.subs["="](Filler, "=fxn", input2)
-	test.deepEquals(
-		[fxn2({}) === ext.fxn, !input2.errors.length],
-		[true, true],
-		"should return a function"
-	)
+	test.true(!input2.errors.length, "no errors")
+	test.equal(fxn2({}), ext.fxn,"should return a function")
 	
 	const input3 = {errors: []}
 	const fxn3 = conv.subs["="](Filler, "=nested.sub.sub", input1)
-	test.deepEquals(
-		[fxn3({nested:{sub:{sub:"val"}}}) === ext.nested.sub.sub, !input3.errors.length],
-		[true, true],
-		"should return a nested property value"
-	)
-
+	test.true(!input3.errors.length, "no errors")
+	test.equal(fxn3({}), ext.nested.sub.sub, "should return an external nested value")
 	test.end()
 })
 
-tape(`subs["@"] should substitute a context property`, function(test){
+tape(`subs["@"]`, function(test){
 	const Filler = new Partjson({template: {}, data:[]})
 	const context = {
 		self: {}, 
@@ -142,101 +110,75 @@ tape(`subs["@"] should substitute a context property`, function(test){
 		root: {
 			fxn: (row, context) => row.dataProp
 		},
-		Filler: {
+		filler: {
 			errors: []
 		}
 	}
 	const input0 = {errors: []}
 	const fxn0 = conv.subs["@"](Filler, "@", input0)
-	test.deepEquals(
-		[fxn0({}, context) === context.self, !input0.errors.length],
-		[true, true], 
-		"@ should return the result itself"
-	)
+	test.true(!input0.errors.length, "no errors")
+	test.equal(fxn0({}, context), context.self,"@ should return the result itself")
 
 	const input1 = {errors: []}
 	const fxn1 = conv.subs["@"](Filler, "@branch", input1)
-	test.deepEquals(
-		[fxn1({}, context) === context.branch, !input1.errors.length],
-		[true, true], 
-		"@branch should return the result's branch"
-	)
+	test.true(!input1.errors.length, "no errors")
+	test.equal(fxn1({}, context), context.branch, "@branch should return the branch")
 
 	const input2 = {errors: []}
 	const fxn2 = conv.subs["@"](Filler, "@parent", input2)
-	test.deepEquals(
-		[fxn2({}, context) === context.parent, !input2.errors.length],
-		[true, true], 
-		"@parent should return the result's parent"
-	)
+	test.true(!input2.errors.length, "no errors")
+	test.equal(fxn2({}, context), context.parent, "@parent should return the parent")
 	
 	const input3 = {errors: []}
 	const fxn3 = conv.subs["@"](Filler, "@root", input3)
-	test.deepEquals(
-		[fxn3({}, context) === context.root, !input3.errors.length],
-		[true, true], 
-		"@root should return the result's root"
-	)
+	test.true(!input3.errors.length, "no errors")
+	test.equal(fxn3({}, context), context.root, "@root should return the root")
 	
 	const input4 = {errors: []}
 	const fxn4 = conv.subs["@"](Filler, "@parent.nested.val", input4)
-	test.deepEquals(
-		[fxn4({}, context) === context.parent.nested.val, !input4.errors.length],
-		[true, true], 
-		"@parent.nested.val should get a nested context property"
-	)
+	test.true(!input4.errors.length, "no errors")
+	test.equal(fxn4({}, context), context.parent.nested.val, "should return a nested context value")
 
 	test.end()
 })
 
-tape(`conv[""] should not convert a substituted property`, function(test){
+tape(`conv[""]`, function(test){
 	const Filler = new Partjson({template: {}, data:[]})
 	const input0 = {errors: []}
 	const fxn0 = conv.subs["$"](Filler, "$prop", input0)
-	test.deepEquals(
-		[conv.conv[""](fxn0, input0) === fxn0, !input0.errors.length],
-		[true, true],
-		`"." on $prop should return the substitution function`
-	)
+	test.equal(conv.conv[""](fxn0, input0), fxn0, "should not convert a substituted property")
+	test.true(!input0.errors.length, "no errors")
 	test.end()
 })
 
-tape(`conv["[]"] should be like "." and not convert to a function`, function(test){
+tape(`conv["[]"]`, function(test){
 	const Filler = new Partjson({template: {}, data:[]})
-	test.equals(
-		conv.conv[""], conv.conv["[]"], `conv[""] == conv["[]"]`
-	)
+	test.equal(conv.conv[""], conv.conv["[]"], `should equal conv["[]"]`)
 	test.end()
 })
 
-tape(`conv["()"] should call a substituted property as a function to return a value`, function(test){
+tape(`conv["()"]`, function(test){
 	const Filler = new Partjson({template: {}, data:[]})
 	const input0 = {errors: []}
 	const fxn0 = conv.subs["$"](Filler, "$fxn", input0)
 	const convFxn0 = conv.conv["()"](fxn0, input0, {})
 	const fxn = (row) => row.prop
 	const row = {fxn, prop: "dataProp"}
-	const value = convFxn0(row);
+	const value = convFxn0(row)
+	test.true(!input0.errors.length, "no errors")
+	test.equal(value, "dataProp", "should call the substituted property as a function")
 
-	test.deepEquals(
-		[value === "dataProp", !input0.errors.length],
-		[true, true],
-		`"()" should call the substituted property as a function`
-	)
 	const input1 = {errors: []}
 	const fxn1 = conv.subs["$"](Filler, "$prop", input0)
 	const convFxn1 = conv.conv["()"](fxn1, input0, {})
-	test.deepEquals(
-		[typeof convFxn1 != "function" || convFxn1(row) === undefined, input0.errors.length > 0],
-		[true, true],
-		`"()" on a non-function $prop should give an error`
-	)
+	test.true(!input1.errors.length, "no errors")
+	test.equal(convFxn1(row), undefined, "on a non-function $prop should give an error")
 	test.end()
 })
 
-tape(`conv["(]"] should convert like ()`, function(test){
-	test.equals(
-		conv.conv["()"], conv.conv["(]"], `conv["(]"] == conv["()"]`
+tape(`conv["(]"]`, function(test){
+	test.equal(
+		conv.conv["()"], conv.conv["(]"], `should equal conv["()"]`
 	)
 	test.end()
 })
