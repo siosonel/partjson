@@ -18,7 +18,7 @@ export default class KeyFiller {
   	const allowed = []
 		for(const key of keys) {
   		if (!input.ignore(key)) {
-  			if (!this.allowedKeyTypes.has(typeof key)) { console.log([key])
+  			if (!this.allowedKeyTypes.has(typeof key)) {
 	      	context.errors.push([input, "INVALID-RESULT-KEY", row])
 	    	}
 	    	else {
@@ -36,12 +36,7 @@ KeyFiller.prototype[""] = function(fxn, input) {
   }
 }
     
-KeyFiller.prototype["()"] = function(convFxn, input) {
-  return (row, context) => {
-  	const key = convFxn(row, context)
-  	return this.getAllowedKeys([key], row, input, context)
-  }
-}
+KeyFiller.prototype["()"] = KeyFiller.prototype[""]
 
 KeyFiller.prototype["[]"] = function(fxn, input) {
 	return (row, context) => {
@@ -49,9 +44,4 @@ KeyFiller.prototype["[]"] = function(fxn, input) {
   }
 }
 
-KeyFiller.prototype["(]"] = function(convFxn, input) {
-  return (row, context) => {
-  	const keys = convFxn(row, context)
-  	return this.getAllowedKeys(keys, row, input, context)
-  }
-}
+KeyFiller.prototype["(]"] = KeyFiller.prototype["[]"]

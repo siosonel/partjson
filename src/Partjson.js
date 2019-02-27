@@ -34,7 +34,6 @@ export default class Partjson {
     )
 
     this.delimit = "."
-    this.delimit = "."
     this.subsSymbols = ["$", "=", "@", "&"]
     this.convSymbols = ["()", "[]", "(]"] //, "{}", "(}"]
     this.aggrSymbols = ["+", "-", "<", ">"]
