@@ -238,5 +238,22 @@ tape("setFxn", function(test){
 	test.equal(filler['@before'], fxn1, "should set the @before() function")
 	test.equal(filler['@after'], fxn2, "should set the @after() function")
 	test.equal(filler['@done'], fxn3, "should set the @done() function")
+
+	// simulate what happens when setFxn is not called
+	Filler.reserved.setFxn = ()=>{}
+	Filler.refresh()
+	const filler1 = Filler.fillers.get(template)
+	test.notEqual(
+		filler1['@before'], fxn1, 
+		"should be the only method that sets the @before() function"
+	)
+	test.notEqual(
+		filler1['@after'], fxn2, 
+		"should be the only method that sets the @after() function"
+	)
+	test.notEqual(
+		filler1['@done'], fxn3, 
+		"should be the only method that sets the @done() function"
+	)
 	test.end()
-});
+})

@@ -86,6 +86,11 @@ tape("parseTemplate", function(test){
   	"should create a default filler ignore object"
   )
   test.true(filler.steps.length > 0, "should set up a filler's steps")
+
+  // simulate what happens when parseTemplate is not called
+	Filler.parseTemplate = ()=>{}
+	Filler.refresh()
+	test.equal(Filler.fillers.size, 0, "should be the only method that creates fillers")
 	test.end()
 });
 
@@ -173,10 +178,20 @@ tape("postLoop", function(test){
 		{a: {total: 2, pct: 0.2}, b: {total: 4, pct: 0.4}, c: {total: 4, pct: 0.4}},
 		"should apply a function after all the data rows have been looped through"
 	)
+
+	// simulate what happens when postLoop is not called
+	Filler.postLoop = ()=>{}
+	Filler.refresh()
+	test.deepEqual(
+		Filler.tree.byType, 
+		{a: {total: 2}, b: {total: 4}, c: {total: 4}},
+		"should be the only method that applies post-lopp functions"
+	)
+
 	test.end()
 })
 
-tape.only("processResult", function(test){
+tape("processResult", function(test){
 	const Filler = new Partjson({
 		template: {
 			total: "+$count",
@@ -185,16 +200,34 @@ tape.only("processResult", function(test){
 		  	map: [["$type", "+$count"], "map"],
 		  	branch: "@bbranch"
 		  },
-		},
-		data: [
-			{type: "a", count: 1},
-			{type: "a", count: 1},
-			{type: "b", count: 4},
-			{type: "c", count: 4}
-		]
+		}
 	})
+	const data = [
+		{type: "a", count: 1},
+		{type: "a", count: 1},
+		{type: "b", count: 4},
+		{type: "c", count: 4}
+	]
+	Filler.refresh({data})
+
 	test.true(Filler.tree.distinct instanceof Array, "should convert a Set to an array")
 	test.true(Filler.tree.child.map instanceof Array, "should convert a Map to an array")
 	test.true(Filler.tree.child.branch.startsWith("{{ "), "should mark errors by default")
+
+	// simulate what happens when processResult is not called
+	Filler.processResult = ()=>{}
+	Filler.refresh({data})
+	test.true(
+		Filler.tree.distinct instanceof Set, 
+		"should be the only method that converts a result Set into an array"
+	)
+	test.true(
+		Filler.tree.child.map instanceof Map, 
+		"should be the only method that converts a result Map into an array"
+	)
+	test.true(
+		!Filler.tree.child.branch, 
+		"should be the only method that marks errors"
+	)
 	test.end()
 })
