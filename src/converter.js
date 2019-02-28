@@ -89,7 +89,7 @@ export const subs = {
 	  	const nestedProps = subterm.split(Filler.delimit)
 	    const reducer = (resultContext, d) => {
 	    	if (d[0] == "@" && d.length > 1 && !Filler.reserved.contexts.includes(d)) {
-	    		input.errors.push(["val", "UNRECOGNIZED-CONTEXT", input.lineage.join(".")+"."+d])
+	    		input.errors.push(["val", "UNRECOGNIZED-CONTEXT-" + subterm, input.lineage.join(".")+"."+d])
 	    		return [null, null]
 	    	}
 	    	const [result, context] = resultContext
@@ -106,7 +106,7 @@ export const subs = {
 	  	return (row, context) => nestedProps.reduce(reducer, [context.self, context])[0]
 	  }
 	  else if (!Filler.reserved.contexts.includes(subterm)) {
-	  	input.errors.push(["val", "UNRECOGNIZED-CONTEXT"])
+	  	input.errors.push(["val", "UNRECOGNIZED-CONTEXT-" + subterm])
 	  }
 	  else { 
 		  const prop = subterm.slice(1)
