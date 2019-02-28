@@ -4,7 +4,11 @@ export default function converter(Filler, input, ignore, val) {
   
   const subconv = subterm + tokens.conv
   input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
-  if (tokens.subs in subs) {
+  if (tokens.skip) {
+  	subs[tokens.skip](Filler, subterm, input)
+  	return []
+  }
+  else if (tokens.subs in subs) {
   	const subsFxn = subs[tokens.subs](Filler, subterm, input)
   	const convFxn = conv[tokens.conv](subsFxn, input, tokens)
   	return [convFxn, tokens]
@@ -42,12 +46,9 @@ export function parseTerm(Filler, term) {
 export const subs = {
 	"#": function(Filler, subterm, input) {
 		if (!Filler.commentedTerms.has(input)) {
-			Filler.commentedTerms.set(input, {
-				keys: new Set(),
-				values: new Set()
-			})
+			Filler.commentedTerms.set(input, [])
 		}
-	  Filler.commentedTerms.get(input).values.add(subterm)
+	  Filler.commentedTerms.get(input).push(subterm)
 	},
 	"": function(Filler, subterm, input) {
 	  return Filler.isNumeric(subterm) 

@@ -24,8 +24,7 @@ export default class Partjson {
   constructor(opts={}) {
     this.defaultOpts = {
       template: {},
-      "=": {},
-      ignore: []
+      "=": {}
     }
 
     this.opts = Object.assign(
@@ -59,9 +58,6 @@ export default class Partjson {
   refresh(opts={}) {
   	Object.assign(this.opts,opts)
     this.errors.clear(this.opts.template["@errmode"])
-  	if (this.opts.template['@delimit']) {
-  		this.delimit = this.opts.template['@delimit']
-  	}
   	if (this.opts.template['@delimit']) {
   		this.delimit = this.opts.template['@delimit']
   	}
