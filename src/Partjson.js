@@ -134,7 +134,7 @@ export default class Partjson {
   }
 
   add(rows, refreshErrors = true) {
-  	if (refreshErrors) error.clear()
+  	if (refreshErrors) this.errors.clear()
   	this.joins.clear()
     for(const row of rows) {
       this.processRow(row, this.opts.template, this.tree)

@@ -7,7 +7,7 @@ tape("\n", function(test){
 });
 
 tape("constructor", function(test){
-	const filler = new Partjson({})
+	const filler = new Partjson()
 	test.deepEqual(
 		filler.reserved.contexts,
 		["@branch", "@parent", "@root", "@self"],
@@ -27,13 +27,13 @@ tape("constructor", function(test){
 })
 
 tape("trueFxn", function(test){
-	const filler = new Partjson({})
+	const filler = new Partjson()
   test.equal(filler.reserved.trueFxn(false), true, "should always return true")
 	test.end()
 })
 
 tape("notDefined", function(test){
-	const filler = new Partjson({})
+	const filler = new Partjson()
   test.equal(filler.reserved.notDefined(undefined), true, "should be true for undefined")
   test.equal(filler.reserved.notDefined("a"), false, "should be false for any defined terms")
 	test.end()
@@ -221,4 +221,22 @@ tape(`@ignore()`, function(test){
 	test.end()
 })
 
-
+tape("setFxn", function(test){
+	const fxn1 = () => {}
+	const fxn2 = () => {}
+	const fxn3 = () => {}
+	const template = {
+		"@before()": "=fxn1()",
+		"@after()": "=fxn2()",
+		"@done()": "=fxn3()",
+	}
+	const Filler = new Partjson({
+		template,
+		"=": {fxn1, fxn2, fxn3}
+	})
+	const filler = Filler.fillers.get(template)
+	test.equal(filler['@before'], fxn1, "should set the @before() function")
+	test.equal(filler['@after'], fxn2, "should set the @after() function")
+	test.equal(filler['@done'], fxn3, "should set the @done() function")
+	test.end()
+});
