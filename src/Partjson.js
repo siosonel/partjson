@@ -44,6 +44,13 @@ export default class Partjson {
     this.reserved = new Reserved(this)
     this.keyFiller = new KeyFiller(this)
     this.valFiller = new ValFiller(this)
+  	
+  	this.commentedTerms = new Map()
+  	this.joins = new Map()
+  	// fillers will track template parsing metadata
+    this.fillers = new Map()
+    // contexts will track results object metadata
+    this.contexts = new Map() 
     this.refresh()
   }
 
@@ -52,21 +59,11 @@ export default class Partjson {
     this.errors.clear(this.opts.template["@errmode"])
   	if (this.opts.template['@delimit']) {
   		this.delimit = this.opts.template['@delimit']
-  	}
-  	//console.clear()
-  	delete this.commentedTerms
-  	this.commentedTerms = new WeakMap()
-
-  	delete this.joins
-  	this.joins = new Map()
-  	
-  	// fillers will track template parsing metadata
-  	delete this.fillers
-    this.fillers = new Map()
-    
-    // contexts will track results object metadata
-    delete this.context
-    this.contexts = new WeakMap() 
+  	}  	
+    this.commentedTerms.clear()
+    this.joins.clear()
+    this.fillers.clear()
+    this.contexts.clear() 
     
     delete this.tree
     this.tree = this.getEmptyResult()
@@ -173,19 +170,7 @@ export default class Partjson {
 
   processResult(result) {
   	const context = this.contexts.get(result)
-  	if (context && context.filler && context.filler["__:"]) {
-	  	for(const term of context.filler["__:"]) { 
-	  		const input = context.filler.inputs[term];
-	  		if (input.keyFxn && input.valFxn) {
-	        const keys = input.keyFxn(null, context)
-	        for(const key of keys) {
-	          if (input.valFxn) {
-	          	input.valFxn(null, key, result, context)
-	          }
-	        }
-	      }
-	  	}
-	  }
+  	this.postLoop(result, context)
 
   	for(const key in result) {
   		if (result[key] instanceof Set) {
@@ -220,6 +205,21 @@ export default class Partjson {
   		context.done(result)
   	}
   }
+
+  postLoop(result, context) {
+  	if (!context || !context.filler || !context.filler["__:"]) return
+  	for(const term of context.filler["__:"]) { 
+  		const input = context.filler.inputs[term];
+  		if (input.keyFxn && input.valFxn) {
+        const keys = input.keyFxn(null, context)
+        for(const key of keys) {
+          if (input.valFxn) {
+          	input.valFxn(null, key, result, context)
+          }
+        }
+      }
+  	}
+	}
 }
 
 Partjson.prototype.converter = converter

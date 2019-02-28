@@ -41,6 +41,7 @@ Reserved.prototype["@before"] = function (subterm, input) {
 }
 
 Reserved.prototype["@after"] = Reserved.prototype["@before"]
+Reserved.prototype["@done"] = Reserved.prototype["@before"]
 
 Reserved.prototype["@join"] = function (joins, input, filler) {
 	return (row) => {
@@ -78,15 +79,6 @@ Reserved.prototype["@dist"] = function (_subterm, input) {
 	    }
 	  }
   }
-}
-
-Reserved.prototype["@done"] = function (subterm, input) {
-	const fxn = this.Tree.opts["="][subterm.slice(1,-2)]
-	if (!fxn) {
-		input.errors.push(["val", "MISSING-@before-FXN"])
-		return this.trueFxn
-	}
-	else return fxn
 }
 
 Reserved.prototype["@ignore"] = function (template, inheritedIgnore, filler) {

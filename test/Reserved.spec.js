@@ -24,4 +24,18 @@ tape("constructor", function(test){
 		"should set the reserved post-processing functions"
 	)
 	test.end()
-});
+})
+
+tape("trueFxn", function(test){
+	const filler = new Partjson({})
+  test.equal(filler.reserved.trueFxn(false), true, "should always return true")
+	test.end()
+})
+
+tape("notDefined", function(test){
+	const filler = new Partjson({})
+  test.equal(filler.reserved.notDefined(undefined), true, "should be true for undefined")
+  test.equal(filler.reserved.notDefined("a"), false, "should be false for any defined terms")
+	test.end()
+})
+
