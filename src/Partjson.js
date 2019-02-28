@@ -105,12 +105,7 @@ export default class Partjson {
       }
 
       if (symbols == "@()") {
-      	if (this[subterm]) {
-      		filler[subterm] = this[subterm](template[term], input, filler)
-      	}
-      	else {
-      		input.errors.push('key', "UNRECOGNIZED-RESERVED-"+term)
-      	}
+      	this.reserved.setFxn(subterm, input, filler, templateVal)
       }
       else {
 	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input, ignore)

@@ -13,6 +13,15 @@ export default class Reserved {
     ]
 	}
 
+	setFxn(subterm, input, filler, templateVal) {
+  	if (this[subterm]) {
+  		filler[subterm] = this[subterm](templateVal, input, filler)
+  	}
+  	else {
+  		input.errors.push('key', "UNRECOGNIZED-RESERVED-"+term)
+  	}
+	}
+
   trueFxn() {
   	return true
   }
@@ -54,7 +63,7 @@ Reserved.prototype["@join"] = function (joins, input, filler) {
 
 Reserved.prototype["@dist"] = function (_subterm, input) {
 	const subterm = Array.isArray(_subterm) ? _subterm[0] : _subterm
-	const subsFxn = converter.subs["@"](this, subterm)
+	const subsFxn = this.Tree.converter.subs["@"](this.Tree, subterm)
 	return (context) => {
 	  context["@dist"] = (result) => {
 	  	const target = subsFxn(null, context)
