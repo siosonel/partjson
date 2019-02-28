@@ -1,6 +1,6 @@
 export default function converter(Filler, input, ignore, val) { 
   const [subterm, symbols, tokens] = parseTerm(Filler, val)
-  if (Filler.reservedOpts.includes(subterm)) return []
+  if (Filler.reserved.opts.includes(subterm)) return []
   
   const subconv = subterm + tokens.conv
   input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
@@ -51,7 +51,7 @@ export const subs = {
 	  Filler.commentedTerms.get(input).push(subterm)
 	},
 	"": function(Filler, subterm, input) {
-	  return Filler.isNumeric(subterm) 
+	  return Filler.valFiller.isNumeric(subterm) 
 	    ? () => +subterm
 	    : () => subterm
 	},
@@ -81,14 +81,14 @@ export const subs = {
 	  return (row) => prop
 	},
 	"@": function(Filler, subterm, input) {
-		if (Filler.reservedOpts.includes(subterm)) return
+		if (Filler.reserved.opts.includes(subterm)) return
 	  if (subterm == "@" || subterm == "@" + Filler.delimit) {
 	  	return (row, context) => context.self
 	  }
 	  else if (subterm.includes(Filler.delimit)) {
 	  	const nestedProps = subterm.split(Filler.delimit)
 	    const reducer = (resultContext, d) => {
-	    	if (d[0] == "@" && d.length > 1 && !Filler.reservedContexts.includes(d)) {
+	    	if (d[0] == "@" && d.length > 1 && !Filler.reserved.contexts.includes(d)) {
 	    		input.errors.push(["val", "UNRECOGNIZED-CONTEXT", input.lineage.join(".")+"."+d])
 	    		return [null, null]
 	    	}
@@ -105,7 +105,7 @@ export const subs = {
 	    }
 	  	return (row, context) => nestedProps.reduce(reducer, [context.self, context])[0]
 	  }
-	  else if (!Filler.reservedContexts.includes(subterm)) {
+	  else if (!Filler.reserved.contexts.includes(subterm)) {
 	  	input.errors.push(["val", "UNRECOGNIZED-CONTEXT"])
 	  }
 	  else { 

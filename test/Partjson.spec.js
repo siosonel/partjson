@@ -15,26 +15,14 @@ tape("constructor", function(test){
 	test.deepEqual(filler.aggrSymbols, ["+", "-", "<", ">"], "should set aggregation symbols")
 	test.deepEqual(filler.timeSymbols, [":__", "_:_", "__:"], "should set timing symbols")
 	test.deepEqual(filler.skipSymbols, ["#"], "should set skip symbols")
-	test.deepEqual(
-		filler.reservedContexts,
-		["@branch", "@parent", "@root", "@self"],
-		"should set the reserved contexts"
-	)
-  test.deepEqual(
-		filler.reservedFilters,
-		["@before()", "@join()", "@ignore()"],
-		"should set the reserved filters"
-	)
-  test.deepEqual(
-		filler.reservedPost, 
-		["@after()", "@dist()", "@end()"],
-		"should set the reserved post-processing functions"
-	)
+	/*
+	
+	*/
 	test.deepEqual(filler.steps, [":__", "", "_:_"], "should set ordered steps")
 	test.end()
 })
 
-tape.only("refresh", function(test){
+tape("refresh", function(test){
 	const template = {
 		"@join()": {
 			loc: "=loc()"

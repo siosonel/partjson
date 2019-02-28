@@ -1,3 +1,4 @@
+import Reserved from "./Reserved"
 import KeyFiller from "./KeyFiller"
 import ValFiller from "./ValFiller"
 import Err from "./Err"
@@ -38,18 +39,9 @@ export default class Partjson {
     this.aggrSymbols = ["+", "-", "<", ">"]
     this.timeSymbols = [":__", "_:_", "__:"]
     this.skipSymbols = ["#"]
-    this.reservedOpts = ["@delimit", "@errmode"]
-    this.reservedContexts = ["@branch", "@parent", "@root", "@self"]
-    this.reservedFilters = ["@before()", "@join()", "@ignore()"]
-    this.reservedPost = ["@after()", "@dist()", "@end()"]
-    this.reservedTerms = [
-      ...this.reservedOpts,
-      ...this.reservedContexts,
-      ...this.reservedFilters,
-      ...this.reservedPost
-    ]
     this.steps = [":__", "", "_:_"]
     this.errors = new Err(this)
+    this.reserved = new Reserved(this)
     this.keyFiller = new KeyFiller(this)
     this.valFiller = new ValFiller(this)
     this.refresh()
@@ -78,7 +70,7 @@ export default class Partjson {
     
     delete this.tree
     this.tree = this.getEmptyResult()
-    this.parseTemplate(this.opts.template, {"@": this.notDefined})
+    this.parseTemplate(this.opts.template, {"@": this.reserved.notDefined})
 
     if (this.opts.data) {
     	this.add(this.opts.data, false)
@@ -89,11 +81,11 @@ export default class Partjson {
   parseTemplate(template, inheritedIgnore, lineage=[]) {
     const filler = Object.create(null)
     filler.inputs = Object.create(null)
-    filler["@before"] = this.trueFxn
-    filler["@after"] = this.trueFxn
+    filler["@before"] = this.reserved.trueFxn
+    filler["@after"] = this.reserved.trueFxn
     filler["__:"] = []
     filler.errors = []
-    const ignore = this["@ignore"](template, inheritedIgnore, filler)
+    const ignore = this.reserved["@ignore"](template, inheritedIgnore, filler)
     filler["@ignore"] = ignore
     this.fillers.set(template, filler)
 
@@ -233,111 +225,6 @@ export default class Partjson {
   		context.done(result)
   	}
   }
-
-  trueFxn() {
-  	return true
-  }
-
-  notDefined(value) {
-  	return typeof value === "undefined"
-  }
-
-  isNumeric(d) {
-    return !isNaN(parseFloat(d)) && isFinite(d) && d!==''
-  }
 }
 
 Partjson.prototype.converter = converter
-
-Partjson.prototype["@before"] = function (subterm, input) {
-	const fxn = this.opts["="][subterm.slice(1,-2)]
-	if (!fxn) {
-		input.errors.push(["val", "MISSING-@before-FXN"])
-		return this.trueFxn
-	}
-	else return fxn
-}
-
-Partjson.prototype["@after"] = Partjson.prototype["@before"]
-
-Partjson.prototype["@join"] = function (joins, input, filler) {
-	return (row) => {
-		let ok = true
-		for(const alias in joins) {
-			const fxnName = joins[alias].slice(1,-2)
-			const fxn = this.opts["="][fxnName]
-			if (!fxn) {
-				input.errors.push(["val", "MISSING-@join-FXN", fxnName])
-			}
-			else {
-				const keyVals = fxn(row)
-				if (keyVals) this.joins.set(alias, keyVals)
-				else ok = false
-			}
-		}
-		return ok
-	}
-}
-
-Partjson.prototype["@dist"] = function (_subterm, input) {
-	const subterm = Array.isArray(_subterm) ? _subterm[0] : _subterm
-	const subsFxn = converter.subs["@"](this, subterm)
-	return (context) => {
-	  context["@dist"] = (result) => {
-	  	const target = subsFxn(null, context)
-	  	if (!target) {
-	  		context.errors.push([input, "MISSING-DIST-TARGET", subterm])
-	  	}
-	  	else if (Array.isArray(target)) {
-	  		target.push(result)
-	  	}
-	    else {
-	    	target[subterm] = result
-	    }
-	  }
-  }
-}
-
-Partjson.prototype["@done"] = function (subterm, input) {
-	const fxn = this.opts["="][subterm.slice(1,-2)]
-	if (!fxn) {
-		input.errors.push(["val", "MISSING-@before-FXN"])
-		return this.trueFxn
-	}
-	else return fxn
-}
-
-Partjson.prototype["@ignore"] = function (template, inheritedIgnore, filler) {
-	if (!template["@ignore()"]) {
-		return inheritedIgnore
-	}
-	const nonObj = Array.isArray(template["@ignore()"]) 
-		|| typeof template["@ignore()"] == "string"
-	const ignore = nonObj
-		? {"@": template["@ignore()"]}
-		: template["@ignore()"]
-
-	const fxns = {}
-	for(const term in ignore) {
-		const ignoreVal = ignore[term]
-		if (Array.isArray(ignoreVal)) {
-			fxns[term] = (value) => ignoreVal.includes(value)
-		}
-		else if (typeof ignoreVal == 'string' && ignoreVal[0] == "=") {
-			const fxn = this.opts["="][ignoreVal.slice(1,-2)]
-  	  if (!fxn) {
-  	  	filler.errors.push(["val", "MISSING-@ignore()-FXN", ignoreVal])
-  	  	fxns[term] = this.notDefined
-  	  }
-  	  else {
-  	  	fxns[term] = fxn
-  		}
-		} 
-		else {
-			filler.errors.push(["val", "UNSUPPORTED-@ignore()-VALUE", ignoreVal])
-  	  fxns[term] = this.notDefined
-		}
-	}
-
-	return nonObj ? fxns : Object.assign({}, inheritedIgnore, fxns)
-}

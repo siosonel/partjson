@@ -14,10 +14,10 @@ tape("constructor", function(test){
 
 tape(`valFiller.isNumeric`, function(test) {
 	const filler = new Partjson()
-	test.true(filler.isNumeric("99"))
-	test.true(filler.isNumeric("0"))
-	test.false(filler.isNumeric(null))
-	test.false(filler.isNumeric(""))
+	test.true(filler.valFiller.isNumeric("99"))
+	test.true(filler.valFiller.isNumeric("0"))
+	test.false(filler.valFiller.isNumeric(null))
+	test.false(filler.valFiller.isNumeric(""))
 	test.end()
 })
 
