@@ -257,10 +257,10 @@ demo([{
 	section: "skip",
 	id: "skip-other-inputs",
 	title: `A <span class="code-snippet">*</span> focus prefix will skip all other inputs,
-		except for the input(s) and its descendants. NOTE: When inputs in different lineages 
-		have the same result term, the last input lineage with the 
-		<span class="code-snippet">*</span> prefix will overwrite the other input results.
-		`,
+		except for the marked input(s) and its descendants. NOTE: When inputs in 
+		different lineages have the same result term, the result from the last input 
+		lineage with the <span class="code-snippet">*</span> prefix 
+		will overwrite the other similarly marked input results.`,
 	template: {
   	"no": {
   		"no": {
