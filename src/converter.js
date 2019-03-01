@@ -10,6 +10,7 @@ export default function converter(Filler, input, ignore, val) {
   }
   else if (tokens.subs in subs) {
   	const subsFxn = subs[tokens.subs](Filler, subterm, input)
+  	if (!subsFxn) return []
   	const convFxn = conv[tokens.conv](subsFxn, input, tokens)
   	return [convFxn, tokens]
   }

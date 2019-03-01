@@ -3,23 +3,21 @@ export default class Err {
     this.Tree = Tree
     this.allErrSet = new Set()
     this.allErrObj = Object.create(null)
-    this.quiet = false
     // modes: 
     // "" silent or unmarked
     // {} group errors by message as keys
     // [] simply list errors 
     this.mode = {
-    	"input": "{}", // include message directly in input key or values
-    	"result": "{}-", // create an @errors property on result, but exclude those marked in inputs
-    	"root": "", 
-    	"console": "{}", // print @errors object in console
+    	input: "{}", // include message directly in input key or values
+    	result: "{}-", // create an @errors property on result, but exclude those marked in inputs
+    	root: "", // do not show errorsAll in root object
+    	console: "{}", // print @errors object in console
     }
     this.modeKeys = ["input", "result", "root", "console"]
     this.setMode()
   }
 
   setMode(mode={}) {
-    if (!mode) return
     if (Array.isArray(mode)) {
     	this.modeKeys.forEach((key, i) => this.mode[key] = mode[i])
     }
@@ -32,7 +30,7 @@ export default class Err {
     }
   }
 
-  clear(mode) {
+  clear(mode={}) {
     this.allErrSet.clear()
     this.allErrObj = Object.create(null)
     this.setMode(mode)
@@ -130,7 +128,7 @@ export default class Err {
     }
   }
 
-  log(fillers) {
+  log() {
   	const allErrArr = [...this.allErrSet] 
     if (!allErrArr.length) return
     if (this.mode.root) {

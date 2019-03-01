@@ -185,7 +185,7 @@ tape("postLoop", function(test){
 	test.deepEqual(
 		Filler.tree.byType, 
 		{a: {total: 2}, b: {total: 4}, c: {total: 4}},
-		"should be the only method that applies post-lopp functions"
+		"should be the only method that applies post-loop functions"
 	)
 
 	test.end()
@@ -200,6 +200,9 @@ tape("processResult", function(test){
 		  	map: [["$type", "+$count"], "map"],
 		  	branch: "@bbranch"
 		  },
+		  "@errmode": {
+		  	console: ""
+		  }
 		}
 	})
 	const data = [
@@ -227,7 +230,7 @@ tape("processResult", function(test){
 	)
 	test.true(
 		!Filler.tree.child.branch, 
-		"should be the only method that marks errors"
+		"should be the only method that calls the errors marker"
 	)
 	test.end()
 })
