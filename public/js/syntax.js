@@ -251,4 +251,26 @@ demo([{
   	  "count": "#+1"
   	}
   }
+},{
+	symbol: "*",
+	tokenType: "skip",
+	section: "skip",
+	id: "skip-other-inputs",
+	title: `A <span class="code-snippet">*</span> focus prefix will skip all other inputs,
+		except for the input(s) and its descendants. NOTE: When inputs in different lineages 
+		have the same result term, the last input lineage with the 
+		<span class="code-snippet">*</span> prefix will overwrite the other input results.
+		`,
+	template: {
+  	"no": {
+  		"no": {
+  			"no": {
+  				"*yes": {
+  					"total": "+1"
+  				}
+  			}
+  		}
+  	},
+  	"also-no": "+1"
+  }
 }], window.location.search.includes("reveal="))

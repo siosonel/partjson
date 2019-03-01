@@ -38,7 +38,7 @@ export default class Partjson {
     this.convSymbols = ["()", "[]", "(]"] //, "{}", "(}"]
     this.aggrSymbols = ["+", "-", "<", ">"]
     this.timeSymbols = [":__", "_:_", "__:"]
-    this.skipSymbols = ["#"]
+    this.skipSymbols = ["#", "*"]
     this.steps = [":__", "", "_:_"]
     this.errors = new Err(this)
     this.reserved = new Reserved(this)
@@ -67,7 +67,15 @@ export default class Partjson {
     
     delete this.tree
     this.tree = this.getEmptyResult()
+    this.focusTemplate = Object.create(null)
     this.parseTemplate(this.opts.template, {"@": this.reserved.notDefined})
+    if (!Object.keys(this.focusTemplate).length) {
+    	this.template = this.opts.template
+    } 
+    else {
+    	this.parseTemplate(this.focusTemplate, {"@": this.reserved.notDefined})
+    	this.template = this.focusTemplate
+    }
 
     if (this.opts.data) {
     	this.add(this.opts.data, false)
@@ -105,7 +113,7 @@ export default class Partjson {
       	this.reserved.setFxn(subterm, input, filler, templateVal)
       }
       else {
-	      input.keyFxn = this.keyFiller.getFxn(subterm, symbols, input, ignore)
+	      input.keyFxn = this.keyFiller.getFxn(input, ignore)
 	      if (input.keyFxn) {
 	        input.valFxn = this.valFiller.getFxn(input, ignore)
 	      	if (keyTokens.time == "__:") {
@@ -137,7 +145,7 @@ export default class Partjson {
   	if (refreshErrors) this.errors.clear()
   	this.joins.clear()
     for(const row of rows) {
-      this.processRow(row, this.opts.template, this.tree)
+      this.processRow(row, this.template, this.tree)
       this.joins.clear()
     }
     this.processResult(this.tree)
@@ -152,7 +160,7 @@ export default class Partjson {
   	if (filler["@join"] && !filler["@join"](row)) return
   	for(const step of filler.steps) {
 	    for(const term of step) { 
-	      const input = filler.inputs[term]; 
+	      const input = filler.inputs[term]
 	      if (input.keyFxn && input.valFxn) {
 	        const keys = input.keyFxn(row, context)
 	        for(const key of keys) {

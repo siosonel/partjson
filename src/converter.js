@@ -8,7 +8,7 @@ export default function converter(Filler, input, ignore, val) {
   	subs[tokens.skip](Filler, subterm, input)
   	return []
   }
-  else if (tokens.subs in subs) {
+  if (tokens.subs in subs) {
   	const subsFxn = subs[tokens.subs](Filler, subterm, input)
   	if (!subsFxn) return []
   	const convFxn = conv[tokens.conv](subsFxn, input, tokens)
@@ -20,7 +20,7 @@ export default function converter(Filler, input, ignore, val) {
 
 /*** the heart of the code ***/
 export function parseTerm(Filler, term) {
-	const skip = Filler.skipSymbols.includes(term[0]) ? "#" : ""
+	const skip = Filler.skipSymbols.includes(term[0]) ? term[0] : ""
 	const colons = term.slice(0,3)
 	const time = Filler.timeSymbols.includes(colons) ? colons : "";
 	const start = skip.length + time.length
@@ -38,7 +38,7 @@ export function parseTerm(Filler, term) {
         	? term.slice(start)
         	: term;
   const subs = Filler.subsSymbols.includes(subterm[0]) ? subterm[0] : ""
-  const symbols = skip ? skip : aggr + subs + conv
+  const symbols = aggr + subs + conv
   const stem = subs ? subterm.slice(1) : subterm
   const tokens = {skip, time, aggr, subs, stem, conv, subterm}
   return [subterm, symbols, tokens, Filler.steps.indexOf(time)]
@@ -50,6 +50,9 @@ export const subs = {
 			Filler.commentedTerms.set(input, [])
 		}
 	  Filler.commentedTerms.get(input).push(subterm)
+	},
+	"*": function(Filler, subterm, input) {
+	  Filler.focusTemplate[input.term.slice(1)] = input.templateVal
 	},
 	"": function(Filler, subterm, input) {
 	  return Filler.valFiller.isNumeric(subterm) 

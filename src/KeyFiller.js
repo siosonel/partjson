@@ -4,7 +4,7 @@ export default class KeyFiller {
     this.allowedKeyTypes = new Set(["string", "number"])
   }
 
-  getFxn(subterm, symbols, input, ignore) {  	
+  getFxn(input, ignore) {  	
 		const [convFxn, tokens] = this.Pj.converter.default(this.Pj, input, ignore, input.term)
 		if (!convFxn) return
   	return this[tokens.conv](convFxn, input)

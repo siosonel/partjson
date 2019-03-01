@@ -71,7 +71,7 @@ tape(`getFxn`, function(test){
   const ignore = {"@": ()=>false}
   const term = "$prop"
   const input0 = {errors: [], term}
-  const fxn0 = filler.keyFiller.getFxn(term, "$", input0, ignore)
+  const fxn0 = filler.keyFiller.getFxn(input0, ignore)
   test.deepEqual(fxn0({prop:"a"}), ["a"], "should return an array of one key")
   test.end()
 })

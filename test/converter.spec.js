@@ -34,6 +34,45 @@ tape("parseTerm", function(test){
 	test.end()
 })
 
+tape(`subs["#"]`, function(test){
+	const Filler = new Partjson({
+		template: {
+			"#no": {
+				"no": {
+					"yes": "test"
+				}
+			}
+		},
+		data: [{},{}]
+	})
+	test.deepEqual(Filler.tree, {}, "should cause prefixed inputs to be skipped")
+	test.end()
+})
+
+tape(`subs["*"]`, function(test){
+	const Filler = new Partjson({
+		template: {
+			"no": {
+				"no": {
+					"*yes": "test"
+				}
+			}
+		},
+		data: [{},{}]
+	})
+	test.deepEqual(Filler.tree, {yes:"test"}, "should skip non-focused inputs")
+
+	// stub
+	Filler.converter.subs["*"] = ()=>{}
+	Filler.refresh()
+	test.notDeepEqual(
+		Filler.tree, 
+		{yes:"test"}, 
+		"should be the only method that focuses the result on selected inputs"
+	)
+	test.end()
+})
+
 tape(`subs[""]`, function(test){
 	const Filler = new Partjson()
 	const input0 = {errors: []}

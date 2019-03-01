@@ -14,7 +14,7 @@ tape("constructor", function(test){
 	test.deepEqual(Filler.convSymbols, ["()", "[]", "(]"], "should set conversion symbols")
 	test.deepEqual(Filler.aggrSymbols, ["+", "-", "<", ">"], "should set aggregation symbols")
 	test.deepEqual(Filler.timeSymbols, [":__", "_:_", "__:"], "should set timing symbols")
-	test.deepEqual(Filler.skipSymbols, ["#"], "should set skip symbols")
+	test.deepEqual(Filler.skipSymbols, ["#", "*"], "should set skip symbols")
 	test.deepEqual(Filler.steps, [":__", "", "_:_"], "should set ordered steps")
 	test.end()
 })
