@@ -1,6 +1,6 @@
 export default class Err {
-	constructor(Tree) {
-    this.Tree = Tree
+	constructor(Pj) {
+    this.Pj = Pj
     this.allErrSet = new Set()
     this.allErrObj = Object.create(null)
     // modes: 
@@ -44,7 +44,7 @@ export default class Err {
 			for(const err of input.errors) {
 	  		const [type, message, row] = err
 	      if (type == "key") {
-					this.track(currLog, err, input.lineage.join(this.Tree.delimit))
+					this.track(currLog, err, input.lineage.join(this.Pj.delimit))
 	      	if (this.mode.input) {
 	      		result["{{ " + message + " }} " + input.term] = input.templateVal
 	      	}
@@ -133,7 +133,7 @@ export default class Err {
     if (!allErrArr.length) return
     if (this.mode.root) {
     	const mode = this.mode.root.slice(0,2)
-    	this.Tree.tree["@errorsAll"] =  mode == "[]" 
+    	this.Pj.tree["@errorsAll"] =  mode == "[]" 
     		? allErrArr
     		: this.allErrObj
     }

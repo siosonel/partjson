@@ -1,6 +1,6 @@
 export default class Reserved {
-	constructor(Tree) {
-		this.Tree = Tree
+	constructor(Pj) {
+    this.Pj = Pj
     this.opts = ["@delimit", "@errmode"]
     this.contexts = ["@branch", "@parent", "@root", "@self"]
     this.filters = ["@before()", "@join()", "@ignore()"]
@@ -32,7 +32,7 @@ export default class Reserved {
 }
 
 Reserved.prototype["@before"] = function (subterm, input) {
-	const fxn = this.Tree.opts["="][subterm.slice(1,-2)]
+	const fxn = this.Pj.opts["="][subterm.slice(1,-2)]
 	if (!fxn) {
 		input.errors.push(["val", "MISSING-@before-FXN"])
 		return this.trueFxn
@@ -48,13 +48,13 @@ Reserved.prototype["@join"] = function (joins, input, filler) {
 		let ok = true
 		for(const alias in joins) {
 			const fxnName = joins[alias].slice(1,-2)
-			const fxn = this.Tree.opts["="][fxnName]
+			const fxn = this.Pj.opts["="][fxnName]
 			if (!fxn) {
 				input.errors.push(["val", "MISSING-@join-FXN", fxnName])
 			}
 			else {
 				const keyVals = fxn(row)
-				if (keyVals) this.Tree.joins.set(alias, keyVals)
+				if (keyVals) this.Pj.joins.set(alias, keyVals)
 				else ok = false
 			}
 		}
@@ -64,7 +64,7 @@ Reserved.prototype["@join"] = function (joins, input, filler) {
 
 Reserved.prototype["@dist"] = function (_subterm, input) {
 	const subterm = Array.isArray(_subterm) ? _subterm[0] : _subterm
-	const subsFxn = this.Tree.converter.subs["@"](this.Tree, subterm)
+	const subsFxn = this.Pj.converter.subs["@"](this.Pj, subterm)
 	return (context) => {
 	  context["@dist"] = (result) => {
 	  	const target = subsFxn(null, context)
@@ -98,7 +98,7 @@ Reserved.prototype["@ignore"] = function (template, inheritedIgnore, filler) {
 			fxns[term] = (value) => ignoreVal.includes(value)
 		}
 		else if (typeof ignoreVal == 'string' && ignoreVal[0] == "=") {
-			const fxn = this.Tree.opts["="][ignoreVal.slice(1,-2)]
+			const fxn = this.Pj.opts["="][ignoreVal.slice(1,-2)]
   	  if (!fxn) {
   	  	filler.errors.push(["val", "MISSING-@ignore()-FXN", ignoreVal])
   	  	fxns[term] = this.notDefined

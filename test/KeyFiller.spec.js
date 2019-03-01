@@ -9,7 +9,7 @@ tape("\n", function(test){
 tape("constructor", function(test){
 	const filler = new Partjson()
 	const kf = filler.keyFiller
-	test.equal(kf.Tree, filler, "should set this.Tree to the Partjson instance")
+	test.equal(kf.Pj, filler, "should set this.Pj to the Partjson instance")
 	test.true(kf.allowedKeyTypes instanceof Set, "should set allowedKeyTypes")
 	test.true(kf.allowedKeyTypes.has("string"), "should allow string keys")
 	test.true(kf.allowedKeyTypes.has("number"), "should allow number keys")

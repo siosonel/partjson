@@ -9,7 +9,7 @@ tape("\n", function(test){
 tape("constructor", function(test){
 	const filler = new Partjson()
 	const err = filler.errors
-	test.equal(err.Tree, filler, "should reference the Tree instance")
+	test.equal(err.Pj, filler, "should reference the Pj instance")
   test.true(err.allErrSet instanceof Set, "should set an array error tracker")
   test.equal(Object.keys(err.allErrObj).length, 0, "should set an empty error object tracker")
     // modes: 

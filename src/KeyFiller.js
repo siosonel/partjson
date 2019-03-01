@@ -1,11 +1,11 @@
 export default class KeyFiller { 
-  constructor(Tree) {
-    this.Tree = Tree
+  constructor(Pj) {
+    this.Pj = Pj
     this.allowedKeyTypes = new Set(["string", "number"])
   }
 
   getFxn(subterm, symbols, input, ignore) {  	
-		const [convFxn, tokens] = this.Tree.converter.default(this.Tree, input, ignore, input.term)
+		const [convFxn, tokens] = this.Pj.converter.default(this.Pj, input, ignore, input.term)
 		if (!convFxn) return
   	return this[tokens.conv](convFxn, input)
   }

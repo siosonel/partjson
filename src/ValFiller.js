@@ -1,6 +1,6 @@
 export default class ValFiller {
-  constructor(Tree) {
-    this.Tree = Tree
+  constructor(Pj) {
+    this.Pj = Pj
   }
 
   getValType(val) {
@@ -19,7 +19,7 @@ export default class ValFiller {
   }
 
   strFiller(input, ignore, val, _aggr) {
-  	const [convFxn, tokens] = this.Tree.converter.default(this.Tree, input, ignore, val)
+  	const [convFxn, tokens] = this.Pj.converter.default(this.Pj, input, ignore, val)
   	if (!convFxn) return
   	const aggr = (_aggr ? _aggr : tokens.aggr) + ',' + tokens.conv
   	if (aggr in this) {
@@ -39,12 +39,12 @@ export default class ValFiller {
 	}
 
   objFiller(input, ignore, val) {
-  	this.Tree.parseTemplate(val, input.inheritedIgnore, input.lineage)
+  	this.Pj.parseTemplate(val, input.inheritedIgnore, input.lineage)
     return (row, key, result) => {
       if (!(key in result)) {
-        result[key] = this.Tree.getEmptyResult(key, result)
+        result[key] = this.Pj.getEmptyResult(key, result)
       }
-      this.Tree.processRow(row, val, result[key])
+      this.Pj.processRow(row, val, result[key])
     }
   }
 
@@ -116,14 +116,14 @@ ValFiller.prototype["[],[]"] = function(fxn, input) {
 ValFiller.prototype["[],(]"] = ValFiller.prototype["[],[]"]
 
 ValFiller.prototype["[{}]"] = function (template, input) {
-  this.Tree.parseTemplate(template, input.inheritedIgnore, input.lineage)
-  const filler = this.Tree.fillers.get(template);
+  this.Pj.parseTemplate(template, input.inheritedIgnore, input.lineage)
+  const filler = this.Pj.fillers.get(template);
   return (row, key, result) => {
     if (!(key in result)) {
-    	result[key] = this.Tree.getEmptyResult(key, result, true)
+    	result[key] = this.Pj.getEmptyResult(key, result, true)
     }
-    const item = this.Tree.getEmptyResult(result[key].length, result)
-    this.Tree.processRow(row, template, item)
+    const item = this.Pj.getEmptyResult(result[key].length, result)
+    this.Pj.processRow(row, template, item)
     result[key].push(item)
   }
 }

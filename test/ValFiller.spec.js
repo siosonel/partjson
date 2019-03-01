@@ -8,7 +8,7 @@ tape("\n", function(test){
 
 tape("constructor", function(test){
 	const filler = new Partjson({template: {}, data:[]})
-	test.equal(filler.valFiller.Tree, filler, "should set this.Tree to the Partjson instance")
+	test.equal(filler.valFiller.Pj, filler, "should set this.Pj to the Partjson instance")
 	test.end()
 })
 
