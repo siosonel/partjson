@@ -209,6 +209,10 @@ button {
 	overflow: scroll;
 }
 
+.code-comment {
+	color: #aaa;
+}
+
 .tsv {
 	display: none;
 	width: 94%; 

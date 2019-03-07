@@ -43,9 +43,47 @@
 			a JSON-based template to match the intended structure 
 			of data collections and aggregated results. 
     </p>
+
+    <h3 class='section-title'>Usage</h3>
+    <p>
+      <pre class="inputtext" style="width: 90%; margin:auto">
+    	
+      <span class="code-comment">// from your project directory</span>
+      $ npm install git+ssh://git@cmpb-devops.stjude.org:5002/esioson/partjson.git
+
+      <span class="code-comment">// in code file</span>
+      import Partjson from "partjson"
+
+      const Pj = new Partjson({
+        template: {...}
+        <span class="code-comment">// data is optional at instantiation, 
+        // but will trigger processing if provided</span>
+        data: [{...}, ...],
+        "=": {
+          <span class="code-comment">// external functions and properties</span>
+        }
+      })
+
+      <span class="code-comment">// append to processed data</span>
+      Pj.add({
+        data: [
+          {...}, 
+          ...
+        ]
+      })
+
+      <span class="code-comment">// re-parse template, clear processed data</span>
+      Pj.refresh({
+        template: {...} <span class="code-comment">// optional if replacing</span>
+        data: {...}  <span class="code-comment">// optional if replacing</span>
+      })
+      </pre>
+    </p>
     <br/>
-    <p>More details are described in the <a href="syntax.html">Syntax</a>
+    <p>
+    	More details are described in the <a href="syntax.html">Syntax</a>
       and <a href="reserved.html">Reserved Terms</a> pages.
+    </p>
 	</section>
 
 	<section id='repository'>
