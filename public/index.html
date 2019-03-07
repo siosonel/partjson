@@ -23,27 +23,64 @@
 			<a href='reserved.html' class="nav-page">Reserved</a>
 		</div>
 	</div>
-	<nav class="nav-bar" 
-		onmouseleave="collapseSymbols()">
+	<nav class="nav-bar">
 		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
-			<!--<div class="nav-col" id="nav-col-skip">
-				<div class="nav-tab" > Syntax </div>
+			<div class="nav-col" id="nav-col-intro">
+				<div class="nav-tab" onclick="goToSection('intro')">[intro]</div>
 			</div>
-			<div class="nav-col" id="nav-col-time">
-				<div class="nav-tab"> Reserved </div>
-			</div>-->
+			<div class="nav-col" id="nav-col-Source">
+				<div class="nav-tab" onclick="goToSection('source')">[source]</div>
+			</div>
+			<div class="nav-col" id="nav-col-examples">
+				<div class="nav-tab" onclick="goToSection('examples')">[examples]</div>
+			</div>
+			<div class="nav-col" id="nav-col-usage">
+				<div class="nav-tab" onclick="goToSection('usage')">[usage]</div>
+			</div>
 		</div>
 	</nav>
 </div>
 <content>
 	<section id='intro'>
-		<h3 class='section-title'>Basics</h3>
+		<h3 class='section-title'>Introduction</h3>
 		<p>
 			Partjson is a data shaping syntax and utility. It fills 
 			a JSON-based template to match the intended structure 
 			of data collections and aggregated results. 
     </p>
+    <br/>
+    <p>
+    	More details are described in the <a href="syntax.html">Syntax</a>
+      and <a href="reserved.html">Reserved Terms</a> pages.
+    </p>
+	</section>
 
+	<section id='source'>
+		<h3 class='section-title'>Source Code</h3>
+		<p><a href="http://cmpb-devops.stjude.org/gitlab/esioson/partjson" target="new">
+			http://cmpb-devops.stjude.org/gitlab/esioson/partjson</a>
+		</p>
+		<br/>
+	</section>
+
+	<!--
+	<section id='license'>
+		<h3 class='section-title'>License</h3>
+		<p>Provided under the opensource 
+			<a href="https://opensource.org/licenses/MIT">MIT license.</a>
+		</p>
+		<br/>
+	</section>
+	-->
+
+	<section id='examples'>
+		<h3 class='section-title'>Examples</h3>
+		<!--<p>Click the <button class='try-btn' style='position:relative'>try</button> button in 
+		the upper right corner of the examples below.</p>-->
+		<br/>
+	</section>
+
+	<section id='usage'>
     <h3 class='section-title'>Usage</h3>
     <p>
       <pre class="inputtext" style="width: 90%; margin:auto">
@@ -64,57 +101,36 @@
         }
       })
 
-      <span class="code-comment">// append to processed data</span>
+      <span class="code-comment">// append to results</span>
       Pj.add({
-        data: [
-          {...}, 
-          ...
-        ]
+        data: [{...}, ...]
       })
 
-      <span class="code-comment">// re-parse template, clear processed data</span>
+      <span class="code-comment">// re-parse template, clear results</span>
       Pj.refresh({
         template: {...} <span class="code-comment">// optional if replacing</span>
-        data: {...}  <span class="code-comment">// optional if replacing</span>
+        data: [{...}, ...] <span class="code-comment">// optional if replacing</span>
+        "=": {...} <span class="code-comment">// optional if replacing</span>
       })
+
+      <span class="code-comment">// *** Use the results *** </span>
+      <span class="code-comment">// either loop through the results manually</span>
+      for(const geneName in Pj.tree.byGene) {
+        ... 
+      }
+
+      <span class="code-comment">// or if the @dist() keyword was used
+      // to target a @root.results container array</span>
+      viz.renderer(Pj.tree.results)
       </pre>
     </p>
     <br/>
-    <p>
-    	More details are described in the <a href="syntax.html">Syntax</a>
-      and <a href="reserved.html">Reserved Terms</a> pages.
-    </p>
-	</section>
-
-	<section id='repository'>
-		<h3 class='section-title'>Source Code</h3>
-		<p><a href="http://cmpb-devops.stjude.org/gitlab/esioson/partjson" target="new">
-			http://cmpb-devops.stjude.org/gitlab/esioson/partjson</a>
-		</p>
-		<br/>
-	</section>
-
-	<!--
-	<section id='license'>
-		<h3 class='section-title'>License</h3>
-		<p>Provided under the opensource 
-			<a href="https://opensource.org/licenses/MIT">MIT license.</a>
-		</p>
-		<br/>
-	</section>
-	-->
-
-	<section id='quick-examples'>
-		<h3 class='section-title'>Quick Examples</h3>
-		<!--<p>Click the <button class='try-btn' style='position:relative'>try</button> button in 
-		the upper right corner of the examples below.</p>-->
-		<br/>
 	</section>
 </content>
 <script src="./js/demo.js"></script>
 <script>
 demo([{
-	section: "quick-examples",
+	section: "examples",
 	id: "group-by-data-value",
 	title: "Group by data value",
 	template: {
@@ -125,7 +141,7 @@ demo([{
   	}
   }
 },{
-	section: "quick-examples",
+	section: "examples",
 	id: "list-by-value",
 	title: "List by data value",
 	template: {
@@ -137,7 +153,7 @@ demo([{
     ]
   }
 },{
-	section: "quick-examples",
+	section: "examples",
 	id: "min-max-values",
 	title: "Find the minimum and maximum values",
 	template: {
@@ -146,7 +162,7 @@ demo([{
     count: "+1"
   }
 },{
-	section: "quick-examples",
+	section: "examples",
 	id: "map-by-value",
 	title: "Map by data value",
 	template: {
@@ -155,7 +171,7 @@ demo([{
     ]
   }
 },{
-	section: "quick-examples",
+	section: "examples",
 	id: "filter-by-value",
 	title: "Filter by data value",
 	template: {
@@ -175,6 +191,10 @@ demo([{
   	"minimumMass": ">$preymass"
   }
 }], true);
+
+function goToSection(id) { 
+  window.location.hash = "#" + id
+}
 </script>
 </body>
 </html>

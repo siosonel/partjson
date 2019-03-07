@@ -211,6 +211,7 @@ button {
 
 .code-comment {
 	color: #aaa;
+	font-style: italic;
 }
 
 .tsv {
