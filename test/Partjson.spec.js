@@ -8,7 +8,7 @@ tape("\n", function(test){
 
 tape("constructor", function(test){
 	const Filler = new Partjson()
-	test.deepEqual(Filler.opts, {template:{}, "=":{}},"should set default opts")
+	test.deepEqual(Filler.opts, {template:'{}', "=":{}},"should set default opts")
 	test.equal(Filler.delimit, ".", "should set a default delimiter")
 	test.deepEqual(Filler.subsSymbols, ["$", "=", "@", "&"], "should set substitution symbols")
 	test.deepEqual(Filler.convSymbols, ["()", "[]", "(]"], "should set conversion symbols")
@@ -37,6 +37,8 @@ tape("refresh", function(test){
 			}
 		}
 	})
+  test.equal(typeof Filler.opts.template, "string", "should convert the template to string")
+  test.notEqual(template, Filler.template, "should preserve the user-supplied template")
   test.true(Filler.commentedTerms instanceof Map)
   test.true(Filler.joins instanceof Map)
   test.true(Filler.fillers instanceof Map)
@@ -54,10 +56,10 @@ tape("refresh", function(test){
   test.equal(Filler.fillers.size, 1, "should only have a filler for the root tree")
   test.equal(Object.keys(Filler.tree).length, 2, "should have root result keys")
 
-  const prevFiller = Filler.fillers.get(template)
+  const prevFiller = Filler.fillers.get(Filler.template)
   const prevResult = Filler.tree
 	Filler.refresh({data:[]})
-  test.notEqual(prevFiller, Filler.fillers.get(template), `should clear fillers after refresh`)
+  test.notEqual(prevFiller, Filler.fillers.get(Filler.template), `should clear fillers after refresh`)
   test.notEqual(prevResult, Filler.tree, "should not reuse a result tree on refresh")
   test.equal(Object.keys(Filler.tree).length, 0, "should clear root result after refresh")
 
@@ -74,7 +76,7 @@ tape("parseTemplate", function(test){
 	const Filler = new Partjson({template})
 	test.equal(Filler.fillers.size, 2, "should create a filler for each (sub)template")
 
-	const filler = Filler.fillers.get(template.child)
+	const filler = Filler.fillers.get(Filler.template.child)
 	test.equal(Object.keys(filler.inputs).length, 1, "should create an inputs object")
   test.equal(filler["@before"], Filler.reserved.trueFxn, "should create a default @before fxn")
   test.equal(filler["@after"], Filler.reserved.trueFxn, "should create a default @after fxn")
@@ -114,10 +116,10 @@ tape("processRow", function(test){
 		total: "+$count"
 	}
 	const Filler = new Partjson({template})
-	const filler = Filler.fillers.get(template)
+	const filler = Filler.fillers.get(Filler.template)
 	const result = Filler.getEmptyResult()
-	Filler.processRow({count: 3}, template, result)
-	Filler.processRow({count: 1}, template, result)
+	Filler.processRow({count: 3}, Filler.template, result)
+	Filler.processRow({count: 1}, Filler.template, result)
 	test.deepEqual(
 		result, 
 		{total: 4},

@@ -49,8 +49,12 @@ export default class ValFiller {
   }
 
   defaultFiller(input, ignore, val) {
+  	// copy a template value in order to not share
+  	// it among results, critical for array or object
+  	// template values
+  	const json = JSON.stringify(val)
   	return (row, key, result) => {
-    	result[key] = val
+    	result[key] = JSON.parse(json)
     }
   }
 

@@ -21,6 +21,18 @@ tape(`valFiller.isNumeric`, function(test) {
 	test.end()
 })
 
+tape(`valFiller.defaultFiller`, function(test) {
+	const filler = new Partjson()
+	const template = {arr: [], obj: []}
+	const fxn = filler.valFiller.defaultFiller(null, null, template.arr)
+  const result = {}
+  fxn(null, 'arr', result)
+  test.notEqual(result.arr, template.arr, "must copy a template array value")
+  fxn(null, 'obj', result)
+  test.notEqual(result.obj, template.obj, "must copy a template object value")
+  test.end()
+})
+
 tape(`valFiller[","]`, function(test){
 	const filler = new Partjson({template: {}, data:[]})
 	const input0 = {errors: [], ignore: (value)=>value == "z"}

@@ -55,11 +55,17 @@ export default class Partjson {
   }
 
   refresh(opts={}) {
-  	Object.assign(this.opts,opts)
-    this.errors.clear(this.opts.template["@errmode"])
-  	if (this.opts.template['@delimit']) {
-  		this.delimit = this.opts.template['@delimit']
-  	}  	
+    Object.assign(this.opts, opts)
+    if (typeof this.opts.template != 'string') {
+    	// ensures that a template object or array 
+    	// is not shared as a result value
+      this.opts.template = JSON.stringify(this.opts.template)
+    }
+    const template = JSON.parse(this.opts.template)
+    this.errors.clear(template["@errmode"])
+    if (template['@delimit']) {
+       this.delimit = template['@delimit']
+    }
     this.commentedTerms.clear()
     this.joins.clear()
     this.fillers.clear()
@@ -68,16 +74,16 @@ export default class Partjson {
     delete this.tree
     this.tree = this.getEmptyResult()
     this.focusTemplate = Object.create(null)
-    this.parseTemplate(this.opts.template, {"@": this.reserved.notDefined})
+    this.parseTemplate(template, {"@": this.reserved.notDefined})
     if (!Object.keys(this.focusTemplate).length) {
-    	this.template = this.opts.template
+    	this.template = template
     } 
     else {
     	this.parseTemplate(this.focusTemplate, {"@": this.reserved.notDefined})
     	this.template = this.focusTemplate
     }
 
-    if (this.opts.data) {
+    if (this.opts.data) { 
     	this.add(this.opts.data, false)
     }
     this.errors.log(this.fillers)
@@ -165,6 +171,7 @@ export default class Partjson {
 	        const keys = input.keyFxn(row, context)
 	        for(const key of keys) {
 	          if (input.valFxn) {
+	          	context.key = key
 	          	input.valFxn(row, key, result, context)
 	          }
 	        }

@@ -234,7 +234,7 @@ tape("setFxn", function(test){
 		template,
 		"=": {fxn1, fxn2, fxn3}
 	})
-	const filler = Filler.fillers.get(template)
+	const filler = Filler.fillers.get(Filler.template)
 	test.equal(filler['@before'], fxn1, "should set the @before() function")
 	test.equal(filler['@after'], fxn2, "should set the @after() function")
 	test.equal(filler['@done'], fxn3, "should set the @done() function")
@@ -242,7 +242,7 @@ tape("setFxn", function(test){
 	// simulate what happens when setFxn is not called
 	Filler.reserved.setFxn = ()=>{}
 	Filler.refresh()
-	const filler1 = Filler.fillers.get(template)
+	const filler1 = Filler.fillers.get(Filler.template)
 	test.notEqual(
 		filler1['@before'], fxn1, 
 		"should be the only method that sets the @before() function"
