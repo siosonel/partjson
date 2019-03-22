@@ -50,8 +50,8 @@ function demo(examples, reveal=false) {
   }
 
   function renderExample(example,i) {
-  	const opts = getOpts()
-    const dom = opts.setExampleDiv(example)
+  	const opts = example.opts ? example.opts : getOpts()
+    const dom = setExampleDiv(example)
     dom.template.innerHTML = highlightTokens(example.template)
     dom.tsv.innerHTML = opts.tsvText
     dom.title.innerHTML = example.title
@@ -218,7 +218,7 @@ function demo(examples, reveal=false) {
         return
       }
       const c = Object.create(null)
-      c['line #'] = i 
+      //c['line #'] = i 
       header.map((key, j) => {
         if (key.endsWith("-json")) {
           c[key.slice(0,-5)] = JSON.parse(d[j])
@@ -307,68 +307,75 @@ ignoreMammals(value) {
 logResultsToDevConsole(tree) {
     console.log(tree)
   },
-wholeNums: [1,2,3]
-},
+wholeNums: [1,2,3],
+removeTemps(result) {
+	for(const key in result) {
+		if (key.startsWith('temp')) {
+			delete result[key]
+		}
+ 	}
+}
+	},
   
-  tsvText: `catname	catsex	owners	ownerblock	huntblock	huntdate	preytype	preysubtype	preymass	nested-json
+  	tsvText: `catname	catsex	owners	ownerblock	huntblock	huntdate	preytype	preysubtype	preymass	nested-json
 Jerry	male	Bob	A1	B1	2019-01-02 19:25	bird	robin	0.596	{"random":{"id": "a10c"}}
 Jerry	male	Bob	A1	B4	2019-01-04 20:45	mammal	rat	0.601	{"random":{"id": "bkd0"}}
 Jerry	male	Bob,Jane	A1	C3	2019-01-07 06:45	mammal	squirel	0.8	{"random":{"id": "jjkl"}}
 Princess	female	Alice,Joe	C2	C3	2019-01-05 09:45	fish	minnow	0.1	{"random":{"id": "hgys"}}
 Princess	female	Alice,Mike	C2	C3	2019-01-07 09:45	fish	catfish	1.6	{"random":{"id": "irty"}}
 Princess	female	Alice,Mike	C2	C3	2019-01-09 09:45	amphibian	frog	0.7	{"random":{"id": "34jd"}}`
-,
+	}
+}
 
-setExampleDiv(example) {
-    const child = document.createElement('div')
-    child.setAttribute('id', example.id); //console.log(div.id)
-    child.setAttribute('class', 'example-div')
-    child.innerHTML = `
-  <button class="try-btn">try</button>
-  <p class="example-title"></p>
-  <div class="example-try">
-    <div style="text-align: center">
-      <div class='jsondiv'>
-        <h3 class='inputlabel'>
-          Template
-        </h3>
-        <pre class='template inputtext' contenteditable="true">
-        </pre>
-      </div>
-      <div class='jsondiv'>
-        <h3 class='inputlabel'>
-          Result
-        </h3>
-        <pre class='results inputtext' disabled="true">
-        </pre>
-      </div>
+function setExampleDiv(example) {
+  const child = document.createElement('div')
+  child.setAttribute('id', example.id); //console.log(div.id)
+  child.setAttribute('class', 'example-div')
+  child.innerHTML = `
+<button class="try-btn">try</button>
+<p class="example-title"></p>
+<div class="example-try">
+  <div style="text-align: center">
+    <div class='jsondiv'>
+      <h3 class='inputlabel'>
+        Template
+      </h3>
+      <pre class='template inputtext' contenteditable="true">
+      </pre>
     </div>
-    <div class='btn-div'>
-      <button class='tsv-btn'>Data</button>
-      <button class='update-btn'>Update</button>
-      <button class='exts-btn' style="display:none">Externals</button>
+    <div class='jsondiv'>
+      <h3 class='inputlabel'>
+        Result
+      </h3>
+      <pre class='results inputtext' disabled="true">
+      </pre>
     </div>
-    <pre class='exts' contenteditable="true">
-    </pre>
-    <textarea class='tsv'>
-    </textarea>
-  </div>`;
+  </div>
+  <div class='btn-div'>
+    <button class='tsv-btn'>Data</button>
+    <button class='update-btn'>Update</button>
+    <button class='exts-btn' style="display:none">Externals</button>
+  </div>
+  <pre class='exts' contenteditable="true">
+  </pre>
+  <textarea class='tsv'>
+  </textarea>
+</div>`;
 
-      const div = document.getElementById(example.section).appendChild(child); 
-      return {
-        div,
-        title: div.querySelector('p'),
-        // the Partjson template, not a DOM template
-        template: div.querySelector(".template"),
-        results: div.querySelector(".results"),
-        tsv: div.querySelector(".tsv"),
-        exts: div.querySelector(".exts"),
-        inputLabels: div.querySelectorAll('.inputlabel'),
-        updateBtn: div.querySelector('.update-btn'),
-        tsvBtn: div.querySelector('.tsv-btn'),
-        tryDiv: div.querySelector('.example-try'),
-        tryBtn: div.querySelector('.try-btn')
-      }
-    }
+  const div = document.getElementById(example.section).appendChild(child); 
+  return {
+    div,
+    title: div.querySelector('p'),
+    // the Partjson template, not a DOM template
+    template: div.querySelector(".template"),
+    results: div.querySelector(".results"),
+    tsv: div.querySelector(".tsv"),
+    exts: div.querySelector(".exts"),
+    inputLabels: div.querySelectorAll('.inputlabel'),
+    updateBtn: div.querySelector('.update-btn'),
+    tsvBtn: div.querySelector('.tsv-btn'),
+    tryDiv: div.querySelector('.example-try'),
+    tryBtn: div.querySelector('.try-btn')
   }
 }
+

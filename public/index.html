@@ -26,16 +26,16 @@
 	<nav class="nav-bar">
 		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
 			<div class="nav-col" id="nav-col-intro">
-				<div class="nav-tab" onclick="goToSection('intro')">[intro]</div>
+				<div class="nav-tab" onclick="goToSection('intro')">intro</div>
 			</div>
 			<div class="nav-col" id="nav-col-Source">
-				<div class="nav-tab" onclick="goToSection('source')">[source]</div>
+				<div class="nav-tab" onclick="goToSection('source')">source</div>
 			</div>
 			<div class="nav-col" id="nav-col-examples">
-				<div class="nav-tab" onclick="goToSection('examples')">[examples]</div>
+				<div class="nav-tab" onclick="goToSection('examples')">examples</div>
 			</div>
 			<div class="nav-col" id="nav-col-usage">
-				<div class="nav-tab" onclick="goToSection('usage')">[usage]</div>
+				<div class="nav-tab" onclick="goToSection('usage')">usage</div>
 			</div>
 		</div>
 	</nav>
@@ -48,6 +48,18 @@
 			a JSON-based template to match the intended structure 
 			of data collections and aggregated results. 
     </p>
+    <br/>
+    <p><i>Good fit for</i></p>
+    <ul>
+    	<li>Aggregating across rows of data</li>
+    	<li>Nested results, especially when tracking totals in different sequences of nesting</li>
+    	<li>Processing batch and streaming data where each data row is encountered once</li>
+    </ul>
+    <br/>
+    <p><i>Bad fit for</i></p>
+    <ul>
+    	<li>Flat results: use array filter and map instead</li>
+    </ul>
     <br/>
     <p>
     	More details are described in the <a href="syntax.html">Syntax</a>
@@ -189,6 +201,32 @@ demo([{
 	  	]
   	},
   	"minimumMass": ">$preymass"
+  }
+},{
+	section: "examples",
+	id: "d3-hierarchy",
+	title: "Nested objects for <a href='https://github.com/d3/d3-hierarchy' target='new'>d3-hierarchy</a>",
+	template: {
+		name: "root",
+		total: "+1",
+		children: [],
+		"@done()": "=removeTemps()",
+		tempType: {
+			"$preytype": {
+				name: "$preytype",
+				total: "+1",
+				children: [],
+				"@dist()": ["@root.children"],
+				"@done()": "=removeTemps()",
+				tempSubtype: {
+					"$preysubtype": {
+						name: "$preysubtype",
+						total: "+1",
+						"@dist()": ["@parent.@parent.children"],
+					}
+				}
+			}
+		}
   }
 }], true);
 
