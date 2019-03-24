@@ -72,7 +72,9 @@ Reserved.prototype["@dist"] = function (_subterm, input) {
 	  		context.errors.push([input, "MISSING-DIST-TARGET", subterm])
 	  	}
 	  	else if (Array.isArray(target)) {
-	  		target.push(result)
+	  		if (!target.includes(result)) {
+	  			target.push(result)
+	  		}
 	  	}
 	    else {
 	    	target[subterm] = result

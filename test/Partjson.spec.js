@@ -131,23 +131,33 @@ tape("processRow", function(test){
 tape("add", function(test){
 	const Filler = new Partjson({
 		template: {
-			total: "+$count",
+			total: "+1",
 			byType: {
-				"$type": "+1"
-			}
+				"$type": "+1",
+				"@dist()": ["@root.subtotals"]
+			},
+			subtotals: []
 		}
 	})
 	const rows = [
-		{type: "a", count: 3},
-		{type: "a", count: 5},
-		{type: "b", count: 2},
-		{type: "c", count: 4}
+		{type: "a"},
+		{type: "a"},
+		{type: "b"},
+		{type: "c"}
 	]
 	Filler.add(rows)
 	test.deepEqual(
 		Filler.tree, 
-		{total: 14, byType: {a:2, b:1, c:1}},
+		{total: 4, byType: {a:2, b:1, c:1}, subtotals: [{a:2, b:1, c:1}]},
 		"should process data rows"
+	)
+	Filler.add([
+		{type: "a", count: 1},
+	])
+	test.deepEqual(
+		Filler.tree, 
+		{total: 5, byType: {a:3, b:1, c:1}, subtotals: [{a:3, b:1, c:1}]},
+		"should not redistribute results when called for separate data"
 	)
 	test.end()
 })
