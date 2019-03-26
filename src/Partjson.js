@@ -203,6 +203,8 @@ export default class Partjson {
   						this.processResult(v)
   					}
   				}
+  				delete value.add
+  				delete value.push
   			}  
   			else if (typeof value == 'object') {
   				const context = this.contexts.get(value)

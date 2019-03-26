@@ -58,21 +58,41 @@ export default class ValFiller {
     }
   }
 
-  getSeed(val) {
-	  const option = val ? val : ""
-	  const seed = option != "distinct" 
-	  	? (result, key) => result[key] = []
-	  	: (result, key) => {
-	  		result[key] = new Set()
-	  		result[key].push = result[key].add
-	  	}
+  getSeed(option=1) {
+  	const tracker = Object.create(null)
+	  const seed = option === 1
+	  	? (result, key) => {
+		  		result[key] = new Set()
+		  		result[key].push = result[key].add
+		  	}
+		  : option === 0
+		  	? (result, key) => {
+		  		result[key] = []
+		  	}
+		  	: this.isNumeric(option)
+		  		? (result, key) => {
+			  		result[key] = []
+			  		//result[key].len = () => result[key].length
+			  		result[key].add = Array.prototype.push
+			  		result[key].push = (value) => {
+			  			if (!(value in tracker)) {
+			  				tracker[value] = 0
+			  			}
+			  			if (tracker[value] < option) {
+			  				result[key].add(value)
+			  				tracker[value] += 1
+			  			}
+			  		}
+			  	}
+			  	: undefined
+
 	  return seed
   }
 
   isNumeric(d) {
     return !isNaN(parseFloat(d)) && isFinite(d) && d!==''
   }
-} 
+}
 
 
 /* NO AGGREGATION */
@@ -91,6 +111,10 @@ ValFiller.prototype[",(]"] = ValFiller.prototype[","]
 /* AGGREGATION into an Array or Set  */
 ValFiller.prototype["[],"] = function(fxn, input) {
 	const seed = this.getSeed(input.templateVal[1])
+	if (!seed) {
+		input.errors.push(["val", "INVALID-OPTION", row])
+		return
+	}
 	return (row, key, result, context) => {
   	const value = fxn(row, context)
 		if (input.ignore(value, key, row, context)) return

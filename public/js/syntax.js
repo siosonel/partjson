@@ -171,13 +171,18 @@ demo([{
 	section: "aggregation",
 	id: "collect-into-a-list",
 	title: `<span class="code-snippet">[ ]</span>, the JSON array, collects values 
-		into a list, or a set when used with the "distinct" option.`,
+		into a set (no repeated items) as default, or with >1 integer option to 
+		indicate the maximum number of occurence allowed for an item, or option=0 to
+		indicate umlimited occurrence for an item.`,
 	template: {
-		"distinctPreyType": [
-			"$preytype", "distinct"
+		distinctPreyType: [
+			"$preytype"
 		],
-    nonDistinct: [
-    	"$preytype"
+    unlimitedOccurence: [
+    	"$preytype", 0
+    ],
+    maxTwoOccurrence: [
+    	"$huntblock", 2
     ]
 	}
 },{

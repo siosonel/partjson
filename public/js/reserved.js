@@ -180,7 +180,7 @@ demo([{
 	template: {
 		"@ignore()": ["mammal"],
   	"okPreyType": [
-  		"$preytype", "distinct"
+  		"$preytype", 0
   	] 
   }
 },{
@@ -214,10 +214,10 @@ demo([{
   		"=preyTypeFxn()": ["fish"]
   	},	
 		"filtered-property-value": [
-			"$preytype", "distinct"
+			"$preytype"
 		],
 		"filtered-returned-value": [
-			"=preyTypeFxn()", "distinct"
+			"=preyTypeFxn()"
 		]
   }
 },{
@@ -235,7 +235,7 @@ demo([{
 		"inheritedIgnore": {
 			"nestedResult": {
 				"filteredPreyTypes": [
-					"$preytype", "distinct"
+					"$preytype"
 				]
 			}
   	},
@@ -245,7 +245,7 @@ demo([{
 			},
 			"nestedResult": {
 				"filteredPreyTypes": [
-					"$preytype", "distinct"
+					"$preytype"
 				]
 			}
   	}

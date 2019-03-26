@@ -207,7 +207,7 @@ tape("processResult", function(test){
 	const Filler = new Partjson({
 		template: {
 			total: "+$count",
-		  distinct: ["$type", "distinct"],
+		  distinct: ["$type"],
 		  child: {
 		  	map: [["$type", "+$count"], "map"],
 		  	branch: "@bbranch"

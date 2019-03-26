@@ -85,12 +85,12 @@ tape(`valFiller[",(]"]`, function(test){
 
 tape(`valFiller.getSeed`, function(test) {
 	const filler = new Partjson()
-	const seed0 = filler.valFiller.getSeed("")
+	const seed0 = filler.valFiller.getSeed(0)
 	const result0 = {}
 	seed0(result0, "key")
 	test.true(Array.isArray(result0.key), "should seed an array")
 
-	const seed1 = filler.valFiller.getSeed("distinct")
+	const seed1 = filler.valFiller.getSeed()
 	const result1 = {}
 	seed1(result1, "key")
 	test.true(result1.key instanceof Set, "should seed a Set")
@@ -99,10 +99,10 @@ tape(`valFiller.getSeed`, function(test) {
 })
 
 tape(`valFiller["[],"]`, function(test){
-	const filler = new Partjson({template: {}, data:[]})
-	const input0 = {errors: [], templateVal: ["$prop"], ignore: (row)=>row.prop == "z"}
+	const filler0 = new Partjson({template: {}, data:[]})
+	const input0 = {errors: [], templateVal: ["$prop",0], ignore: (row)=>row.prop == "z"}
 	const fxn0 = (row) => row.prop
-	const aggrFxn0 = filler.valFiller["[],"](fxn0, input0)
+	const aggrFxn0 = filler0.valFiller["[],"](fxn0, input0)
 	const row = {prop: "dataProp"}
 	const result = {}
 	aggrFxn0(row, 'key', result)
@@ -115,10 +115,16 @@ tape(`valFiller["[],"]`, function(test){
 	aggrFxn0({prop:"z"}, "key1", result)
 	test.equal(result.key.length, 1, "should ignore a value as specified")
 
-	const template = {test: ["$type", "distinct"]}
+	const template = {test: ["$type"]}
 	const data = [{type: "a"}, {type: "a"}, {type: "b"}, {type: "c"}]
-	const filler1 = new Partjson({template, data})
-	test.deepEqual(filler1.tree, {test: ["a","b","c"]})
+	const filler = new Partjson({template, data})
+	test.deepEqual(filler.tree, {test: ["a","b","c"]})
+
+	const template1 = {test: ["$type", 2]}
+	const data1 = [{type: "a"}, {type: "a"}, {type: "a"}, {type: "c"}]
+	const filler1 = new Partjson({template: template1, data: data1})
+	test.deepEqual(filler1.tree, {test: ["a","a","c"]})
+
 	test.end()
 })
 
@@ -134,7 +140,7 @@ tape(`valFiller["[],()"]`, function(test){
 
 tape(`valFiller["[],[]"]`, function(test){
 	const filler = new Partjson({template: {}, data:[]})
-	const input0 = {errors: [], templateVal: ["$prop[]"], ignore: ()=>false}
+	const input0 = {errors: [], templateVal: ["$prop[]",0], ignore: ()=>false}
 	const context0 = {errors: []}
 	const fxn0 = (row) => row.prop
 	const aggrFxn0 = filler.valFiller["[],[]"](fxn0, input0)
@@ -156,7 +162,7 @@ tape(`valFiller["[],(]"]`, function(test){
 		`should equal valFiller["[],[]"]`
 	)
 
-	const input0 = {errors: [], templateVal: ["$prop(]"], ignore: ()=>false}
+	const input0 = {errors: [], templateVal: ["$prop(]",0], ignore: ()=>false}
 	const fxn0 = (row) => row.prop
 	const aggrFxn0 = filler.valFiller["[],(]"](fxn0, input0)
 	const context0 = {errors: []}

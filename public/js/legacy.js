@@ -58,7 +58,7 @@ const template0 = {
       	"$preytype"
       ],
       distinctPreyType: [
-      	"$preytype", "distinct"
+      	"$preytype"
       ],
       //"rows": ["$"],
       nestedRandomId: [
@@ -82,10 +82,10 @@ const template0 = {
   	"distinct"
   ],
   uniqueOwners: [
-  	"$owners[]", "distinct"
+  	"$owners[]"
   ],
   repeatOwners: [
-  	"$owners[]"
+  	"$owners[]", 0
   ],
   "=splitOwners[]": [
   	"test"
@@ -105,13 +105,13 @@ const template0 = {
   	}
   },
   roundedPreyMassDistinct: [
-  	"=roundedPreyMass()", "distinct"
+  	"=roundedPreyMass()"
   ],
   involvedLocations: [
   	"=locations[]"
   ],
   distinctLocations: [
-  	"=locations[]", "distinct"
+  	"=locations[]"
   ],
   byComputedLocations: {
   	"=locations[]": {

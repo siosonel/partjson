@@ -19,7 +19,7 @@ npm install
 # set git-ignored patterns 
 ```
 
-`npm run build` builds the library to `dist`, generating three files:
+`npm run build` outputs the library to `dist`, generating three files:
 
 * `dist/partjson.cjs.js`
     A CommonJS bundle, suitable for use in Node.js, that `require`s the external dependency. This corresponds to the `"main"` field in package.json
@@ -30,7 +30,7 @@ npm install
 
 `npm run dev` builds the library, then keeps rebuilding it whenever the source files change using [rollup-watch](https://github.com/rollup/rollup-watch).
 
-`npm test` builds the library, then tests it.
+`npm test` tests the library.
 
 ## Variations
 
