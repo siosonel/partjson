@@ -1,102 +1,99 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>Partjson</title>
-	<meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-	<link rel="stylesheet" href="./css/normalize.css">
-	<link rel="stylesheet" href="./css/partjson.css">
-	<style>
-	</style>
-	<script src="./dist/partjson.umd.js" charset="utf-8"></script>
-</head>
-<body>
+  <head>
+    <title>Partjson</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/normalize.css" />
+    <link rel="stylesheet" href="./css/partjson.css" />
+    <style></style>
+    <script src="./dist/partjson.umd.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div class="nav-top">
+      <div class="nav-banner">
+        <div style="float:left; padding: 0 12px;">
+          <a class="nodecor" href="./">Partjson</a>
+        </div>
+        <div class="nav-page-wrapper">
+          <a href="./" class="nav-page">Home</a>
+          <a href="syntax.html" class="nav-page">Syntax</a>
+          <a href="reserved.html" class="nav-page">Reserved</a>
+        </div>
+      </div>
+      <nav class="nav-bar">
+        <div style="width: 100%; min-height: 16px; white-space: nowrap;">
+          <div class="nav-col" id="nav-col-intro">
+            <div class="nav-tab" onclick="goToSection('intro')">intro</div>
+          </div>
+          <div class="nav-col" id="nav-col-Source">
+            <div class="nav-tab" onclick="goToSection('source')">source</div>
+          </div>
+          <div class="nav-col" id="nav-col-examples">
+            <div class="nav-tab" onclick="goToSection('examples')">
+              examples
+            </div>
+          </div>
+          <div class="nav-col" id="nav-col-usage">
+            <div class="nav-tab" onclick="goToSection('usage')">usage</div>
+          </div>
+        </div>
+      </nav>
+    </div>
+    <content>
+      <section id="intro">
+        <h3 class="section-title">Introduction</h3>
+        <p>
+          Partjson is a data shaping syntax and utility. It fills a JSON-based
+          template to match the intended structure of data collections and
+          aggregated results.
+        </p>
+        <br />
+        <p><i>Good fit for</i></p>
+        <ul>
+          <li>Aggregating across rows of data</li>
+          <li>
+            Nested results, especially when tracking totals in different
+            sequences of nesting
+          </li>
+          <li>
+            Processing batch and streaming data where each data row is
+            encountered once
+          </li>
+        </ul>
+        <br />
+        <p><i>Bad fit for</i></p>
+        <ul>
+          <li>Flat results: use array filter and map instead</li>
+        </ul>
+        <br />
+        <p>
+          More details are described in the <a href="syntax.html">Syntax</a> and
+          <a href="reserved.html">Reserved Terms</a> pages.
+        </p>
+      </section>
 
-<div class='nav-top'>
-	<div class="nav-banner">
-		<div style="float:left; padding: 0 12px;">
-			<a class="nodecor" href="./">Partjson</a>
-		</div>
-		<div class='nav-page-wrapper'>
-			<a href='./' class="nav-page">Home</a>
-			<a href='syntax.html' class="nav-page">Syntax</a>
-			<a href='reserved.html' class="nav-page">Reserved</a>
-		</div>
-	</div>
-	<nav class="nav-bar">
-		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
-			<div class="nav-col" id="nav-col-intro">
-				<div class="nav-tab" onclick="goToSection('intro')">intro</div>
-			</div>
-			<div class="nav-col" id="nav-col-Source">
-				<div class="nav-tab" onclick="goToSection('source')">source</div>
-			</div>
-			<div class="nav-col" id="nav-col-examples">
-				<div class="nav-tab" onclick="goToSection('examples')">examples</div>
-			</div>
-			<div class="nav-col" id="nav-col-usage">
-				<div class="nav-tab" onclick="goToSection('usage')">usage</div>
-			</div>
-		</div>
-	</nav>
-</div>
-<content>
-	<section id='intro'>
-		<h3 class='section-title'>Introduction</h3>
-		<p>
-			Partjson is a data shaping syntax and utility. It fills 
-			a JSON-based template to match the intended structure 
-			of data collections and aggregated results. 
-    </p>
-    <br/>
-    <p><i>Good fit for</i></p>
-    <ul>
-    	<li>Aggregating across rows of data</li>
-    	<li>Nested results, especially when tracking totals in different sequences of nesting</li>
-    	<li>Processing batch and streaming data where each data row is encountered once</li>
-    </ul>
-    <br/>
-    <p><i>Bad fit for</i></p>
-    <ul>
-    	<li>Flat results: use array filter and map instead</li>
-    </ul>
-    <br/>
-    <p>
-    	More details are described in the <a href="syntax.html">Syntax</a>
-      and <a href="reserved.html">Reserved Terms</a> pages.
-    </p>
-	</section>
+      <section id="source">
+        <h3 class="section-title">Source Code</h3>
+        <p>
+          <a
+            href="http://cmpb-devops.stjude.org/gitlab/esioson/partjson"
+            target="new"
+          >
+            http://cmpb-devops.stjude.org/gitlab/esioson/partjson</a
+          >
+        </p>
+        <br />
+      </section>
 
-	<section id='source'>
-		<h3 class='section-title'>Source Code</h3>
-		<p><a href="http://cmpb-devops.stjude.org/gitlab/esioson/partjson" target="new">
-			http://cmpb-devops.stjude.org/gitlab/esioson/partjson</a>
-		</p>
-		<br/>
-	</section>
+      <section id="examples">
+        <h3 class="section-title">Examples</h3>
+        <br />
+      </section>
 
-	<!--
-	<section id='license'>
-		<h3 class='section-title'>License</h3>
-		<p>Provided under the opensource 
-			<a href="https://opensource.org/licenses/MIT">MIT license.</a>
-		</p>
-		<br/>
-	</section>
-	-->
-
-	<section id='examples'>
-		<h3 class='section-title'>Examples</h3>
-		<!--<p>Click the <button class='try-btn' style='position:relative'>try</button> button in 
-		the upper right corner of the examples below.</p>-->
-		<br/>
-	</section>
-
-	<section id='usage'>
-    <h3 class='section-title'>Usage</h3>
-    <p>
-      <pre class="inputtext" style="width: 90%; margin:auto">
-    	
+      <section id="usage">
+        <h3 class="section-title">Usage</h3>
+        <pre class="inputtext" style="width: 90%; margin:auto">
       <span class="code-comment">// from your project directory</span>
       $ npm install git+ssh://git@cmpb-devops.stjude.org:5002/esioson/partjson.git
 
@@ -134,106 +131,105 @@
       <span class="code-comment">// or if the @dist() keyword was used
       // to target a @root.results container array</span>
       viz.renderer(Pj.tree.results)
-      </pre>
-    </p>
-    <br/>
-	</section>
-</content>
-<script src="./js/demo.js"></script>
-<script>
-demo([{
-	section: "examples",
-	id: "group-by-data-value",
-	title: "Group by data value",
-	template: {
-		byCat: {
-    	"$catname": {
-    	  count: "+1"
-   		}
-  	}
-  }
-},{
-	section: "examples",
-	id: "list-by-value",
-	title: `List by data value`,
-	template: {
-		distinctPreyType: [
-    	"$preytype"
-    ],
-    nonDistinct: [
-    	"$preytype", 0
-    ]
-  }
-},{
-	section: "examples",
-	id: "min-max-values",
-	title: "Find the minimum and maximum values",
-	template: {
-    massMin: ">$preymass",
-		massMax: "<$preymass",
-    count: "+1"
-  }
-},{
-	section: "examples",
-	id: "map-by-value",
-	title: "Map by data value",
-	template: {
-		mapType: [
-    	["$preytype", {total:"+1"}], "map"
-    ]
-  }
-},{
-	section: "examples",
-	id: "filter-by-value",
-	title: "Filter by data value",
-	template: {
-		"@ignore()": {
-			"$preymass": "=ignoreTinyMass()",
-			"$preytype": ["mammal"],
-		},
-  	"okPreyType": [
-  		"$preytype"
-  	],
-  	"overrideParentFilter": {
-  		"@ignore()": ["fish","bird"],
-  		"okPreyType": [
-	  		"$preytype"
-	  	]
-  	},
-  	"minimumMass": ">$preymass"
-  }
-},{
-	section: "examples",
-	id: "d3-hierarchy",
-	title: "Nested objects for <a href='https://github.com/d3/d3-hierarchy' target='new'>d3-hierarchy</a>",
-	template: {
-		name: "root",
-		total: "+1",
-		children: [],
-		"@done()": "=removeTemps()",
-		tempType: {
-			"$preytype": {
-				name: "$preytype",
-				total: "+1",
-				children: [],
-				"@dist()": ["@root.children"],
-				"@done()": "=removeTemps()",
-				tempSubtype: {
-					"$preysubtype": {
-						name: "$preysubtype",
-						total: "+1",
-						"@dist()": ["@parent.@parent.children"],
-					}
-				}
-			}
-		}
-  }
-}], true);
+    </pre>
+        <br />
+      </section>
+    </content>
+    <script src="./js/demo.js"></script>
+    <script>
+      demo(
+        [
+          {
+            section: "examples",
+            id: "group-by-data-value",
+            title: "Group by data value",
+            template: {
+              byCat: {
+                $catname: {
+                  count: "+1"
+                }
+              }
+            }
+          },
+          {
+            section: "examples",
+            id: "list-by-value",
+            title: `List by data value`,
+            template: {
+              distinctPreyType: ["$preytype"],
+              nonDistinct: ["$preytype", 0]
+            }
+          },
+          {
+            section: "examples",
+            id: "min-max-values",
+            title: "Find the minimum and maximum values",
+            template: {
+              massMin: ">$preymass",
+              massMax: "<$preymass",
+              count: "+1"
+            }
+          },
+          {
+            section: "examples",
+            id: "map-by-value",
+            title: "Map by data value",
+            template: {
+              mapType: [["$preytype", { total: "+1" }], "map"]
+            }
+          },
+          {
+            section: "examples",
+            id: "filter-by-value",
+            title: "Filter by data value",
+            template: {
+              "@ignore()": {
+                $preymass: "=ignoreTinyMass()",
+                $preytype: ["mammal"]
+              },
+              okPreyType: ["$preytype"],
+              overrideParentFilter: {
+                "@ignore()": ["fish", "bird"],
+                okPreyType: ["$preytype"]
+              },
+              minimumMass: ">$preymass"
+            }
+          },
+          {
+            section: "examples",
+            id: "d3-hierarchy",
+            title:
+              "Nested objects for <a href='https://github.com/d3/d3-hierarchy' target='new'>d3-hierarchy</a>",
+            template: {
+              name: "root",
+              total: "+1",
+              children: [],
+              "@done()": "=removeTemps()",
+              tempType: {
+                $preytype: {
+                  name: "$preytype",
+                  total: "+1",
+                  children: [],
+                  "@dist()": ["@root.children"],
+                  "@done()": "=removeTemps()",
+                  tempSubtype: {
+                    $preysubtype: {
+                      name: "$preysubtype",
+                      total: "+1",
+                      "@dist()": ["@parent.@parent.children"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        true
+      )
 
-function goToSection(id) { 
-  window.location.hash = "#" + id
-}
-</script>
-</body>
+      function goToSection(id) {
+        window.location.hash = "#" + id
+      }
+    </script>
+  </body>
 </html>
-

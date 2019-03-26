@@ -1,106 +1,102 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>Partjson</title>
-	<meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-	<link rel="stylesheet" href="./css/normalize.css">
-	<link rel="stylesheet" href="./css/partjson.css">
-	<style>
-		.nav-tab {
-			min-width: 75px;
-		}
-	</style>
-	<style>
-	</style>
-	<script src="./dist/partjson.umd.js" charset="utf-8"></script>
-</head>
-<body>
+  <head>
+    <title>Partjson</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/normalize.css" />
+    <link rel="stylesheet" href="./css/partjson.css" />
+    <style>
+      .nav-tab {
+        min-width: 75px;
+      }
+    </style>
+    <style></style>
+    <script src="./dist/partjson.umd.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div class="nav-top">
+      <div class="nav-banner">
+        <div style="float:left; padding: 0 12px;">
+          <a class="nodecor" href="./">Partjson</a>
+        </div>
+        <div class="nav-page-wrapper">
+          <a href="./" class="nav-page">Home</a>
+          <a href="syntax.html" class="nav-page">Syntax</a>
+          <a href="reserved.html" class="nav-page">Reserved</a>
+        </div>
+      </div>
+      <nav class="nav-bar" onmouseleave="collapseSymbols()">
+        <div style="width: 100%; min-height: 16px; white-space: nowrap;">
+          <div class="nav-col" id="nav-col-context">
+            <div class="nav-tab" onmouseenter="expandSymbols()">context</div>
+          </div>
+          <div class="nav-col" id="nav-col-filters">
+            <div class="nav-tab" onmouseenter="expandSymbols()">filters</div>
+          </div>
+          <div class="nav-col" id="nav-col-post">
+            <div class="nav-tab" onmouseenter="expandSymbols()">post</div>
+          </div>
+          <div class="nav-col" id="nav-col-options">
+            <div class="nav-tab" onmouseenter="expandSymbols()">options</div>
+          </div>
+        </div>
+      </nav>
+    </div>
 
-<div class='nav-top'>
-	<div class="nav-banner">
-		<div style="float:left; padding: 0 12px;">
-			<a class="nodecor" href="./">Partjson</a>
-		</div>
-		<div  class='nav-page-wrapper'>
-			<a href='./' class="nav-page">Home</a>
-			<a href='syntax.html' class="nav-page">Syntax</a>
-			<a href='reserved.html' class="nav-page">Reserved</a>
-		</div>
-	</div>
-	<nav class="nav-bar" 
-		onmouseleave="collapseSymbols()">
-		<div style="width: 100%; min-height: 16px; white-space: nowrap;">
-			<div class="nav-col" id="nav-col-context">
-				<div class="nav-tab" onmouseenter="expandSymbols()">context</div>
-			</div>
-			<div class="nav-col" id="nav-col-filters">
-				<div class="nav-tab" onmouseenter="expandSymbols()">filters</div>
-			</div>
-			<div class="nav-col" id="nav-col-post">
-				<div class="nav-tab" onmouseenter="expandSymbols()">post</div>
-			</div>
-			<div class="nav-col" id="nav-col-options">
-				<div class="nav-tab" onmouseenter="expandSymbols()">options</div>
-			</div>
-		</div>
-	</nav>
-</div>
+    <content>
+      <section id="intro">
+        <h3 class="section-title">Reserved Terms</h3>
+        <p>
+          Partjson reserves the use of terms prefixed by the character
+          <span class="code-snippet">@</span>.
+        </p>
+      </section>
 
-<content>
-	<section id='intro'>
-		<h3 class='section-title'>Reserved Terms</h3>
-		<p>
-			Partjson reserves the use of terms prefixed by the
-			character <span class="code-snippet">@</span>.
-    </p>
-	</section>
+      <section id="context">
+        <h3 class="section-title">Context</h3>
+      </section>
 
-	<section id='context'>
-		<h3 class='section-title'>Context</h3>
-	</section>
+      <section id="filters">
+        <h3 class="section-title">Filters</h3>
+        <p>
+          There are multiple levels at which a filter may exclude a data row
+          from being used to fill a result:
+        </p>
+        <br />
+        <ul>
+          <li>
+            Prior to entering a template: use a
+            <span class="code-snippet">@before</span> or a
+            <span class="code-snippet">@join</span> function as described below.
+          </li>
+          <li>
+            For a given set of computed input keys: a user-supplied input key
+            function should return an empty array to ignore a data row for the
+            current input, as described in the
+            <a href="syntax.html#conversion">conversion syntax section</a>
+            for <span class="code-snippet">()</span> and
+            <span class="code-snippet">[]</span>. Keys that match an
+            <span class="code-snippet">@ignore</span> value, as described below,
+            will also be skipped.
+          </li>
+          <li>
+            For a given set of computed inputs: described in the
+            <span class="code-snippet">@ignore</span> examples below.
+          </li>
+        </ul>
+        <br /><br />
+      </section>
 
-	<section id='filters'>
-		<h3 class='section-title'>Filters</h3>
-		<p>There are multiple levels at which a filter 
-			may exclude a data row from being used to fill
-			a result:</p>
-		<br/>
-		<ul>
-			<li>
-				Prior to entering a template: use a 
-				<span class="code-snippet">@before</span> or a
-				<span class="code-snippet">@join</span> function as
-				described below.
-			</li>
-			<li>
-				For a given set of computed input keys: a user-supplied 
-				input key function should return an empty array to
-				ignore a data row for the current input, as described in the
-				<a href="syntax.html#conversion">conversion syntax section</a> 
-				for <span class="code-snippet">()</span> and
-				<span class="code-snippet">[]</span>. Keys that match an 
-				<span class="code-snippet">@ignore</span> value, as 
-				described below, will also be skipped.
-			</li>
-			<li>
-        For a given set of computed inputs: described in the
-        <span class="code-snippet">@ignore</span> examples below.
-			</li>
-		</ul>
-		<br/><br/>
-	</section>
+      <section id="post">
+        <h3 class="section-title">Post-Process</h3>
+      </section>
 
-	<section id='post'>
-		<h3 class='section-title'>Post-Process</h3>
-	</section>
-
-	<section id='options'>
-		<h3 class='section-title'>Options</h3>
-	</section>
-</content>
-<script src="./js/demo.js"></script>
-<script src="./js/reserved.js"></script>
-</body>
+      <section id="options">
+        <h3 class="section-title">Options</h3>
+      </section>
+    </content>
+    <script src="./js/demo.js"></script>
+    <script src="./js/reserved.js"></script>
+  </body>
 </html>
-

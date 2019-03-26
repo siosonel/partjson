@@ -16,7 +16,7 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "test": "prettier --write --no-semi \"{src,test,public}/**/*.js\" && tape test/*.spec.js",
+    "test": "prettier --write --no-semi \"{src,test,public}/**/*.{js,html,css}\" && tape test/*.spec.js",
     "prepare": "rollup -c"
   },
   "files": [
