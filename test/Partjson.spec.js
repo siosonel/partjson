@@ -10,7 +10,7 @@ tape("constructor", function(test) {
   const Filler = new Partjson()
   test.deepEqual(
     Filler.opts,
-    { template: "{}", "=": {} },
+    { template: "{}", seed: {}, "=": {} },
     "should set default opts"
   )
   test.equal(Filler.delimit, ".", "should set a default delimiter")
@@ -178,7 +178,7 @@ tape("parseTemplate", function(test) {
 
 tape("getEmptyResult", function(test) {
   const Filler = new Partjson()
-  const result = Filler.getEmptyResult("test", {})
+  const result = Filler.getEmptyResult("test", {}, {})
   test.equal(Object.keys(result).length, 0, "should return an empty object")
   test.true(Filler.contexts.has(result), "should set up the object's context")
 

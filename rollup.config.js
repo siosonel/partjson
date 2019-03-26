@@ -34,7 +34,9 @@ export default [
 			{ file: pkg.module, format: 'es' }
 		],
 		plugins: [
-			terser()
+			terser({
+				ecma: 6
+			})
 		]
 	}
 ];

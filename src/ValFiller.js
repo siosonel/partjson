@@ -47,7 +47,8 @@ export default class ValFiller {
     this.Pj.parseTemplate(val, input.inheritedIgnore, input.lineage)
     return (row, key, result) => {
       if (!(key in result)) {
-        result[key] = this.Pj.getEmptyResult(key, result)
+        const seed = this.defaultSeed(input.lineage, {})
+        result[key] = this.Pj.getEmptyResult(key, result, seed)
       }
       this.Pj.processRow(row, val, result[key])
     }
@@ -63,21 +64,42 @@ export default class ValFiller {
     }
   }
 
-  getSeed(option = 1) {
+  defaultSeed(lineage, _val) {
+    if (!lineage || !lineage.length) {
+      return _val
+    }
+    let val = this.Pj.opts.seed
+    for (const key of lineage) {
+      if (key in val) {
+        val = val[key]
+      } else {
+        val = _val
+        break
+      }
+    }
+    return JSON.parse(JSON.stringify(val))
+  }
+
+  getArrSeed(input) {
+    const option =
+      input.templateVal && input.templateVal.length > 1
+        ? input.templateVal[1]
+        : 1
+    const arr = this.defaultSeed(input.lineage, [])
     const tracker = Object.create(null)
     const seed =
       option === 1
         ? (result, key) => {
-            result[key] = new Set()
+            result[key] = new Set(...arr)
             result[key].push = result[key].add
           }
         : option === 0
         ? (result, key) => {
-            result[key] = []
+            result[key] = arr
           }
         : this.isNumeric(option)
         ? (result, key) => {
-            result[key] = []
+            result[key] = arr
             //result[key].len = () => result[key].length
             result[key].add = Array.prototype.push
             result[key].push = value => {
@@ -115,9 +137,9 @@ ValFiller.prototype[",(]"] = ValFiller.prototype[","]
 
 /* AGGREGATION into an Array or Set  */
 ValFiller.prototype["[],"] = function(fxn, input) {
-  const seed = this.getSeed(input.templateVal[1])
+  const seed = this.getArrSeed(input)
   if (!seed) {
-    input.errors.push(["val", "INVALID-OPTION", row])
+    input.errors.push(["val", "INVALID-OPTION"])
     return
   }
   return (row, key, result, context) => {
@@ -131,7 +153,7 @@ ValFiller.prototype["[],"] = function(fxn, input) {
 ValFiller.prototype["[],()"] = ValFiller.prototype["[],"]
 
 ValFiller.prototype["[],[]"] = function(fxn, input) {
-  const seed = this.getSeed(input.templateVal[1])
+  const seed = this.getArrSeed(input)
   return (row, key, result, context) => {
     const values = fxn(row, context)
     if (!Array.isArray(values)) {
@@ -153,9 +175,11 @@ ValFiller.prototype["[{}]"] = function(template, input) {
   const filler = this.Pj.fillers.get(template)
   return (row, key, result) => {
     if (!(key in result)) {
-      result[key] = this.Pj.getEmptyResult(key, result, true)
+      const seed = this.defaultSeed(input.lineage, [])
+      result[key] = this.Pj.getEmptyResult(key, result, seed)
     }
-    const item = this.Pj.getEmptyResult(result[key].length, result)
+    const seed = this.defaultSeed([...input.lineage, 0], Object.create(null))
+    const item = this.Pj.getEmptyResult(result[key].length, result, seed)
     this.Pj.processRow(row, template, item)
     result[key].push(item)
   }
@@ -194,7 +218,9 @@ ValFiller.prototype["[[,]]"] = function(templates, input) {
 /* AGGREGATION by OPERATOR */
 ValFiller.prototype["+,"] = function(fxn, input) {
   return (row, key, result, context) => {
-    if (!(key in result)) result[key] = 0
+    if (!(key in result)) {
+      result[key] = +this.defaultSeed(input.lineage, 0)
+    }
     const value = fxn(row, context)
     if (input.ignore(value, key, row, context)) return
     result[key] += +value
@@ -205,7 +231,9 @@ ValFiller.prototype["+,()"] = ValFiller.prototype["+,"]
 
 ValFiller.prototype["+,[]"] = function(fxn, input) {
   return (row, key, result, context) => {
-    if (!(key in result)) result[key] = 0
+    if (!(key in result)) {
+      result[key] = this.defaultSeed(input.lineage, 0)
+    }
     const values = fxn(row, context)
     if (!Array.isArray(values)) {
       input.errors.push(["val", "NON-ARRAY-VALS", row])
@@ -222,7 +250,9 @@ ValFiller.prototype["+,(]"] = ValFiller.prototype["+,[]"]
 
 ValFiller.prototype["-,"] = function(fxn, input) {
   return (row, key, result, context) => {
-    if (!(key in result)) result[key] = 0
+    if (!(key in result)) {
+      result[key] = this.defaultSeed(input.lineage, 0)
+    }
     const value = fxn(row, context)
     if (input.ignore(value, key, row, context)) return
     result[key] += -value
@@ -238,7 +268,9 @@ ValFiller.prototype["-,[]"] = function(fxn, input) {
       input.errors.push(["val", "NON-ARRAY-VALS", row])
       return
     }
-    if (!(key in result)) result[key] = 0
+    if (!(key in result)) {
+      result[key] = this.defaultSeed(input.lineage, 0)
+    }
     for (const value of values) {
       if (input.ignore(value, key, row, context)) continue
       result[key] += -value

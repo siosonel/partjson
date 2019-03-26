@@ -21,7 +21,7 @@ npm install
 
 `npm run dev` builds the library, then keeps rebuilding it whenever the source files change using [rollup-watch](https://github.com/rollup/rollup-watch).
 
-`npm test` prettifies js code and tests the library.
+`npm test` prettifies the code and tests the umd or cjs build.
 
 `npm run build` outputs the library to `dist`, generating three files:
 

@@ -191,8 +191,8 @@ demo(
 			integer option will be interpreted as follows:<br/>
 			<ul>
 				<li>option = 1 (default): no repeated value or maximum of 1 occurrence</li> 
-				<li>option > 1: limits the maximum number of occurence to the integer value</i>
-				<li>option = 0: allow unlimited occurrence of a value</li>
+				<li>option > 1: limits the maximum number of occurence to the integer option</i>
+				<li>option = 0: allows an unlimited occurrence of a value</li>
 			</ul>`,
       template: {
         distinctPreyType: ["$preytype"],

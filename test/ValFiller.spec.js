@@ -1,5 +1,5 @@
 const tape = require("tape")
-const Partjson = require("../dist/partjson.cjs.js")
+const Partjson = require("../dist/partjson.umd.js")
 
 tape("\n", function(test) {
   test.pass("-***- ValFiller specs -***-")
@@ -89,16 +89,58 @@ tape(`valFiller[",(]"]`, function(test) {
 
 tape(`valFiller.getSeed`, function(test) {
   const filler = new Partjson()
-  const seed0 = filler.valFiller.getSeed(0)
+  const seed0 = filler.valFiller.getArrSeed({ templateVal: [, 0] })
   const result0 = {}
   seed0(result0, "key")
   test.true(Array.isArray(result0.key), "should seed an array")
 
-  const seed1 = filler.valFiller.getSeed()
+  const seed1 = filler.valFiller.getArrSeed({ templateVal: [] })
   const result1 = {}
   seed1(result1, "key")
   test.true(result1.key instanceof Set, "should seed a Set")
   test.equal(seed1.push, seed1.add, "should alias set.add with set.push")
+
+  const filler2 = new Partjson({
+    template: {
+      total: "+1",
+      props: ["$prop"],
+      byKey: {
+        $prop: "+1"
+      }, 
+      arr: [
+        {prop: "$prop"}
+      ]
+    },
+    seed: {
+      total: 3,
+      props: ["a"],
+      byKey: {
+        c: 3
+      },
+      arr: [
+        {prop: "d"}
+      ]
+    }
+  })
+  filler2.add([{ prop: "b" }, { prop: "c" }])
+  test.deepEqual(
+    filler2.tree,
+    {
+      total: 5,
+      props: ["a", "b", "c"],
+      byKey: {
+        b: 1,
+        c: 4
+      },
+      arr: [
+        {prop: "d"},
+        {prop: "b"},
+        {prop: "c"}
+      ]
+    },
+    "should use the user-supplied seed"
+  )
+
   test.end()
 })
 
@@ -107,21 +149,21 @@ tape(`valFiller["[],"]`, function(test) {
   const input0 = {
     errors: [],
     templateVal: ["$prop", 0],
-    ignore: row => row.prop == "z"
+    ignore: value => value == "z"
   }
   const fxn0 = row => row.prop
   const aggrFxn0 = filler0.valFiller["[],"](fxn0, input0)
   const row = { prop: "dataProp" }
   const result = {}
   aggrFxn0(row, "key", result)
-  test.true(
-    Array.isArray(result.key) && result.key[0] == row.prop,
+  test.deepEqual(
+    result.key,
+    [row.prop],
     `should update the result with the substituted or converted value`
   )
   test.true(!input0.errors.length)
-
   aggrFxn0({ prop: "z" }, "key1", result)
-  test.equal(result.key.length, 1, "should ignore a value as specified")
+  test.deepEqual(result.key1, undefined, "should ignore a value as specified")
 
   const template = { test: ["$type"] }
   const data = [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }]

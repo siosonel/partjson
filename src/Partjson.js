@@ -25,6 +25,7 @@ export default class Partjson {
   constructor(opts = {}) {
     this.defaultOpts = {
       template: {},
+      seed: {},
       "=": {}
     }
 
@@ -131,8 +132,8 @@ export default class Partjson {
     filler.steps = steps.filter(d => d.length)
   }
 
-  getEmptyResult(branch = null, parent = null, isArray = false) {
-    const result = isArray ? [] : Object.create(null)
+  getEmptyResult(branch = null, parent = null, seed = null) {
+    const result = branch || seed ? seed : Object.create(null)
     const context = {
       branch, // string name where this result will be mounted to the tree
       parent,
