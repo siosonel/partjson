@@ -1,7 +1,7 @@
 export default class KeyFiller {
   constructor(Pj) {
-    this.Pj = Pj;
-    this.allowedKeyTypes = new Set(["string", "number"]);
+    this.Pj = Pj
+    this.allowedKeyTypes = new Set(["string", "number"])
   }
 
   getFxn(input, ignore) {
@@ -10,42 +10,42 @@ export default class KeyFiller {
       input,
       ignore,
       input.term
-    );
-    if (!convFxn) return;
-    return this[tokens.conv](convFxn, input);
+    )
+    if (!convFxn) return
+    return this[tokens.conv](convFxn, input)
   }
 
   getAllowedKeys(keys, row, input, context) {
     if (!Array.isArray(keys)) {
-      context.errors.push(["key", "NON-ARRAY-KEYS", row]);
-      return [];
+      context.errors.push(["key", "NON-ARRAY-KEYS", row])
+      return []
     }
-    const allowed = [];
+    const allowed = []
     for (const key of keys) {
       if (!input.ignore(key)) {
         if (!this.allowedKeyTypes.has(typeof key)) {
-          context.errors.push([input, "INVALID-RESULT-KEY", row]);
+          context.errors.push([input, "INVALID-RESULT-KEY", row])
         } else {
-          allowed.push(key);
+          allowed.push(key)
         }
       }
     }
-    return allowed;
+    return allowed
   }
 }
 
 KeyFiller.prototype[""] = function(fxn, input) {
   return (row, context) => {
-    return this.getAllowedKeys([fxn(row, context)], row, input, context);
-  };
-};
+    return this.getAllowedKeys([fxn(row, context)], row, input, context)
+  }
+}
 
-KeyFiller.prototype["()"] = KeyFiller.prototype[""];
+KeyFiller.prototype["()"] = KeyFiller.prototype[""]
 
 KeyFiller.prototype["[]"] = function(fxn, input) {
   return (row, context) => {
-    return this.getAllowedKeys(fxn(row, context), row, input, context);
-  };
-};
+    return this.getAllowedKeys(fxn(row, context), row, input, context)
+  }
+}
 
-KeyFiller.prototype["(]"] = KeyFiller.prototype["[]"];
+KeyFiller.prototype["(]"] = KeyFiller.prototype["[]"]
