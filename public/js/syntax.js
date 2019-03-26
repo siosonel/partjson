@@ -170,10 +170,13 @@ demo([{
 	tokenType: "aggr",
 	section: "aggregation",
 	id: "collect-into-a-list",
-	title: `<span class="code-snippet">[ ]</span>, the JSON array, collects values 
-		into a set (no repeated items) as default, or with >1 integer option to 
-		indicate the maximum number of occurence allowed for an item, or option=0 to
-		indicate umlimited occurrence for an item.`,
+	title: `<span class="code-snippet">[ ]</span>, the JSON array, will collect values into an array. An 
+			integer option will be interpreted as follows:<br/>
+			<ul>
+				<li>option = 1 (default): no repeated value or maximum of 1 occurrence</li> 
+				<li>option > 1: limits the maximum number of occurence to the integer value</i>
+				<li>option = 0: allow unlimited occurrence for value</li>
+			</ul>`,
 	template: {
 		distinctPreyType: [
 			"$preytype"
