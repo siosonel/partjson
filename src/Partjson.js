@@ -25,7 +25,7 @@ export default class Partjson {
   constructor(opts = {}) {
     this.defaultOpts = {
       template: {},
-      seed: '{}',
+      seed: "{}",
       "=": {}
     }
     this.opts = Object.assign(this.defaultOpts, opts)
@@ -87,7 +87,8 @@ export default class Partjson {
   }
 
   setResultContext(seed, branch = null, parent = null) {
-    const result = branch !== null && branch in parent ? parent[branch] : JSON.parse(seed)
+    const result =
+      branch !== null && branch in parent ? parent[branch] : JSON.parse(seed)
     if (this.contexts.has(result)) return result
     const context = {
       branch, // string name where this result will be mounted to the tree
@@ -230,7 +231,7 @@ export default class Partjson {
     }
   }
 
-  // will convert Set, Map to arrays, 
+  // will convert Set, Map to arrays,
   // useful for JSON.stringify
   copyResult(_result = undefined, copy = {}) {
     if (arguments.length && _result === undefined) return

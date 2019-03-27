@@ -357,7 +357,11 @@ tape("copyResult", function(test) {
     seed
   })
 
-  test.deepEqual(Filler.copyResult(), JSON.parse(seed), "should copy the initial seed")
+  test.deepEqual(
+    Filler.copyResult(),
+    JSON.parse(seed),
+    "should copy the initial seed"
+  )
 
   Filler.add([{ prop: "c" }, { prop: "b" }])
 

@@ -497,9 +497,11 @@ tape(`valFiller.defaultFiller`, function(test) {
 
 tape(`valFiller[{}]`, function(test) {
   const template = {
-    test: [{
-      $type: "+1"
-    }]
+    test: [
+      {
+        $type: "+1"
+      }
+    ]
   }
   const data = [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }]
   const filler = new Partjson({ template, data })

@@ -176,8 +176,7 @@ ValFiller.prototype["[[,]]"] = function(templates, input) {
     return (row, key, result) => {
       if (!(key in result)) {
         result[key] = new Map()
-      }
-      else if (!(result[key] instanceof Map)) {
+      } else if (!(result[key] instanceof Map)) {
         result[key] = new Map(result[key])
       }
       const temp = []
