@@ -10,7 +10,7 @@ tape("constructor", function(test) {
   const Filler = new Partjson()
   test.deepEqual(
     Filler.opts,
-    { template: "{}", seed: {}, "=": {} },
+    { template: "{}", seed: "{}", "=": {} },
     "should set default opts"
   )
   test.equal(Filler.delimit, ".", "should set a default delimiter")
@@ -176,9 +176,9 @@ tape("parseTemplate", function(test) {
   test.end()
 })
 
-tape("getEmptyResult", function(test) {
+tape("setResultContext", function(test) {
   const Filler = new Partjson()
-  const result = Filler.getEmptyResult("test", {}, {})
+  const result = Filler.setResultContext("{}", "test", {})
   test.equal(Object.keys(result).length, 0, "should return an empty object")
   test.true(Filler.contexts.has(result), "should set up the object's context")
 
@@ -200,7 +200,7 @@ tape("processRow", function(test) {
   }
   const Filler = new Partjson({ template })
   const filler = Filler.fillers.get(Filler.template)
-  const result = Filler.getEmptyResult()
+  const result = Filler.setResultContext("{}")
   Filler.processRow({ count: 3 }, Filler.template, result)
   Filler.processRow({ count: 1 }, Filler.template, result)
   test.deepEqual(
@@ -337,6 +337,14 @@ tape("processResult", function(test) {
 })
 
 tape("copyResult", function(test) {
+  const seed = JSON.stringify({
+    total: 3,
+    props: ["a"],
+    byKey: {
+      c: 3
+    },
+    map: [["d", 3]]
+  })
   const Filler = new Partjson({
     template: {
       total: "+1",
@@ -346,17 +354,10 @@ tape("copyResult", function(test) {
       },
       map: [["$prop", "+1"], "map"]
     },
-    seed: {
-      total: 3,
-      props: ["a"],
-      byKey: {
-        c: 3
-      },
-      map: [["d", 3]]
-    }
+    seed
   })
 
-  test.deepEqual(Filler.copyResult(), {}, "should copy empty results")
+  test.deepEqual(Filler.copyResult(), JSON.parse(seed), "should copy the initial seed")
 
   Filler.add([{ prop: "c" }, { prop: "b" }])
 

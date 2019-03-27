@@ -87,58 +87,7 @@ tape(`valFiller[",(]"]`, function(test) {
   test.end()
 })
 
-tape(`valFiller.defaultSeed`, function(test) {
-  const filler = new Partjson({
-    template: {
-      total: "+1",
-      props: ["$prop"],
-      byKey: {
-        $prop: "+1"
-      },
-      arr: [{ prop: "$prop" }],
-      map: [["$prop", "+1"], "map"]
-    },
-    seed: {
-      total: 3,
-      props: ["a"],
-      byKey: {
-        c: 3
-      },
-      arr: [{ prop: "d" }],
-      map: [["d", 3]]
-    }
-  })
-
-  const vf = filler.valFiller
-  test.equal(
-    vf.defaultSeed(["total"], 0),
-    3,
-    "should use an integer seed value"
-  )
-  test.deepEqual(
-    vf.defaultSeed(["props"], []),
-    ["a"],
-    "should use an array seed value"
-  )
-  test.deepEqual(
-    vf.defaultSeed(["byKey"], []),
-    { c: 3 },
-    "should use an object seed value"
-  )
-  test.deepEqual(
-    vf.defaultSeed(["arr"], []),
-    [{ prop: "d" }],
-    "should use an array of object seed value"
-  )
-  test.deepEqual(
-    vf.defaultSeed(["map"], new Map()),
-    new Map([["d", 3]]),
-    "should use a Map seed value"
-  )
-  test.end()
-})
-
-tape(`valFiller.getSeed`, function(test) {
+tape(`valFiller.getArrSeed`, function(test) {
   const filler = new Partjson()
   const seed0 = filler.valFiller.getArrSeed({ templateVal: [, 0] })
   const result0 = {}
@@ -149,8 +98,15 @@ tape(`valFiller.getSeed`, function(test) {
   const result1 = {}
   seed1(result1, "key")
   test.true(result1.key instanceof Set, "should seed a Set")
-  test.equal(seed1.push, seed1.add, "should alias set.add with set.push")
 
+  const seed2 = {
+    total: 3,
+    props: ["a"],
+    byKey: {
+      c: 3
+    },
+    arr: [{ prop: "d" }]
+  }
   const filler2 = new Partjson({
     template: {
       total: "+1",
@@ -160,30 +116,10 @@ tape(`valFiller.getSeed`, function(test) {
       },
       arr: [{ prop: "$prop" }]
     },
-    seed: {
-      total: 3,
-      props: ["a"],
-      byKey: {
-        c: 3
-      },
-      arr: [{ prop: "d" }]
-    }
+    seed: JSON.stringify(seed2)
   })
-  filler2.add([{ prop: "b" }, { prop: "c" }])
-  test.deepEqual(
-    filler2.tree,
-    {
-      total: 5,
-      props: ["a", "b", "c"],
-      byKey: {
-        b: 1,
-        c: 4
-      },
-      arr: [{ prop: "d" }, { prop: "b" }, { prop: "c" }]
-    },
-    "should use the user-supplied seed"
-  )
-
+  //filler2.add([{ prop: "b" }, { prop: "c" }])
+  test.deepEqual(filler2.tree, seed2, "should use the user-supplied seed")
   test.end()
 })
 
@@ -561,11 +497,9 @@ tape(`valFiller.defaultFiller`, function(test) {
 
 tape(`valFiller[{}]`, function(test) {
   const template = {
-    test: [
-      {
-        $type: "+1"
-      }
-    ]
+    test: [{
+      $type: "+1"
+    }]
   }
   const data = [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }]
   const filler = new Partjson({ template, data })

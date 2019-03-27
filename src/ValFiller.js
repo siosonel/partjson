@@ -46,10 +46,7 @@ export default class ValFiller {
   objFiller(input, ignore, val) {
     this.Pj.parseTemplate(val, input.inheritedIgnore, input.lineage)
     return (row, key, result) => {
-      if (!(key in result)) {
-        const seed = this.defaultSeed(input.lineage, {})
-        result[key] = this.Pj.getEmptyResult(key, result, seed)
-      }
+      this.Pj.setResultContext("{}", key, result)
       this.Pj.processRow(row, val, result[key])
     }
   }
@@ -64,67 +61,38 @@ export default class ValFiller {
     }
   }
 
-  defaultSeed(lineage, _val) {
-    if (!lineage || !lineage.length) {
-      return _val
-    }
-    let val = this.Pj.opts.seed
-    for (const key of lineage) {
-      if (key in val) {
-        if (_val instanceof Map) {
-          return Array.isArray(val[key]) ? new Map(val[key]) : _val
-        } else if (_val instanceof Set) {
-          return Array.isArray(val[key]) ? new Set(val[key]) : _val
-        } else {
-          val = val[key]
-          if (typeof val != "object") {
-            break
-          }
-        }
-      } else {
-        val = _val
-        break
-      }
-    }
-    return _val instanceof Map || _val instanceof Set
-      ? _val
-      : typeof val === typeof _val
-      ? JSON.parse(JSON.stringify(val))
-      : _val
-  }
-
   getArrSeed(input) {
     const option =
       input.templateVal && input.templateVal.length > 1
         ? input.templateVal[1]
         : 1
-    const arr = this.defaultSeed(input.lineage, [])
-    const tracker = Object.create(null)
-    const seed =
-      option === "set"
-        ? (result, key, value) => {
-            if (!(key in result)) result[key] = new Set(...arr)
-            result[key].add(value)
-          }
-        : option === 0
-        ? (result, key, value) => {
-            if (!(key in result)) result[key] = arr
-            result[key].push(value)
-          }
-        : this.isNumeric(option)
-        ? (result, key, value) => {
-            if (!(key in result)) result[key] = arr
-            if (!(value in tracker)) {
-              tracker[value] = 0
-            }
-            if (tracker[value] < option) {
-              result[key].push(value)
-              tracker[value] += 1
-            }
-          }
-        : undefined
-
-    return seed
+    if (option == "set") {
+      return (result, key, value) => {
+        if (!(key in result)) result[key] = new Set()
+        else if (!(result[key] instanceof Set)) {
+          result[key] = new Set(result[key])
+        }
+        result[key].add(value)
+      }
+    } else if (option == 0) {
+      return (result, key, value) => {
+        if (!(key in result)) result[key] = []
+        result[key].push(value)
+      }
+    } else if (this.isNumeric(option)) {
+      const tracker = new Map()
+      return (result, key, value) => {
+        if (!(key in result)) result[key] = []
+        if (!tracker.has(value)) {
+          tracker.set(value, 0)
+        }
+        const count = tracker.get(value)
+        if (count < option) {
+          result[key].push(value)
+          tracker.set(value, count + 1)
+        }
+      }
+    }
   }
 
   isNumeric(d) {
@@ -182,14 +150,9 @@ ValFiller.prototype["[{}]"] = function(template, input) {
   this.Pj.parseTemplate(template, input.inheritedIgnore, input.lineage)
   const filler = this.Pj.fillers.get(template)
   return (row, key, result) => {
-    if (!(key in result)) {
-      const seed = this.defaultSeed(input.lineage, [])
-      result[key] = this.Pj.getEmptyResult(key, result, seed)
-    }
-    const seed = this.defaultSeed([...input.lineage, 0], Object.create(null))
-    const item = this.Pj.getEmptyResult(result[key].length, result, seed)
+    this.Pj.setResultContext("[]", key, result)
+    const item = this.Pj.setResultContext("{}", result[key].length, result[key])
     this.Pj.processRow(row, template, item)
-    result[key].push(item)
   }
 }
 
@@ -212,11 +175,13 @@ ValFiller.prototype["[[,]]"] = function(templates, input) {
   } else {
     return (row, key, result) => {
       if (!(key in result)) {
-        result[key] = this.defaultSeed(input.lineage, new Map())
+        result[key] = new Map()
+      }
+      else if (!(result[key] instanceof Map)) {
+        result[key] = new Map(result[key])
       }
       const temp = []
       fillers[0](row, 0, temp)
-      //if (input.ignore(temp[0]) || input.ignore(temp[1])) return
       if (result[key].has(temp[0])) {
         temp[1] = result[key].get(temp[0])
       }
@@ -230,7 +195,7 @@ ValFiller.prototype["[[,]]"] = function(templates, input) {
 ValFiller.prototype["+,"] = function(fxn, input) {
   return (row, key, result, context) => {
     if (!(key in result)) {
-      result[key] = this.defaultSeed(input.lineage, 0)
+      result[key] = 0
     }
     const value = fxn(row, context)
     if (input.ignore(value, key, row, context)) return
@@ -243,7 +208,7 @@ ValFiller.prototype["+,()"] = ValFiller.prototype["+,"]
 ValFiller.prototype["+,[]"] = function(fxn, input) {
   return (row, key, result, context) => {
     if (!(key in result)) {
-      result[key] = this.defaultSeed(input.lineage, 0)
+      result[key] = 0
     }
     const values = fxn(row, context)
     if (!Array.isArray(values)) {
@@ -262,7 +227,7 @@ ValFiller.prototype["+,(]"] = ValFiller.prototype["+,[]"]
 ValFiller.prototype["-,"] = function(fxn, input) {
   return (row, key, result, context) => {
     if (!(key in result)) {
-      result[key] = this.defaultSeed(input.lineage, 0)
+      result[key] = 0
     }
     const value = fxn(row, context)
     if (input.ignore(value, key, row, context)) return
@@ -280,7 +245,7 @@ ValFiller.prototype["-,[]"] = function(fxn, input) {
       return
     }
     if (!(key in result)) {
-      result[key] = this.defaultSeed(input.lineage, 0)
+      result[key] = 0
     }
     for (const value of values) {
       if (input.ignore(value, key, row, context)) continue

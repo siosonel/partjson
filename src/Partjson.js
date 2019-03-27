@@ -25,7 +25,7 @@ export default class Partjson {
   constructor(opts = {}) {
     this.defaultOpts = {
       template: {},
-      seed: {},
+      seed: '{}',
       "=": {}
     }
     this.opts = Object.assign(this.defaultOpts, opts)
@@ -69,7 +69,8 @@ export default class Partjson {
     this.contexts.clear()
 
     delete this.tree
-    this.tree = this.getEmptyResult()
+    this.tree = this.setResultContext(this.opts.seed)
+
     this.focusTemplate = Object.create(null)
     this.parseTemplate(template, { "@": this.reserved.notDefined })
     if (!Object.keys(this.focusTemplate).length) {
@@ -83,6 +84,21 @@ export default class Partjson {
       this.add(this.opts.data, false)
     }
     this.errors.log(this.fillers)
+  }
+
+  setResultContext(seed, branch = null, parent = null) {
+    const result = branch !== null && branch in parent ? parent[branch] : JSON.parse(seed)
+    if (this.contexts.has(result)) return result
+    const context = {
+      branch, // string name where this result will be mounted to the tree
+      parent,
+      self: result,
+      root: this.tree ? this.tree : result,
+      errors: []
+    }
+    this.contexts.set(result, context)
+    if (branch !== null) parent[branch] = result
+    return result
   }
 
   parseTemplate(template, inheritedIgnore, lineage = []) {
@@ -129,19 +145,6 @@ export default class Partjson {
       }
     }
     filler.steps = steps.filter(d => d.length)
-  }
-
-  getEmptyResult(branch = null, parent = null, seed = null) {
-    const result = branch || seed ? seed : Object.create(null)
-    const context = {
-      branch, // string name where this result will be mounted to the tree
-      parent,
-      self: result,
-      root: this.tree ? this.tree : result,
-      errors: []
-    }
-    this.contexts.set(result, context)
-    return result
   }
 
   add(rows, refreshErrors = true) {
