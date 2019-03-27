@@ -193,11 +193,13 @@ demo(
 				<li>option = 1 (default): no repeated value or maximum of 1 occurrence</li> 
 				<li>option > 1: limits the maximum number of occurence to the integer option</i>
 				<li>option = 0: allows an unlimited occurrence of a value</li>
+        <li>option = "set": use an ES6 Set instance for tracking</li>
 			</ul>`,
       template: {
         distinctPreyType: ["$preytype"],
-        unlimitedOccurence: ["$preytype", 0],
-        maxTwoOccurrence: ["$huntblock", 2]
+        maxTwoOccurrence: ["$huntblock", 2],
+        unlimitedOccurrence: ["$preytype", 0],
+        jsSetCopiedAsArray: ["$preytype", "set"]
       }
     },
     {

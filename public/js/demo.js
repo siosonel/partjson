@@ -138,7 +138,7 @@ function demo(examples, reveal = false) {
         })
       }
 
-      dom.results.innerHTML = JSON.stringify(tracker.tree, null, "  ")
+      dom.results.innerHTML = JSON.stringify(tracker.copyResult(), null, "  ")
       displayExternals(externals, templateStr, dom.div)
     }
   }
