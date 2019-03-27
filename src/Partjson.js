@@ -28,7 +28,6 @@ export default class Partjson {
       seed: {},
       "=": {}
     }
-
     this.opts = Object.assign(this.defaultOpts, opts)
 
     this.delimit = "."
@@ -181,27 +180,36 @@ export default class Partjson {
     if (filler["@done"]) context.done = filler["@done"]
   }
 
+  postLoop(result, context) {
+    if (!context || !context.filler || !context.filler["__:"]) return
+    for (const term of context.filler["__:"]) {
+      const input = context.filler.inputs[term]
+      if (input.keyFxn && input.valFxn) {
+        const keys = input.keyFxn(null, context)
+        for (const key of keys) {
+          if (input.valFxn) {
+            input.valFxn(null, key, result, context)
+          }
+        }
+      }
+    }
+  }
+
   processResult(result) {
     const context = this.contexts.get(result)
     this.postLoop(result, context)
 
     for (const key in result) {
-      if (result[key] instanceof Set) {
-        result[key] = [...result[key]]
-      } else if (result[key] instanceof Map) {
-        result[key] = [...result[key].entries()]
-      }
       const value = result[key]
       if (value) {
-        if (Array.isArray(value)) {
-          // assumes all element values will be the same type
-          if (value[0] && typeof value[0] == "object") {
-            for (const v of value) {
-              this.processResult(v)
-            }
+        if (
+          Array.isArray(value) ||
+          value instanceof Set ||
+          value instanceof Map
+        ) {
+          for (const v of value) {
+            if (typeof v == "object") this.processResult(v)
           }
-          delete value.add
-          delete value.push
         } else if (typeof value == "object") {
           const context = this.contexts.get(value)
           if (context && context["@dist"]) {
@@ -219,19 +227,34 @@ export default class Partjson {
     }
   }
 
-  postLoop(result, context) {
-    if (!context || !context.filler || !context.filler["__:"]) return
-    for (const term of context.filler["__:"]) {
-      const input = context.filler.inputs[term]
-      if (input.keyFxn && input.valFxn) {
-        const keys = input.keyFxn(null, context)
-        for (const key of keys) {
-          if (input.valFxn) {
-            input.valFxn(null, key, result, context)
+  // will convert Set, Map to arrays, 
+  // useful for JSON.stringify
+  copyResult(_result = undefined, copy = {}) {
+    if (arguments.length && _result === undefined) return
+    const result = !arguments.length ? this.tree : _result
+    for (const key in result) {
+      const value = result[key]
+      if (value instanceof Set || value instanceof Map) {
+        copy[key] = [...value]
+      } else if (Array.isArray(value)) {
+        copy[key] = []
+        for (const v of value) {
+          if (value && typeof v == "object") {
+            const obj = Object.create(null)
+            copy[key].push(obj)
+            this.copyResult(v, obj)
+          } else {
+            copy[key] = JSON.parse(JSON.stringify(value))
           }
         }
+      } else if (value && typeof value == "object") {
+        copy[key] = Object.create(null)
+        this.copyResult(value, copy[key])
+      } else {
+        copy[key] = JSON.parse(JSON.stringify(value))
       }
     }
+    return copy
   }
 }
 

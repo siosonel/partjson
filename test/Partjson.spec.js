@@ -295,7 +295,7 @@ tape("processResult", function(test) {
   const Filler = new Partjson({
     template: {
       total: "+$count",
-      distinct: ["$type"],
+      distinct: ["$type", "set"],
       child: {
         map: [["$type", "+$count"], "map"],
         branch: "@bbranch"
@@ -314,12 +314,8 @@ tape("processResult", function(test) {
   Filler.refresh({ data })
 
   test.true(
-    Filler.tree.distinct instanceof Array,
-    "should convert a Set to an array"
-  )
-  test.true(
-    Filler.tree.child.map instanceof Array,
-    "should convert a Map to an array"
+    Filler.tree.distinct instanceof Set,
+    "should not convert a Set to an array"
   )
   test.true(
     Filler.tree.child.branch.startsWith("{{ "),
@@ -334,12 +330,59 @@ tape("processResult", function(test) {
     "should be the only method that converts a result Set into an array"
   )
   test.true(
-    Filler.tree.child.map instanceof Map,
-    "should be the only method that converts a result Map into an array"
-  )
-  test.true(
     !Filler.tree.child.branch,
     "should be the only method that calls the errors marker"
   )
+  test.end()
+})
+
+tape("copyResult", function(test) {
+  const Filler = new Partjson({
+    template: {
+      total: "+1",
+      props: ["$prop"],
+      byKey: {
+        $prop: "+1"
+      },
+      map: [["$prop", "+1"], "map"]
+    },
+    seed: {
+      total: 3,
+      props: ["a"],
+      byKey: {
+        c: 3
+      },
+      map: [["d", 3]]
+    }
+  })
+
+  test.deepEqual(Filler.copyResult(), {}, "should copy empty results")
+
+  Filler.add([{ prop: "c" }, { prop: "b" }])
+
+  test.deepEqual(
+    Filler.copyResult(),
+    {
+      total: 5,
+      props: ["a", "c", "b"],
+      byKey: { c: 4, b: 1 },
+      map: [["d", 3], ["c", 1], ["b", 1]]
+    },
+    "should copy early results"
+  )
+
+  Filler.add([{ prop: "b" }, { prop: "d" }])
+
+  test.deepEqual(
+    Filler.copyResult(),
+    {
+      total: 7,
+      props: ["a", "c", "b", "d"],
+      byKey: { c: 4, b: 2, d: 1 },
+      map: [["d", 4], ["c", 1], ["b", 2]]
+    },
+    "should copy later results"
+  )
+
   test.end()
 })

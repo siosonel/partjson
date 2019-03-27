@@ -87,6 +87,57 @@ tape(`valFiller[",(]"]`, function(test) {
   test.end()
 })
 
+tape(`valFiller.defaultSeed`, function(test) {
+  const filler = new Partjson({
+    template: {
+      total: "+1",
+      props: ["$prop"],
+      byKey: {
+        $prop: "+1"
+      },
+      arr: [{ prop: "$prop" }],
+      map: [["$prop", "+1"], "map"]
+    },
+    seed: {
+      total: 3,
+      props: ["a"],
+      byKey: {
+        c: 3
+      },
+      arr: [{ prop: "d" }],
+      map: [["d", 3]]
+    }
+  })
+
+  const vf = filler.valFiller
+  test.equal(
+    vf.defaultSeed(["total"], 0),
+    3,
+    "should use an integer seed value"
+  )
+  test.deepEqual(
+    vf.defaultSeed(["props"], []),
+    ["a"],
+    "should use an array seed value"
+  )
+  test.deepEqual(
+    vf.defaultSeed(["byKey"], []),
+    { c: 3 },
+    "should use an object seed value"
+  )
+  test.deepEqual(
+    vf.defaultSeed(["arr"], []),
+    [{ prop: "d" }],
+    "should use an array of object seed value"
+  )
+  test.deepEqual(
+    vf.defaultSeed(["map"], new Map()),
+    new Map([["d", 3]]),
+    "should use a Map seed value"
+  )
+  test.end()
+})
+
 tape(`valFiller.getSeed`, function(test) {
   const filler = new Partjson()
   const seed0 = filler.valFiller.getArrSeed({ templateVal: [, 0] })
@@ -94,7 +145,7 @@ tape(`valFiller.getSeed`, function(test) {
   seed0(result0, "key")
   test.true(Array.isArray(result0.key), "should seed an array")
 
-  const seed1 = filler.valFiller.getArrSeed({ templateVal: [] })
+  const seed1 = filler.valFiller.getArrSeed({ templateVal: [, "set"] })
   const result1 = {}
   seed1(result1, "key")
   test.true(result1.key instanceof Set, "should seed a Set")
@@ -106,10 +157,8 @@ tape(`valFiller.getSeed`, function(test) {
       props: ["$prop"],
       byKey: {
         $prop: "+1"
-      }, 
-      arr: [
-        {prop: "$prop"}
-      ]
+      },
+      arr: [{ prop: "$prop" }]
     },
     seed: {
       total: 3,
@@ -117,9 +166,7 @@ tape(`valFiller.getSeed`, function(test) {
       byKey: {
         c: 3
       },
-      arr: [
-        {prop: "d"}
-      ]
+      arr: [{ prop: "d" }]
     }
   })
   filler2.add([{ prop: "b" }, { prop: "c" }])
@@ -132,11 +179,7 @@ tape(`valFiller.getSeed`, function(test) {
         b: 1,
         c: 4
       },
-      arr: [
-        {prop: "d"},
-        {prop: "b"},
-        {prop: "c"}
-      ]
+      arr: [{ prop: "d" }, { prop: "b" }, { prop: "c" }]
     },
     "should use the user-supplied seed"
   )
@@ -471,12 +514,19 @@ tape(`valFiller.strFiller`, function(test) {
 tape(`valFiller.arrFiller`, function(test) {
   const filler = new Partjson()
   const ignore = { "@": value => typeof value === "undefined" }
-  const templateVal = ["$prop"]
+  const templateVal = ["$prop", 0]
   const input0 = { errors: [], templateVal }
   const fxn0 = filler.valFiller.arrFiller(input0, ignore, templateVal)
-  const result = { test: [] }
+  const result = {}
   fxn0({ prop: "a" }, "test", result)
   test.equal(result.test[0], "a", "should return an array filler")
+
+  const templateVal1 = ["$prop"]
+  const input1 = { errors: [], templateVal: templateVal1 }
+  const fxn1 = filler.valFiller.arrFiller(input1, ignore, templateVal1)
+  const result1 = {}
+  fxn1({ prop: "a" }, "test", result1)
+  test.equal([...result1.test][0], "a", "should return an array filler")
   test.end()
 })
 
@@ -545,7 +595,17 @@ tape(`valFiller[[,]]`, function(test) {
   const filler1 = new Partjson({ template: template1, data })
   test.deepEqual(
     filler1.tree,
-    { test: [["a", 2], ["b", 1], ["c", 1]] },
+    { test: new Map([["a", 2], ["b", 1], ["c", 1]]) },
+    `should create a map`
+  )
+  const filler2 = new Partjson({
+    template: template1,
+    data,
+    arrayedValues: true
+  })
+  test.deepEqual(
+    filler2.tree,
+    { test: new Map([["a", 2], ["b", 1], ["c", 1]]) },
     `should create a map`
   )
   test.end()
