@@ -227,7 +227,7 @@ export default class Partjson {
       this.errors.markErrors(result, context)
     }
     if (context && context.done) {
-      context.done(result)
+      context.done(result, context)
     }
   }
 
