@@ -120,6 +120,25 @@ tape(`valFiller.getArrSeed`, function(test) {
   })
   //filler2.add([{ prop: "b" }, { prop: "c" }])
   test.deepEqual(filler2.tree, seed2, "should use the user-supplied seed")
+
+  const filler3 = new Partjson({
+    template: {
+      "$id": ["$prop"]
+    },
+    data: [
+      {id: "a", prop: 0},
+      {id: "a", prop: 1},
+      {id: "b", prop: 0},
+      {id: "b", prop: 1},
+      {id: "b", prop: 2},
+    ]
+  })
+  test.deepEqual(
+    filler3.tree, 
+    {a: [0,1], b: [0, 1, 2]},
+    "should not share an array value-frequency tracker between results"
+  )
+
   test.end()
 })
 

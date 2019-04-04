@@ -83,13 +83,17 @@ export default class ValFiller {
       const tracker = new Map()
       return (result, key, value) => {
         if (!(key in result)) result[key] = []
-        if (!tracker.has(value)) {
-          tracker.set(value, 0)
+        if (!tracker.has(result[key])) {
+          tracker.set(result[key], new Map())
         }
-        const count = tracker.get(value)
+        const t = tracker.get(result[key])
+        if (!t.has(value)) {
+          t.set(value, 0)
+        }
+        const count = t.get(value)
         if (count < option) {
           result[key].push(value)
-          tracker.set(value, count + 1)
+          t.set(value, count + 1)
         }
       }
     }
