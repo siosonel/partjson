@@ -197,7 +197,7 @@ export default class Partjson {
     }
     filler["@after"](row, context)
     if (filler["@dist"]) filler["@dist"](context)
-    if (filler["@done"]) {
+    if (filler["@done"] && !this.done.includes(context)) {
       context.done = filler["@done"]
       this.done.push(context)
     }
