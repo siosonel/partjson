@@ -105,6 +105,8 @@ export const subs = {
           ? [null, null]
           : d == "@"
           ? [context.self, context]
+          : d == "@values"
+          ? [Object.values(result), context]
           : d[0] == "@"
           ? [context[d.slice(1)], Filler.contexts.get(context[d.slice(1)])]
           : !result

@@ -10,7 +10,7 @@ tape("constructor", function(test) {
   const filler = new Partjson()
   test.deepEqual(
     filler.reserved.contexts,
-    ["@branch", "@parent", "@root", "@self"],
+    ["@branch", "@parent", "@root", "@self", "@values"],
     "should set the reserved contexts"
   )
   test.deepEqual(

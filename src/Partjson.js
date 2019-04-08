@@ -265,7 +265,11 @@ export default class Partjson {
       } else if (Array.isArray(value)) {
         copy[key] = []
         for (const v of value) {
-          if (value && typeof v == "object") {
+          if (Array.isArray(v)) {
+            const arr = []
+            copy[key].push(arr)
+            this.copyResult(v, arr)
+          } else if (v && typeof v == "object") {
             const obj = Object.create(null)
             copy[key].push(obj)
             this.copyResult(v, obj)

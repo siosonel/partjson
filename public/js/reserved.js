@@ -130,6 +130,21 @@ demo(
       }
     },
     {
+      symbol: "@values",
+      tokenType: "context",
+      section: "context",
+      id: "values",
+      title: `The <span class="code-snippet">@values</span> term returns the 
+      equivalent of Javascript's Object.values(result). This is RECOMMENDED
+      over the use of <span class="code-snippet">@dist()</a>.`,
+      template: {
+        "__:results": "@.byCatName.@values",
+        byCatName: {
+          "$catname": ["$preytype"]
+        }
+      }
+    },
+    {
       symbol: "@before()",
       tokenType: "filters",
       section: "filters",
@@ -276,7 +291,12 @@ demo(
       tokenType: "post",
       section: "post",
       id: "dist",
-      title: `The <span class="code-snippet">@dist()</span> function distributes 
+      title: `NOTE: Use <a href="#values"><span class="code-snippet">@values</span></a>
+    whenever possible, as it is a more readable to specify an
+    input source in a template instead of templating a "goto"-like result 
+    target such as when <span class="code-snippet">@dist()</span> is used.
+    <br/><br/>
+    The <span class="code-snippet">@dist()</span> function distributes 
 		results from one result subtree to another, once all data rows have been
 		processed and template branches are filled with final results. 
 		Usually, this would copy deeply nested result 

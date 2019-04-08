@@ -235,6 +235,25 @@ tape(`subs["@"]`, function(test) {
   test.equal(typeof fxn5, "undefined", "@unknown should return undefined")
   test.true(input5.errors.length > 0, "has errors")
 
+  const Filler1 = new Partjson({
+    template: {
+      "__:arrs": "@.byKey.@values",
+      byKey: {
+        "$key": ["$"]
+      }
+    },
+    data: [
+      {key: "a"},
+      {key: "a"},
+      {key: "b"},
+      {key: "c"},
+    ]
+  })
+  test.deepEqual(
+    Filler1.tree.arrs,
+    [[{key: "a"}, {key: "a"}], [{key: "b"}], [{key: "c"}]],
+    "@values should return a result's Object.values"
+  )
   test.end()
 })
 

@@ -421,15 +421,24 @@ tape("copyResult", function(test) {
     byKey: {
       c: 3
     },
+    arrsByProp: {},
     map: [["d", 3]]
   })
   const Filler = new Partjson({
     template: {
+      "__:arrsObj": "@.arrsByProp.@values",
+      "__:arrsArr": "@.propsByProp.@values",
       total: "+1",
       props: ["$prop"],
       byKey: {
         $prop: "+1"
       },
+      arrsByProp: {
+        "$prop": ["$"]
+      },
+      propsByProp: {
+        "$prop": ["$prop", 0]
+      },  
       map: [["$prop", "+1"], "map"]
     },
     seed
@@ -442,13 +451,45 @@ tape("copyResult", function(test) {
   )
 
   Filler.add([{ prop: "c" }, { prop: "b" }])
-
+  const copy = Filler.copyResult()
+  test.deepEqual(
+    copy.arrsObj,
+    [[{ prop: "c" }], [{ prop: "b" }]],
+    "should copy an array of array of objects"
+  )
+  test.deepEqual(
+    copy.arrsArr,
+    [["c"], ["b"]],
+    "should copy an array of arrays"
+  )
+  test.equal(copy.total, 5, "should copy a numeric result")
+  test.deepEqual(copy.props, ["a", "c", "b"], "should copy an array")
+  test.deepEqual(copy.byKey, { c: 4, b: 1 }, "should copy an object")
+  test.deepEqual(
+    copy.arrsByProp, 
+    {c: [{ prop: "c" }], b: [{ prop: "b" }]},
+    "should copy an object that has array of objects as values"
+  )
+  test.deepEqual(
+    copy.propsByProp, 
+    {c: ["c"], b: ["b"]},
+    "should copy an object that has array of strings as values"
+  )
+  test.deepEqual(
+    copy.map, 
+    [["d", 3], ["c", 1], ["b", 1]],
+    "should convert a Map instance to an array of [key, value]"
+  )
   test.deepEqual(
     Filler.copyResult(),
     {
+      arrsObj: [[{ prop: "c" }], [{ prop: "b" }]],
+      arrsArr: [["c"], ["b"]],
       total: 5,
       props: ["a", "c", "b"],
       byKey: { c: 4, b: 1 },
+      arrsByProp: {c: [{ prop: "c" }], b: [{ prop: "b" }]},
+      propsByProp: {c: ["c"], b: ["b"]},
       map: [["d", 3], ["c", 1], ["b", 1]]
     },
     "should copy early results"
@@ -459,9 +500,13 @@ tape("copyResult", function(test) {
   test.deepEqual(
     Filler.copyResult(),
     {
+      arrsObj: [[{ prop: "c" }], [{ prop: "b" },{ prop: "b" }], [{ prop: "d" }]],
+      arrsArr: [["c"], ["b", "b"], ["d"]],
       total: 7,
       props: ["a", "c", "b", "d"],
       byKey: { c: 4, b: 2, d: 1 },
+      arrsByProp: {c: [{ prop: "c" }], b: [{ prop: "b" }, { prop: "b" }], d: [{ prop: "d" }]},
+      propsByProp: {c: ["c"], b: ["b", "b"], d: ["d"]},
       map: [["d", 4], ["c", 1], ["b", 2]]
     },
     "should copy later results"

@@ -2,7 +2,7 @@ export default class Reserved {
   constructor(Pj) {
     this.Pj = Pj
     this.opts = ["@delimit", "@errmode"]
-    this.contexts = ["@branch", "@parent", "@root", "@self"]
+    this.contexts = ["@branch", "@parent", "@root", "@self", "@values"]
     this.filters = ["@before()", "@join()", "@ignore()"]
     this.post = ["@after()", "@dist()", "@end()"]
     this.terms = [...this.opts, ...this.contexts, ...this.filters, ...this.post]
