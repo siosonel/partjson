@@ -255,6 +255,23 @@ demo(
       }
     },
     {
+      symbol: "_#:",
+      tokenType: "time",
+      section: "timing",
+      id: "numbered-post-loop",
+      title: `A <span class="code-snippet">_#:</span> prefix, 
+        where <span class="code-snippet">#</span> is an integer from 0 to 9, 
+        will delay the processing of a template input after the last data row 
+        has been looped through and in the order of the integer value.`,
+      template: {
+        count: "+1",
+        totalPreyMass: "+$preymass",
+        "__:mean": "=totalMassOverCount()",
+        "_1:halfMean": "=halfMean()",
+        "_2:quarterMean": "=quarterMean()"
+      }
+    },
+    {
       symbol: "#",
       tokenType: "skip",
       section: "skip",

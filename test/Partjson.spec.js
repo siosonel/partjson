@@ -31,7 +31,7 @@ tape("constructor", function(test) {
   )
   test.deepEqual(
     Filler.timeSymbols,
-    [":__", "_:_", "__:"],
+    [":__", "_:_", "__:", "_0:", "_1:", "_2:", "_3:", "_4:", "_5:", "_6:", "_7:", "_8:", "_9:"],
     "should set timing symbols"
   )
   test.deepEqual(Filler.skipSymbols, ["#", "*"], "should set skip symbols")
@@ -149,8 +149,8 @@ tape("parseTemplate", function(test) {
     "should create a default @after fxn"
   )
   test.deepEqual(
-    filler["__:"],
-    [],
+    filler.postTerms,
+    {},
     "should create a default post-loop function tracker"
   )
   test.deepEqual(
@@ -208,6 +208,50 @@ tape("processRow", function(test) {
     { total: 4 },
     "should fill a result object with data rows as input"
   )
+ 
+  const mean = () => {}
+  const calc = () => {}
+  const compute = () => {}
+  const done = () => {}
+  const Filler1 = new Partjson({
+    template: {
+      total: "+$value",
+      "__:mean": "=mean()",
+      "_1:calc": "=calc()",
+      "_1:compute": "=compute()",
+      "@done()": "=done()"
+    },
+    "=": {
+      mean,
+      calc,
+      compute,
+      done
+    },
+    data: [
+      {value: 3}
+    ]
+  });
+  test.equal(Filler1.done[0].done, done, "should collect done functions")
+  test.equal(
+    Filler1.postLoopTerms["__:"].length, 
+    1, 
+    "should collect all post-loop contexts"
+  )
+  test.deepEqual(
+    Filler1.contexts.get(Filler1.tree).filler.postTerms["__:"], 
+    ["__:mean"],
+    "should track all post-loop functions"
+  )
+  test.equal(
+    Filler1.postLoopTerms["_1:"].length, 
+    1, 
+    "should collect all numbered post-loop contexts"
+  )
+  test.deepEqual(
+    Filler1.contexts.get(Filler1.tree).filler.postTerms["_1:"], 
+    ["_1:calc", "_1:compute"],
+    "should track all numbered post-loop functions"
+  )
   test.end()
 })
 
@@ -243,6 +287,40 @@ tape("add", function(test) {
     },
     "should not redistribute results when called for separate data"
   )
+
+  const mean = (row, context) => context.self.total / context.self.count
+  const calc = (row, context) => 2*context.self.mean 
+  const compute = (row, context) => 0.5*context.self.mean
+  const sum = (row, context) => context.self.calc + context.self.compute
+  const done = (result) => result.final = result.sum + result.mean
+  const Filler1 = new Partjson({
+    template: {
+      total: "+$value",
+      count: "+1",
+      "__:mean": "=mean()",
+      "_1:calc": "=calc()",
+      "_1:compute": "=compute()",
+      "_2:sum": "=sum()",
+      "@done()": "=done()"
+    },
+    "=": {
+      mean,
+      calc,
+      compute,
+      sum,
+      done
+    },
+    data: [
+      {value: 3},
+      {value: 1},
+      {value: 2}
+    ]
+  });
+  test.equal(Filler1.tree.mean, 2, "should fill unnumbered post-loop inputs first")
+  test.equal(Filler1.tree.calc, 4, "should fill numbered post-loop inputs after unnumbered")
+  test.equal(Filler1.tree.compute, 1, "should fill similarly numbered post-loop inputs in the same order")
+  test.equal(Filler1.tree.sum, 5, "should fill numbered post-loop inputs in increasing order")
+  test.equal(Filler1.tree.final, 7, "should execute a done function at the end")
   test.end()
 })
 

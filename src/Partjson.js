@@ -34,7 +34,8 @@ export default class Partjson {
     this.subsSymbols = ["$", "=", "@", "&"]
     this.convSymbols = ["()", "[]", "(]"] //, "{}", "(}"]
     this.aggrSymbols = ["+", "-", "<", ">"]
-    this.timeSymbols = [":__", "_:_", "__:"]
+    this.timePost = ["_0:", "_1:", "_2:", "_3:", "_4:", "_5:", "_6:", "_7:", "_8:", "_9:"]
+    this.timeSymbols = [":__", "_:_", "__:", ...this.timePost]
     this.skipSymbols = ["#", "*"]
     this.steps = [":__", "", "_:_"]
     this.errors = new Err(this)
@@ -80,6 +81,8 @@ export default class Partjson {
       this.template = this.focusTemplate
     }
 
+    this.postLoopTerms = Object.create(null)
+    this.done = []
     if (this.opts.data) {
       this.add(this.opts.data, false)
     }
@@ -107,7 +110,7 @@ export default class Partjson {
     filler.inputs = Object.create(null)
     filler["@before"] = this.reserved.trueFxn
     filler["@after"] = this.reserved.trueFxn
-    filler["__:"] = []
+    filler.postTerms = {}
     filler.errors = []
     const ignore = this.reserved["@ignore"](template, inheritedIgnore, filler)
     filler["@ignore"] = ignore
@@ -137,8 +140,11 @@ export default class Partjson {
         input.keyFxn = this.keyFiller.getFxn(input, ignore)
         if (input.keyFxn) {
           input.valFxn = this.valFiller.getFxn(input, ignore)
-          if (keyTokens.time == "__:") {
-            filler["__:"].push(term)
+          if (keyTokens.time == "__:" || this.timePost.includes(keyTokens.time)) {
+            if (!filler.postTerms[keyTokens.time]) {
+              filler.postTerms[keyTokens.time] = []
+            }
+            filler.postTerms[keyTokens.time].push(term)
           } else {
             steps[step].push(term)
           }
@@ -156,6 +162,16 @@ export default class Partjson {
       this.joins.clear()
     }
     this.processResult(this.tree)
+    for(const time of this.timePost) {
+      if (this.postLoopTerms[time]) {
+        for(const context of this.postLoopTerms[time]) {
+          this.postLoop(context.self, context, time)
+        }
+      }
+    }
+    for(const context of this.done) {
+      context.done(context.self, context)
+    }
     if (refreshErrors) this.errors.log()
   }
 
@@ -181,12 +197,21 @@ export default class Partjson {
     }
     filler["@after"](row, context)
     if (filler["@dist"]) filler["@dist"](context)
-    if (filler["@done"]) context.done = filler["@done"]
+    if (filler["@done"]) {
+      context.done = filler["@done"]
+      this.done.push(context)
+    }
+    for(const time in filler.postTerms) {
+      if (!this.postLoopTerms[time]) {
+        this.postLoopTerms[time] = []
+      }
+      this.postLoopTerms[time].push(context)
+    }
   }
 
-  postLoop(result, context) {
-    if (!context || !context.filler || !context.filler["__:"]) return
-    for (const term of context.filler["__:"]) {
+  postLoop(result, context, time="__:") {
+    if (!context || !context.filler || !context.filler.postTerms[time]) return
+    for (const term of context.filler.postTerms[time]) {
       const input = context.filler.inputs[term]
       if (input.keyFxn && input.valFxn) {
         const keys = input.keyFxn(null, context)
@@ -201,7 +226,7 @@ export default class Partjson {
 
   processResult(result) {
     const context = this.contexts.get(result)
-    this.postLoop(result, context)
+    this.postLoop(result, context, "__:")
 
     for (const key in result) {
       const value = result[key]
@@ -225,9 +250,6 @@ export default class Partjson {
     }
     if (context && context.filler) {
       this.errors.markErrors(result, context)
-    }
-    if (context && context.done) {
-      context.done(result, context)
     }
   }
 

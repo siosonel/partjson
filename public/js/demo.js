@@ -266,6 +266,12 @@ function getOpts() {
       totalMassOverCount(row, context) {
         return context.self.totalPreyMass / context.self.count
       },
+      halfMean(row, context) {
+        return context.self.mean / 2
+      },
+      quarterMean(row, context) {
+        return context.self.halfMean / 2
+      },
       roundedPreyMass(row) {
         return isNumeric(row.preymass) ? +row.preymass.toPrecision(2) : null
       },
