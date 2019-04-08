@@ -31,7 +31,21 @@ tape("constructor", function(test) {
   )
   test.deepEqual(
     Filler.timeSymbols,
-    [":__", "_:_", "__:", "_0:", "_1:", "_2:", "_3:", "_4:", "_5:", "_6:", "_7:", "_8:", "_9:"],
+    [
+      ":__",
+      "_:_",
+      "__:",
+      "_0:",
+      "_1:",
+      "_2:",
+      "_3:",
+      "_4:",
+      "_5:",
+      "_6:",
+      "_7:",
+      "_8:",
+      "_9:"
+    ],
     "should set timing symbols"
   )
   test.deepEqual(Filler.skipSymbols, ["#", "*"], "should set skip symbols")
@@ -208,7 +222,7 @@ tape("processRow", function(test) {
     { total: 4 },
     "should fill a result object with data rows as input"
   )
- 
+
   const mean = () => {}
   const calc = () => {}
   const compute = () => {}
@@ -227,28 +241,26 @@ tape("processRow", function(test) {
       compute,
       done
     },
-    data: [
-      {value: 3}
-    ]
-  });
+    data: [{ value: 3 }]
+  })
   test.equal(Filler1.done[0].done, done, "should collect done functions")
   test.equal(
-    Filler1.postLoopTerms["__:"].length, 
-    1, 
+    Filler1.postLoopTerms["__:"].length,
+    1,
     "should collect all post-loop contexts"
   )
   test.deepEqual(
-    Filler1.contexts.get(Filler1.tree).filler.postTerms["__:"], 
+    Filler1.contexts.get(Filler1.tree).filler.postTerms["__:"],
     ["__:mean"],
     "should track all post-loop functions"
   )
   test.equal(
-    Filler1.postLoopTerms["_1:"].length, 
-    1, 
+    Filler1.postLoopTerms["_1:"].length,
+    1,
     "should collect all numbered post-loop contexts"
   )
   test.deepEqual(
-    Filler1.contexts.get(Filler1.tree).filler.postTerms["_1:"], 
+    Filler1.contexts.get(Filler1.tree).filler.postTerms["_1:"],
     ["_1:calc", "_1:compute"],
     "should track all numbered post-loop functions"
   )
@@ -289,10 +301,10 @@ tape("add", function(test) {
   )
 
   const mean = (row, context) => context.self.total / context.self.count
-  const calc = (row, context) => 2*context.self.mean 
-  const compute = (row, context) => 0.5*context.self.mean
+  const calc = (row, context) => 2 * context.self.mean
+  const compute = (row, context) => 0.5 * context.self.mean
   const sum = (row, context) => context.self.calc + context.self.compute
-  const done = (result) => result.final = result.sum + result.mean
+  const done = result => (result.final = result.sum + result.mean)
   const Filler1 = new Partjson({
     template: {
       total: "+$value",
@@ -310,16 +322,28 @@ tape("add", function(test) {
       sum,
       done
     },
-    data: [
-      {value: 3},
-      {value: 1},
-      {value: 2}
-    ]
-  });
-  test.equal(Filler1.tree.mean, 2, "should fill unnumbered post-loop inputs first")
-  test.equal(Filler1.tree.calc, 4, "should fill numbered post-loop inputs after unnumbered")
-  test.equal(Filler1.tree.compute, 1, "should fill similarly numbered post-loop inputs in the same order")
-  test.equal(Filler1.tree.sum, 5, "should fill numbered post-loop inputs in increasing order")
+    data: [{ value: 3 }, { value: 1 }, { value: 2 }]
+  })
+  test.equal(
+    Filler1.tree.mean,
+    2,
+    "should fill unnumbered post-loop inputs first"
+  )
+  test.equal(
+    Filler1.tree.calc,
+    4,
+    "should fill numbered post-loop inputs after unnumbered"
+  )
+  test.equal(
+    Filler1.tree.compute,
+    1,
+    "should fill similarly numbered post-loop inputs in the same order"
+  )
+  test.equal(
+    Filler1.tree.sum,
+    5,
+    "should fill numbered post-loop inputs in increasing order"
+  )
   test.equal(Filler1.tree.final, 7, "should execute a done function at the end")
   test.end()
 })
@@ -434,11 +458,11 @@ tape("copyResult", function(test) {
         $prop: "+1"
       },
       arrsByProp: {
-        "$prop": ["$"]
+        $prop: ["$"]
       },
       propsByProp: {
-        "$prop": ["$prop", 0]
-      },  
+        $prop: ["$prop", 0]
+      },
       map: [["$prop", "+1"], "map"]
     },
     seed
@@ -457,26 +481,22 @@ tape("copyResult", function(test) {
     [[{ prop: "c" }], [{ prop: "b" }]],
     "should copy an array of array of objects"
   )
-  test.deepEqual(
-    copy.arrsArr,
-    [["c"], ["b"]],
-    "should copy an array of arrays"
-  )
+  test.deepEqual(copy.arrsArr, [["c"], ["b"]], "should copy an array of arrays")
   test.equal(copy.total, 5, "should copy a numeric result")
   test.deepEqual(copy.props, ["a", "c", "b"], "should copy an array")
   test.deepEqual(copy.byKey, { c: 4, b: 1 }, "should copy an object")
   test.deepEqual(
-    copy.arrsByProp, 
-    {c: [{ prop: "c" }], b: [{ prop: "b" }]},
+    copy.arrsByProp,
+    { c: [{ prop: "c" }], b: [{ prop: "b" }] },
     "should copy an object that has array of objects as values"
   )
   test.deepEqual(
-    copy.propsByProp, 
-    {c: ["c"], b: ["b"]},
+    copy.propsByProp,
+    { c: ["c"], b: ["b"] },
     "should copy an object that has array of strings as values"
   )
   test.deepEqual(
-    copy.map, 
+    copy.map,
     [["d", 3], ["c", 1], ["b", 1]],
     "should convert a Map instance to an array of [key, value]"
   )
@@ -488,8 +508,8 @@ tape("copyResult", function(test) {
       total: 5,
       props: ["a", "c", "b"],
       byKey: { c: 4, b: 1 },
-      arrsByProp: {c: [{ prop: "c" }], b: [{ prop: "b" }]},
-      propsByProp: {c: ["c"], b: ["b"]},
+      arrsByProp: { c: [{ prop: "c" }], b: [{ prop: "b" }] },
+      propsByProp: { c: ["c"], b: ["b"] },
       map: [["d", 3], ["c", 1], ["b", 1]]
     },
     "should copy early results"
@@ -500,13 +520,21 @@ tape("copyResult", function(test) {
   test.deepEqual(
     Filler.copyResult(),
     {
-      arrsObj: [[{ prop: "c" }], [{ prop: "b" },{ prop: "b" }], [{ prop: "d" }]],
+      arrsObj: [
+        [{ prop: "c" }],
+        [{ prop: "b" }, { prop: "b" }],
+        [{ prop: "d" }]
+      ],
       arrsArr: [["c"], ["b", "b"], ["d"]],
       total: 7,
       props: ["a", "c", "b", "d"],
       byKey: { c: 4, b: 2, d: 1 },
-      arrsByProp: {c: [{ prop: "c" }], b: [{ prop: "b" }, { prop: "b" }], d: [{ prop: "d" }]},
-      propsByProp: {c: ["c"], b: ["b", "b"], d: ["d"]},
+      arrsByProp: {
+        c: [{ prop: "c" }],
+        b: [{ prop: "b" }, { prop: "b" }],
+        d: [{ prop: "d" }]
+      },
+      propsByProp: { c: ["c"], b: ["b", "b"], d: ["d"] },
       map: [["d", 4], ["c", 1], ["b", 2]]
     },
     "should copy later results"

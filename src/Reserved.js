@@ -28,7 +28,7 @@ export default class Reserved {
 Reserved.prototype["@before"] = function(subterm, input) {
   const fxn = this.Pj.opts["="][subterm.slice(1, -2)]
   if (!fxn) {
-    input.errors.push(["val", "MISSING-"+input.term+"-FXN"])
+    input.errors.push(["val", "MISSING-" + input.term + "-FXN"])
     return this.trueFxn
   } else return fxn
 }

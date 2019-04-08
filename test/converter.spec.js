@@ -239,19 +239,14 @@ tape(`subs["@"]`, function(test) {
     template: {
       "__:arrs": "@.byKey.@values",
       byKey: {
-        "$key": ["$"]
+        $key: ["$"]
       }
     },
-    data: [
-      {key: "a"},
-      {key: "a"},
-      {key: "b"},
-      {key: "c"},
-    ]
+    data: [{ key: "a" }, { key: "a" }, { key: "b" }, { key: "c" }]
   })
   test.deepEqual(
     Filler1.tree.arrs,
-    [[{key: "a"}, {key: "a"}], [{key: "b"}], [{key: "c"}]],
+    [[{ key: "a" }, { key: "a" }], [{ key: "b" }], [{ key: "c" }]],
     "@values should return a result's Object.values"
   )
   test.end()

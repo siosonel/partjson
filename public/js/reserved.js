@@ -140,7 +140,7 @@ demo(
       template: {
         "__:results": "@.byCatName.@values",
         byCatName: {
-          "$catname": ["$preytype"]
+          $catname: ["$preytype"]
         }
       }
     },
