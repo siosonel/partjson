@@ -26,8 +26,10 @@ export function parseTerm(Filler, term) {
   const start = skip.length + time.length
   const prefix = term[start]
   const suffix = term.slice(-2)
-  const aggr = Filler.aggrSymbols.includes(prefix) ? prefix : ""
-  const conv = Filler.convSymbols.includes(suffix) ? suffix : ""
+  const aggr =
+    Filler.aggrSymbols.includes(prefix) && prefix != term ? prefix : ""
+  const conv =
+    Filler.convSymbols.includes(suffix) && suffix != term ? suffix : ""
   const subterm =
     aggr && conv
       ? term.slice(start + 1, -2)

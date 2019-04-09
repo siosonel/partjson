@@ -48,6 +48,21 @@ tape("parseTerm", function(test) {
   test.equal(tokens2.time, "_:_")
   test.equal(step2, Filler.steps.indexOf("_:_"))
   test.equal(symbols2, "=()", "should correctly parse a timed term")
+
+  const [subterm3, symbols3, tokens3, step3] = conv.parseTerm(Filler, "-")
+  test.equal(
+    tokens3.aggr,
+    "",
+    "should not convert a lone dash char to tokens.aggr"
+  )
+  test.equal(tokens3.subs, "")
+  test.equal(
+    tokens3.stem,
+    "-",
+    "should convert a lone dash char to tokens.term"
+  )
+  test.equal(tokens3.conv, "")
+  test.equal(symbols3, "", "should correctly parse a lone dash character")
   test.end()
 })
 
