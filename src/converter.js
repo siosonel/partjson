@@ -14,7 +14,7 @@ export default function converter(Filler, input, ignore, val) {
     const convFxn = conv[tokens.conv](subsFxn, input, tokens)
     return [convFxn, tokens]
   }
-  input.errors.push(["val", "UNSUPPORTED-SYMBOL-" + token.subs])
+  input.errors.push(["val", "UNSUPPORTED-SYMBOL-" + tokens.subs])
   return []
 }
 

@@ -135,8 +135,8 @@ tape("refresh", function(test) {
     }
   })
   test.equal(
-    Filler2.delimit, 
-    "|", 
+    Filler2.delimit,
+    "|",
     "should reset to an optional delimiter chararacter"
   )
 

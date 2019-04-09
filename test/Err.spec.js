@@ -53,6 +53,50 @@ tape("setMode", function(test) {
     { input: "{}", result: "", root: "{}", console: "{}" },
     "should accept an object as argument"
   )
+
+  const log = console.log
+  const errs = []
+  console.log = output => {
+    errs.push(output)
+    log(output)
+  }
+  const filler1 = new Partjson({
+    template: {
+      "@errmode": ["", "", "", "{}"],
+      test: "@unknown"
+    },
+    data: [{}]
+  })
+  const err1 = filler1.errors
+  err1.markErrors(filler1.tree, filler1.contexts.get(filler1.tree))
+  test.equal(errs.length, 1, "should log errors to the console if applicable")
+  console.log = log
+
+  const filler2 = new Partjson({
+    template: {
+      "@errmode": ["", "{}", "", ""],
+      test: "@unknown"
+    },
+    data: [{}]
+  })
+  test.deepEqual(
+    filler2.tree["@errors"],
+    { "UNRECOGNIZED-CONTEXT-@unknown": { "@unknown": 1 } },
+    "should mark errors in the root result if applicable"
+  )
+
+  const filler3 = new Partjson({
+    template: {
+      "@errmode": ["{}", "", "", ""],
+      test: "@unknown"
+    },
+    data: [{}]
+  })
+  test.deepEqual(
+    filler3.tree,
+    { test: "{{ UNRECOGNIZED-CONTEXT-@unknown }} @unknown" },
+    "should mark errors in the input key if applicable"
+  )
   test.end()
 })
 
