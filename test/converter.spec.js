@@ -1,5 +1,5 @@
 const tape = require("tape")
-const Partjson = require("../dist/partjson.cjs")
+const Partjson = require("../dist/partjson.umd")
 const conv = Partjson.prototype.converter
 
 tape("\n", function(test) {
@@ -252,6 +252,41 @@ tape(`subs["@"]`, function(test) {
   test.end()
 })
 
+tape(`subs["&"]`, function(test) {
+  const Filler = new Partjson()
+  const joinedData = {sub: 1, nested: {subsub: 2}}
+  Filler.joins.set("alias", joinedData)
+
+  const input0 = { errors: [] }
+  const fxn0 = conv.subs["&"](Filler, "&alias", input0)
+  test.deepEqual(
+    fxn0({}),
+    joinedData,
+    "should return undelimited joined data"
+  )
+  test.true(!input0.errors.length, "no errors")
+
+  const input1 = { errors: [] }
+  const fxn1 = conv.subs["&"](Filler, "&alias.sub", input1)
+  test.deepEqual(
+    fxn1({}),
+    1,
+    "should return a sub-property of a delimited joined data"
+  )
+  test.true(!input1.errors.length, "no errors")
+
+  const input2 = { errors: [] }
+  const fxn2 = conv.subs["&"](Filler, "&alias.nested.subsub", input2)
+  test.deepEqual(
+    fxn2({}),
+    2,
+    "should return a nested sub-property of a delimited joined data"
+  )
+  test.true(!input2.errors.length, "no errors")
+
+  test.end()
+})
+
 tape(`conv[""]`, function(test) {
   const Filler = new Partjson()
   const input0 = { errors: [] }
@@ -272,7 +307,12 @@ tape(`conv["[]"]`, function(test) {
 })
 
 tape(`conv["()"]`, function(test) {
-  const Filler = new Partjson()
+  const Filler = new Partjson({
+    "=": {
+      test1: "not-a-function",
+      test2: () => 1
+    }
+  })
   const input0 = { errors: [] }
   const subsFxn0 = conv.subs["$"](Filler, "$fxn", input0)
   const convFxn0 = conv.conv["()"](subsFxn0, input0, {})
@@ -295,6 +335,27 @@ tape(`conv["()"]`, function(test) {
     "should error on a non-function $prop"
   )
   test.true(input1.errors.length > 0, "has errors")
+  
+  const input2 = { errors: [] }
+  const subsFxn2 = conv.subs["="](Filler, "=test1", input2)
+  const convFxn2 = conv.conv["()"](subsFxn2, input2, {subs:"="})
+  test.equal(
+    convFxn2,
+    undefined,
+    "should error on a non-function external"
+  )
+  test.true(input2.errors.length > 0, "has errors")
+
+  const input3 = { errors: [] }
+  const subsFxn3 = conv.subs["="](Filler, "=test2", input3)
+  const convFxn3 = conv.conv["()"](subsFxn3, input3, {subs:"="})
+  test.equal(
+    convFxn3({ prop: 1 }),
+    1,
+    "should not have an error on an external function"
+  )
+  test.equal(input3.errors.length, 0, "has no errors")
+
   test.end()
 })
 

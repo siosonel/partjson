@@ -6,6 +6,7 @@
   "browser": "dist/partjson.umd.js",
   "dependencies": {},
   "devDependencies": {
+    "nyc": "^13.3.0",
     "prettier": "1.16.4",
     "rollup": "^1.2.2",
     "rollup-plugin-commonjs": "^9.1.0",
@@ -18,7 +19,8 @@
     "dev": "rollup -c -w",
     "test": "tape test/*.spec.js",
     "prettify": "prettier --write --no-semi \"{src,test,public}/**/*.{js,html,css}\" && tape test/*.spec.js",
-    "prepare": "rollup -c"
+    "prepare": "rollup -c",
+    "nyc": "nyc tape test/*.spec.js"
   },
   "files": [
     "dist"

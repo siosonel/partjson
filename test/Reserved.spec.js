@@ -1,5 +1,5 @@
 const tape = require("tape")
-const Partjson = require("../dist/partjson.cjs.js")
+const Partjson = require("../dist/partjson.umd")
 
 tape("\n", function(test) {
   test.pass("-***- Reserved specs -***-")

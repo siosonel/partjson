@@ -1,5 +1,5 @@
 const tape = require("tape")
-const Partjson = require("../dist/partjson.umd.js")
+const Partjson = require("../dist/partjson.umd")
 
 tape("\n", function(test) {
   test.pass("-***- Partjson specs -***-")
@@ -127,6 +127,17 @@ tape("refresh", function(test) {
     Object.keys(Filler.tree).length,
     0,
     "should clear root result after refresh"
+  )
+
+  const Filler2 = new Partjson({
+    template: {
+      "@delimit": "|"
+    }
+  })
+  test.equal(
+    Filler2.delimit, 
+    "|", 
+    "should reset to an optional delimiter chararacter"
   )
 
   test.end()

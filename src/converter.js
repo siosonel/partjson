@@ -152,7 +152,7 @@ export const conv = {
         input.errors.push([
           "val",
           "NOT-A-FUNCTION",
-          token.subs + tokens.term + tokens.conv
+          tokens.subs + tokens.term + tokens.conv
         ])
         return
       }
