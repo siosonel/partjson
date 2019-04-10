@@ -158,7 +158,9 @@ export default class Partjson {
             if (!filler.postTerms[keyTokens.time]) {
               filler.postTerms[keyTokens.time] = []
             }
-            filler.postTerms[keyTokens.time].push(term)
+            if (!filler.postTerms[keyTokens.time].includes(term)) {
+              filler.postTerms[keyTokens.time].push(term)
+            }
           } else {
             steps[step].push(term)
           }
@@ -219,7 +221,9 @@ export default class Partjson {
       if (!this.postLoopTerms[time]) {
         this.postLoopTerms[time] = []
       }
-      this.postLoopTerms[time].push(context)
+      if (!this.postLoopTerms[time].includes(context)) {
+        this.postLoopTerms[time].push(context)
+      }
     }
   }
 
