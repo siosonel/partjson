@@ -69,7 +69,7 @@ export default class ValFiller {
     if (option == "set") {
       return (result, key, value) => {
         if (!(key in result)) result[key] = new Set()
-        else if (!(result[key] instanceof Set)) {
+        else if (Array.isArray(result[key])) {
           result[key] = new Set(result[key])
         }
         result[key].add(value)

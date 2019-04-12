@@ -118,8 +118,26 @@ tape(`valFiller.getArrSeed`, function(test) {
     },
     seed: JSON.stringify(seed2)
   })
-  //filler2.add([{ prop: "b" }, { prop: "c" }])
-  test.deepEqual(filler2.tree, seed2, "should use the user-supplied seed")
+  test.deepEqual(
+    filler2.tree,
+    seed2,
+    "should use the user-supplied seed for array aggregation"
+  )
+
+  const filler2a = new Partjson({
+    template: {
+      props: ["$prop", "set"]
+    },
+    seed: JSON.stringify({
+      props: ["a"]
+    }),
+    data: [{ prop: 1 }]
+  })
+  test.deepEqual(
+    filler2a.tree.props,
+    new Set(["a"]),
+    "should use the user-supplied seed for Set aggregation"
+  )
 
   const filler3 = new Partjson({
     template: {
@@ -163,16 +181,43 @@ tape(`valFiller["[],"]`, function(test) {
   aggrFxn0({ prop: "z" }, "key1", result)
   test.deepEqual(result.key1, undefined, "should ignore a value as specified")
 
+  const input0a = {
+    errors: [],
+    templateVal: ["$prop", "invalid-option"],
+    ignore: value => value == "z"
+  }
+  const aggrFxn0a = filler0.valFiller["[],"](fxn0, input0a)
+  test.equal(
+    aggrFxn0a,
+    undefined,
+    "should not give an aggr fxn when the option is invalid"
+  )
+  test.deepEqual(
+    input0a.errors,
+    [["val", "INVALID-OPTION"]],
+    `should result in an input error on an invalid option`
+  )
+
   const template = { test: ["$type"] }
   const data = [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }]
-  const filler = new Partjson({ template, data })
-  test.deepEqual(filler.tree, { test: ["a", "b", "c"] })
+  const filler1 = new Partjson({ template, data })
+  test.deepEqual(filler1.tree, { test: ["a", "b", "c"] })
 
-  const template1 = { test: ["$type", 2] }
-  const data1 = [{ type: "a" }, { type: "a" }, { type: "a" }, { type: "c" }]
-  const filler1 = new Partjson({ template: template1, data: data1 })
-  test.deepEqual(filler1.tree, { test: ["a", "a", "c"] })
+  const template2 = { test: ["$type", 2] }
+  const data2 = [{ type: "a" }, { type: "a" }, { type: "a" }, { type: "c" }]
+  const filler2 = new Partjson({ template: template2, data: data2 })
+  test.deepEqual(filler2.tree, { test: ["a", "a", "c"] })
 
+  const filler3 = new Partjson({
+    template: {
+      test: ["test", "option"]
+    }
+  })
+  test.deepEqual(
+    filler3.errors.allErrObj,
+    [],
+    "should error on invalid array aggregation option"
+  )
   test.end()
 })
 
@@ -203,6 +248,19 @@ tape(`valFiller["[],[]"]`, function(test) {
   test.true(result.key[0], row.prop[0])
   test.true(result.key[1], row.prop[1])
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
+
+  const input1 = { errors: [], ignore: () => false }
+  const context1 = { errors: [] }
+  const fxn1 = row => row.val
+  const aggrFxn1 = filler.valFiller["[],[]"](fxn1, input1)
+  const result1 = {}
+  const row1a = { prop: 1 }
+  aggrFxn1(row1a, "key", result1, context1)
+  test.deepEqual(
+    context1.errors,
+    [[input1, "NON-ARRAY-VALS", row1a]],
+    "should error on non-array values"
+  )
   test.end()
 })
 
@@ -282,6 +340,19 @@ tape(`valFiller["+,[]"]`, function(test) {
     `should add all items in an array value to the result`
   )
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
+
+  const input1 = { errors: [], ignore: () => false }
+  const context1 = { errors: [] }
+  const fxn1 = row => row.val
+  const aggrFxn1 = filler.valFiller["+,[]"](fxn1, input1)
+  const result1 = {}
+  const row1a = { val: 1 }
+  aggrFxn1(row1a, "key", result1, context1)
+  test.deepEqual(
+    input1.errors,
+    [["val", "NON-ARRAY-VALS", row1a]],
+    "should error on non-array values"
+  )
   test.end()
 })
 
@@ -330,6 +401,20 @@ tape(`valFiller["-,[]"]`, function(test) {
   aggrFxn0(row0, "key", result0, context0)
   test.equal(result0.key, -6, `should increment with a constant value`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
+
+  const input1 = { errors: [], ignore: () => false }
+  const context1 = { errors: [] }
+  const fxn1 = row => row.val
+  const aggrFxn1 = filler.valFiller["-,[]"](fxn1, input1)
+  const result1 = {}
+  const row1a = { val: 1 }
+  aggrFxn1(row1a, "key", result1, context1)
+  test.deepEqual(
+    input1.errors,
+    [["val", "NON-ARRAY-VALS", row1a]],
+    "should error on non-array values"
+  )
+
   test.end()
 })
 
@@ -355,6 +440,19 @@ tape(`valFiller["<,"]`, function(test) {
   aggrFxn0({ val: 2 }, "key", result0, context0)
   test.equal(result0.key, 3, `should find the maximum`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
+
+  const input1 = { errors: [], ignore: () => false }
+  const context1 = { errors: [] }
+  const fxn1 = row => row.val
+  const aggrFxn1 = filler.valFiller["<,"](fxn1, input1)
+  const result1 = {}
+  const row1a = { val: ["a"] }
+  aggrFxn1(row1a, "key", result1, context1)
+  test.deepEqual(
+    context1.errors,
+    [[input1, "NON-NUMERIC-THAN", row1a]],
+    "should error on non-numeric values"
+  )
   test.end()
 })
 
@@ -380,6 +478,27 @@ tape(`valFiller["<,[]"]`, function(test) {
   aggrFxn0({ val: [5, 2] }, "key", result0, context0)
   test.equal(result0.key, 5, `should spread values to find maximum`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
+
+  const input1 = { errors: [], ignore: () => false }
+  const context1 = { errors: [] }
+  const fxn1 = row => row.val
+  const aggrFxn1 = filler.valFiller["<,[]"](fxn1, input1)
+  const result1 = {}
+  const row1a = { val: 1 }
+  aggrFxn1(row1a, "key", result1, context1)
+  test.deepEqual(
+    input1.errors,
+    [["val", "NON-ARRAY-VALS", row1a]],
+    "should error on non-array values"
+  )
+  const row1b = { val: ["a"] }
+  aggrFxn1(row1b, "key", result1, context1)
+  test.deepEqual(
+    context1.errors,
+    [[input1, "NON-NUMERIC-THAN", row1b]],
+    "should error on non-numeric values"
+  )
+
   test.end()
 })
 
@@ -405,6 +524,19 @@ tape(`valFiller[">,"]`, function(test) {
   aggrFxn0({ val: 2 }, "key", result0, context0)
   test.equal(result0.key, 1, `should find the minimum value`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
+
+  const input1 = { errors: [], ignore: () => false }
+  const context1 = { errors: [] }
+  const fxn1 = row => row.val
+  const aggrFxn1 = filler.valFiller[">,"](fxn1, input1)
+  const result1 = {}
+  const row1a = { val: ["a"] }
+  aggrFxn1(row1a, "key", result1, context1)
+  test.deepEqual(
+    context1.errors,
+    [[input1, "NON-NUMERIC-THAN", row1a]],
+    "should error on non-numeric values"
+  )
   test.end()
 })
 
@@ -430,6 +562,27 @@ tape(`valFiller[">,[]"]`, function(test) {
   aggrFxn0({ val: [5, 2] }, "key", result0, context0)
   test.equal(result0.key, 0, `should spread values to find the minimum`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
+
+  const input1 = { errors: [], ignore: () => false }
+  const context1 = { errors: [] }
+  const fxn1 = row => row.val
+  const aggrFxn1 = filler.valFiller[">,[]"](fxn1, input1)
+  const result1 = {}
+  const row1a = { val: 1 }
+  aggrFxn1(row1a, "key", result1, context1)
+  test.deepEqual(
+    input1.errors,
+    [["val", "NON-ARRAY-VALS", row1a]],
+    "should error on non-array values"
+  )
+  const row1b = { val: ["a"] }
+  aggrFxn1(row1b, "key", result1, context1)
+  test.deepEqual(
+    context1.errors,
+    [[input1, "NON-NUMERIC-THAN", row1b]],
+    "should error on non-numeric values"
+  )
+
   test.end()
 })
 
