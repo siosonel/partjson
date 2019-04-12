@@ -240,6 +240,7 @@ tape("processRow", function(test) {
   const done = () => {}
   const Filler1 = new Partjson({
     template: {
+      "@before()": "=not2()",
       total: "+$value",
       "__:mean": "=mean()",
       "_1:calc": "=calc()",
@@ -250,9 +251,12 @@ tape("processRow", function(test) {
       mean,
       calc,
       compute,
-      done
+      done,
+      not2(row) {
+        return row.value != 2
+      }
     },
-    data: [{ value: 3 }]
+    data: [{ value: 3 }, { value: 2 }]
   })
   test.equal(Filler1.done[0].done, done, "should collect done functions")
   test.equal(
@@ -274,6 +278,21 @@ tape("processRow", function(test) {
     Filler1.contexts.get(Filler1.tree).filler.postTerms["_1:"],
     ["_1:calc", "_1:compute"],
     "should track all numbered post-loop functions"
+  )
+
+  Filler1.add([{ value: 4 }])
+  test.deepEqual(
+    Filler1.tree,
+    { total: 7 },
+    "should fill the result tree as expected"
+  )
+  const input = Filler1.contexts.get(Filler1.tree).filler.inputs["total"]
+  delete input.valFxn
+  Filler1.add([{ value: 4 }])
+  test.deepEqual(
+    Filler1.tree,
+    { total: 7 },
+    "should not fill an input when the valFxn is missing"
   )
   test.end()
 })
@@ -393,12 +412,36 @@ tape("postLoop", function(test) {
   )
 
   // simulate what happens when postLoop is not called
+  const postLoop = Filler.postLoop
   Filler.postLoop = () => {}
   Filler.refresh()
   test.deepEqual(
     Filler.tree.byType,
     { a: { total: 2 }, b: { total: 4 }, c: { total: 4 } },
     "should be the only method that applies post-loop functions"
+  )
+
+  Filler.postLoop = postLoop
+  const fake = []
+  const context = {
+    filler: {
+      postTerms: {
+        "__:": ["__:test0", "__:test1"]
+      },
+      inputs: {
+        "__:test0": {},
+        "__:test1": {
+          keyFxn: () => ["test"]
+        }
+      }
+    }
+  }
+  const result = {}
+  Filler.postLoop(result, context)
+  test.deepEqual(
+    result,
+    {},
+    "should not fill post-loop results if missing keyFxn or valFxn"
   )
 
   test.end()
@@ -549,6 +592,12 @@ tape("copyResult", function(test) {
       map: [["d", 4], ["c", 1], ["b", 2]]
     },
     "should copy later results"
+  )
+
+  test.equal(
+    Filler.copyResult(undefined),
+    undefined,
+    "should not copy undefined results"
   )
 
   test.end()

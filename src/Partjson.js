@@ -203,10 +203,8 @@ export default class Partjson {
         if (input.keyFxn && input.valFxn) {
           const keys = input.keyFxn(row, context)
           for (const key of keys) {
-            if (input.valFxn) {
-              context.key = key
-              input.valFxn(row, key, result, context)
-            }
+            context.key = key
+            input.valFxn(row, key, result, context)
           }
         }
       }
@@ -234,9 +232,7 @@ export default class Partjson {
       if (input.keyFxn && input.valFxn) {
         const keys = input.keyFxn(null, context)
         for (const key of keys) {
-          if (input.valFxn) {
-            input.valFxn(null, key, result, context)
-          }
+          input.valFxn(null, key, result, context)
         }
       }
     }

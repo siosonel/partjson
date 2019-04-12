@@ -20,7 +20,8 @@
     "test": "tape test/*.spec.js",
     "prettify": "prettier --write --no-semi \"{src,test,public}/**/*.{js,html,css}\" && tape test/*.spec.js",
     "prepare": "rollup -c",
-    "nyc": "nyc tape test/*.spec.js"
+    "nyc": "nyc tape test/*.spec.js",
+    "report": "nyc --reporter=html --reporter=text npm test"
   },
   "files": [
     "dist"
