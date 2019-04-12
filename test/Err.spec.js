@@ -156,6 +156,141 @@ tape("markErrors", function(test) {
     "{{ ",
     "if missing, should have no impact on valid inputs"
   )
+
+  const filler1 = new Partjson({
+    template: { "@errmode": { context: "{}" } }
+  })
+  const result1 = {}
+  const err1 = [{ term: "key" }, "ERR-TEST", {}]
+  const context1 = { filler: { inputs: [], errors: [] }, errors: [err1] }
+  filler1.errors.markErrors(result1, context1)
+  test.deepEqual(
+    result1,
+    { "@errors": { "{{ ERR-TEST }} key": 1 } },
+    "should mark context errors"
+  )
+
+  const filler2 = new Partjson({
+    template: { "@errmode": { context: "{}" } }
+  })
+  const result2 = {}
+  const err2 = [{ term: "term" }, "ERR-TEST", "test"]
+  const context2 = { filler: { inputs: [], errors: [err2] }, errors: [] }
+  filler2.errors.markErrors(result2, context2)
+  test.equal(
+    filler2.errors.allErrSet.has(err2),
+    true,
+    "should track filler errors in a Set"
+  )
+  test.deepEqual(
+    filler2.errors.allErrObj,
+    { "ERR-TEST": { test: ["test"] } },
+    "should track filler errors in an object"
+  )
+
+  const filler3 = new Partjson()
+  const result3 = {}
+  const err3 = ["val", "ERR-TEST", "test"]
+  const context3 = {
+    filler: {
+      inputs: {
+        key: {
+          term: "key",
+          templateVal: 99,
+          errors: [err3]
+        }
+      },
+      errors: []
+    },
+    errors: []
+  }
+  filler3.errors.markErrors(result3, context3)
+  test.equal(
+    filler3.errors.allErrSet.has(err3),
+    true,
+    "should track input errors in a Set, where the input templateVal is a number"
+  )
+  test.deepEqual(
+    filler3.errors.allErrObj,
+    { "ERR-TEST": { "99": ["test"] } },
+    "should track input errors in an object, where the input templateVal is a number"
+  )
+  test.deepEqual(
+    result3,
+    { key: "{{ ERR-TEST }} " },
+    "should track input errors in the result, where the input templateVal is a number"
+  )
+
+  const filler4 = new Partjson({
+    "@errmode": { input: "{}" }
+  })
+  const result4 = {}
+  const err4 = ["val", "ERR-TEST", "test"]
+  const context4 = {
+    filler: {
+      inputs: {
+        key: {
+          term: "key",
+          templateVal: ["test"],
+          errors: [err4]
+        }
+      },
+      errors: []
+    },
+    errors: []
+  }
+  filler4.errors.markErrors(result4, context4)
+  test.equal(
+    filler4.errors.allErrSet.has(err4),
+    true,
+    "should track input errors in a Set, where the input templateVal is an array"
+  )
+  test.deepEqual(
+    filler4.errors.allErrObj,
+    { "ERR-TEST": { test: ["test"] } },
+    "should track input errors in an object, where the input templateVal is an array"
+  )
+  test.deepEqual(
+    result4,
+    { key: ["{{ ERR-TEST }} ", "test"] },
+    "should track input errors in the result, where the input templateVal is an array"
+  )
+
+  const filler5 = new Partjson({
+    "@errmode": { input: "{}" }
+  })
+  const result5 = {}
+  const err5 = ["key", "ERR-TEST", "test"]
+  const context5 = {
+    filler: {
+      inputs: {
+        key: {
+          lineage: ["key"],
+          term: "key",
+          templateVal: ["test"],
+          errors: [err5]
+        }
+      },
+      errors: []
+    },
+    errors: []
+  }
+  filler5.errors.markErrors(result5, context5)
+  test.equal(
+    filler5.errors.allErrSet.has(err5),
+    true,
+    "should track input errors in a Set, where the input type is a 'key'"
+  )
+  test.deepEqual(
+    filler5.errors.allErrObj,
+    { "ERR-TEST": { key: ["test"] } },
+    "should track input errors in an object, where the input type is a 'key'"
+  )
+  test.deepEqual(
+    result5,
+    { "{{ ERR-TEST }} key": ["test"] },
+    "should track input errors in the result, where the input type is a 'key'"
+  )
   test.end()
 })
 
