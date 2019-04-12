@@ -76,6 +76,18 @@ tape(`@before()`, function(test) {
     "should be called before a data row enters the loop"
   )
 
+  const Filler2 = new Partjson({
+    template: {
+      "@before()": "=test()"
+    },
+    data: [{}]
+  })
+  test.deepEqual(
+    [...Filler2.errors.allErrSet],
+    [["val", "MISSING-@before()-FXN", "test"]],
+    "should error on a missing join function"
+  )
+
   test.end()
 })
 
@@ -125,7 +137,43 @@ tape(`@dist()`, function(test) {
   test.deepEqual(
     Filler.tree.results,
     [{ total: 6 }],
-    "should distribute finalized results"
+    "should distribute finalized results into an array"
+  )
+
+  const Filler2 = new Partjson({
+    template: {
+      results: {},
+      obj: {
+        $test: "+1",
+        "@dist()": ["@root.results"]
+      }
+    },
+    data: [{ test: 1 }, { test: 2 }, { test: 3 }]
+  })
+  test.deepEqual(
+    Filler2.tree.results,
+    {},
+    "should not distribute finalized results to a non-array target"
+  )
+  test.deepEqual(
+    Filler2.contexts.get(Filler2.tree.obj).errors[0].slice(1),
+    ["NON-ARRAY-DIST-TARGET", "@root.results"],
+    "should error on a non-array dist target"
+  )
+
+  const Filler3 = new Partjson({
+    template: {
+      obj: {
+        $test: "+1",
+        "@dist()": ["@root.results"]
+      }
+    },
+    data: [{ test: 1 }, { test: 2 }, { test: 3 }]
+  })
+  test.deepEqual(
+    Filler3.contexts.get(Filler3.tree.obj).errors[0].slice(1),
+    ["MISSING-DIST-TARGET", "@root.results"],
+    "shoud error on a missing dist target"
   )
   test.end()
 })
@@ -184,6 +232,20 @@ tape(`@join()`, function(test) {
     { byCity: { abc: 2, xyz: 1 } },
     "should filter and join data to a row"
   )
+
+  const Filler2 = new Partjson({
+    template: {
+      "@join()": {
+        test: "=test()"
+      }
+    },
+    data: [{}]
+  })
+  test.deepEqual(
+    [...Filler2.errors.allErrSet],
+    [["val", "MISSING-@join-FXN", "test"]],
+    "should error on a missing join function"
+  )
   test.end()
 })
 
@@ -230,6 +292,34 @@ tape(`@ignore()`, function(test) {
     { total: 6 },
     "should inherit ancestor ignore unless overriden"
   )
+
+  const Filler1 = new Partjson({
+    template: {
+      "@ignore()": "=fxn()",
+      "@errmode": { root: {} },
+      test: "+1"
+    },
+    data: [{}]
+  })
+  test.deepEqual(
+    Filler1.tree["@errors"],
+    { "MISSING-@ignore()-FXN": { "=fxn()": ["=fxn()"] } },
+    "should error on a missing ignore function"
+  )
+
+  const Filler2 = new Partjson({
+    template: {
+      "@ignore()": 9,
+      "@errmode": { console: "" },
+      test: "+1"
+    },
+    data: [{}]
+  })
+  test.deepEqual(
+    [...Filler2.errors.allErrSet],
+    [["val", "UNSUPPORTED-@ignore()-VALUE", 9]],
+    "should error on unsupported @ignore template value"
+  )
   test.end()
 })
 
@@ -270,5 +360,15 @@ tape("setFxn", function(test) {
     fxn3,
     "should be the only method that sets the @done() function"
   )
+
+  const Filler1 = new Partjson()
+  const input1 = { errors: [] }
+  Filler1.reserved.setFxn("unknown", input1, {}, "")
+  test.deepEqual(
+    input1.errors,
+    [["key", "UNRECOGNIZED-RESERVED-unknown"]],
+    "should error on unknown reserved term"
+  )
+
   test.end()
 })

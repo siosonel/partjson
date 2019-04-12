@@ -12,7 +12,7 @@ export default class Reserved {
     if (this[subterm]) {
       filler[subterm] = this[subterm](templateVal, input, filler)
     } else {
-      input.errors.push("key", "UNRECOGNIZED-RESERVED-" + term)
+      input.errors.push(["key", "UNRECOGNIZED-RESERVED-" + subterm])
     }
   }
 
@@ -26,9 +26,10 @@ export default class Reserved {
 }
 
 Reserved.prototype["@before"] = function(subterm, input) {
-  const fxn = this.Pj.opts["="][subterm.slice(1, -2)]
+  const fxnName = subterm.slice(1, -2)
+  const fxn = this.Pj.opts["="][fxnName]
   if (!fxn) {
-    input.errors.push(["val", "MISSING-" + input.term + "-FXN"])
+    input.errors.push(["val", "MISSING-" + input.term + "-FXN", fxnName])
     return this.trueFxn
   } else return fxn
 }
@@ -67,7 +68,7 @@ Reserved.prototype["@dist"] = function(_subterm, input) {
           target.push(result)
         }
       } else {
-        target[subterm] = result
+        context.errors.push([input, "NON-ARRAY-DIST-TARGET", subterm])
       }
     }
   }
@@ -79,9 +80,9 @@ Reserved.prototype["@ignore"] = function(template, inheritedIgnore, filler) {
   }
   const nonObj =
     Array.isArray(template["@ignore()"]) ||
-    typeof template["@ignore()"] == "string"
+    typeof template["@ignore()"] == "string" ||
+    typeof template["@ignore()"] !== "object"
   const ignore = nonObj ? { "@": template["@ignore()"] } : template["@ignore()"]
-
   const fxns = {}
   for (const term in ignore) {
     const ignoreVal = ignore[term]

@@ -378,9 +378,12 @@ tape("log", function(test) {
     data: [{}, {}, {}]
   })
 
-  test.equal(
-    filler.tree["@errorsAll"].length,
-    2,
+  test.deepEqual(
+    filler.tree["@errorsAll"],
+    {
+      "UNRECOGNIZED-CONTEXT-@ppparent": { "@ppparent": 1 },
+      "MISSING-EXTERNAL-SUBS": { "=fxn()": 1 }
+    },
     "should optionally attach an errorsAll array to the root"
   )
 

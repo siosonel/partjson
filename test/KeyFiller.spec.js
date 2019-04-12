@@ -41,6 +41,16 @@ tape(`getAllowedKeys`, function(test) {
   test.deepEqual(keys0, ["a"], "should filter out ignored keys")
   test.equal(input1.errors.length, 0)
   test.equal(context1.errors.length, 0)
+
+  const input2 = { errors: [], ignore: value => value == "z" }
+  const context2 = { errors: [] }
+  const keys2 = filler.keyFiller.getAllowedKeys("a", {}, input2, context2)
+  test.equal(input2.errors.length, 0)
+  test.deepEqual(
+    context2.errors,
+    [["key", "NON-ARRAY-KEYS", {}]],
+    "should error on non-array keys"
+  )
   test.end()
 })
 
