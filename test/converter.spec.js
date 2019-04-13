@@ -150,6 +150,15 @@ tape(`subs["$"]`, function(test) {
     "should return a nested property value"
   )
   test.true(!input1.errors.length, "no errors")
+
+  const input2 = { errors: [] }
+  const fxn2 = conv.subs["$"](Filler, "$.prop.sub.sub", input1)
+  test.equal(
+    fxn2({ prop: { sub: { sub: "val" } } }),
+    "val",
+    "should return the same nested value for $prop and $.prop"
+  )
+  test.true(!input1.errors.length, "no errors")
   test.end()
 })
 
@@ -265,6 +274,15 @@ tape(`subs["@"]`, function(test) {
   const fxn6 = conv.subs["@"](Filler, "@parent.@unknown", input6)
   test.equal(fxn6({}, {}), null, "@parent.@unknown should return null")
   test.true(input6.errors.length > 0, "has errors")
+
+  const input7 = { errors: [] }
+  const fxn7 = conv.subs["@"](Filler, "@delimit", input7)
+  test.equal(
+    fxn7,
+    undefined,
+    "should not create a value function for a non-context reserved keyword"
+  )
+  test.true(!input0.errors.length, "no errors")
 
   const Filler1 = new Partjson({
     template: {

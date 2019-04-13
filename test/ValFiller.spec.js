@@ -236,17 +236,18 @@ tape(`valFiller["[],[]"]`, function(test) {
   const input0 = {
     errors: [],
     templateVal: ["$prop[]", 0],
-    ignore: () => false
+    ignore: val => val == "c" 
   }
   const context0 = { errors: [] }
   const fxn0 = row => row.prop
   const aggrFxn0 = filler.valFiller["[],[]"](fxn0, input0)
-  const row = { prop: ["a", "b"] }
+  const row = { prop: ["a", "b", "c"] }
   const result = {}
   aggrFxn0(row, "key", result, context0)
   test.true(Array.isArray(result.key))
-  test.true(result.key[0], row.prop[0])
-  test.true(result.key[1], row.prop[1])
+  test.equal(result.key[0], row.prop[0])
+  test.equal(result.key[1], row.prop[1])
+  test.equal(result.key.length, 2, "should not add a key for ignored values")
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
   const input1 = { errors: [], ignore: () => false }
@@ -327,9 +328,12 @@ tape(`valFiller["+,()"]`, function(test) {
 
 tape(`valFiller["+,[]"]`, function(test) {
   const filler = new Partjson({ template: {}, data: [] })
-  const input0 = { errors: [], ignore: () => false }
+  const input0 = {
+    errors: [],
+    ignore: val => val == 4
+  }
   const context0 = { errors: [] }
-  const fxn0 = () => [1, 2, 3]
+  const fxn0 = () => [1, 2, 3, 4]
   const aggrFxn0 = filler.valFiller["+,[]"](fxn0, input0)
   const row0 = {}
   const result0 = {}
@@ -337,7 +341,7 @@ tape(`valFiller["+,[]"]`, function(test) {
   test.equal(
     result0.key,
     6,
-    `should add all items in an array value to the result`
+    `should add all non-ignored items in an array value to the result`
   )
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
@@ -367,16 +371,25 @@ tape(`valFiller["+,(]"]`, function(test) {
 })
 
 tape(`valFiller["-,"]`, function(test) {
-  const filler = new Partjson({ template: {}, data: [] })
-  const input0 = { errors: [], ignore: () => false }
+  const filler = new Partjson()
+  const input0 = { errors: [], ignore: () => {} }
   const context0 = { errors: [] }
   const fxn0 = () => 1
   const aggrFxn0 = filler.valFiller["-,"](fxn0, input0)
-  const row0 = {}
   const result0 = {}
-  aggrFxn0(row0, "key", result0, context0)
+  aggrFxn0({}, "key", result0, context0)
   test.equal(result0.key, -1, `should increment with a constant value`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
+
+  const input1 = { errors: [], ignore: val => val == 2 }
+  const context1 = { errors: [] }
+  const fxn1 = () => 2
+  const aggrFxn1 = filler.valFiller["-,"](fxn1, input1)
+  const result1 = {}
+  aggrFxn1({}, "key", result1, context1)
+  test.equal(result1.key, 0, `should not increment with an ignored value`)
+  test.true(!input1.errors.length && !context1.errors.length, `no errors`)
+  
   test.end()
 })
 
@@ -392,14 +405,14 @@ tape(`valFiller["-,()"]`, function(test) {
 
 tape(`valFiller["-,[]"]`, function(test) {
   const filler = new Partjson({ template: {}, data: [] })
-  const input0 = { errors: [], ignore: () => false }
+  const input0 = { errors: [], ignore: val => val == 4 }
   const context0 = { errors: [] }
-  const fxn0 = () => [1, 2, 3]
+  const fxn0 = () => [1, 2, 3, 4]
   const aggrFxn0 = filler.valFiller["-,[]"](fxn0, input0)
   const row0 = {}
   const result0 = {}
   aggrFxn0(row0, "key", result0, context0)
-  test.equal(result0.key, -6, `should increment with a constant value`)
+  test.equal(result0.key, -6, `should increment with all non-ignored constant value`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
   const input1 = { errors: [], ignore: () => false }
@@ -430,7 +443,7 @@ tape(`valFiller["-,(]"]`, function(test) {
 
 tape(`valFiller["<,"]`, function(test) {
   const filler = new Partjson({ template: {}, data: [] })
-  const input0 = { errors: [], ignore: () => false }
+  const input0 = { errors: [], ignore: val => val == 4 }
   const context0 = { errors: [] }
   const fxn0 = row => row.val
   const aggrFxn0 = filler.valFiller["<,"](fxn0, input0)
@@ -438,7 +451,8 @@ tape(`valFiller["<,"]`, function(test) {
   aggrFxn0({ val: 1 }, "key", result0, context0)
   aggrFxn0({ val: 3 }, "key", result0, context0)
   aggrFxn0({ val: 2 }, "key", result0, context0)
-  test.equal(result0.key, 3, `should find the maximum`)
+  aggrFxn0({ val: 4 }, "key", result0, context0)
+  test.equal(result0.key, 3, `should find the maximum non-ignored value`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
   const input1 = { errors: [], ignore: () => false }
@@ -468,7 +482,7 @@ tape(`valFiller["<,()"]`, function(test) {
 
 tape(`valFiller["<,[]"]`, function(test) {
   const filler = new Partjson({ template: {}, data: [] })
-  const input0 = { errors: [], ignore: () => false }
+  const input0 = { errors: [], ignore: val => val == 9 }
   const context0 = { errors: [] }
   const fxn0 = row => row.val
   const aggrFxn0 = filler.valFiller["<,[]"](fxn0, input0)
@@ -476,7 +490,8 @@ tape(`valFiller["<,[]"]`, function(test) {
   aggrFxn0({ val: [1, 2] }, "key", result0, context0)
   aggrFxn0({ val: [3, 0] }, "key", result0, context0)
   aggrFxn0({ val: [5, 2] }, "key", result0, context0)
-  test.equal(result0.key, 5, `should spread values to find maximum`)
+  aggrFxn0({ val: [9] }, "key", result0, context0)
+  test.equal(result0.key, 5, `should spread values to find the maximum non-ignored value`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
   const input1 = { errors: [], ignore: () => false }
@@ -514,7 +529,7 @@ tape(`valFiller["<,(]"]`, function(test) {
 
 tape(`valFiller[">,"]`, function(test) {
   const filler = new Partjson({ template: {}, data: [] })
-  const input0 = { errors: [], ignore: () => false }
+  const input0 = { errors: [], ignore: val => val == -1 }
   const context0 = { errors: [] }
   const fxn0 = row => row.val
   const aggrFxn0 = filler.valFiller[">,"](fxn0, input0)
@@ -522,7 +537,8 @@ tape(`valFiller[">,"]`, function(test) {
   aggrFxn0({ val: 3 }, "key", result0, context0)
   aggrFxn0({ val: 1 }, "key", result0, context0)
   aggrFxn0({ val: 2 }, "key", result0, context0)
-  test.equal(result0.key, 1, `should find the minimum value`)
+  aggrFxn0({ val: -1 }, "key", result0, context0)
+  test.equal(result0.key, 1, `should find the minimum non-ignored value`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
   const input1 = { errors: [], ignore: () => false }
@@ -552,7 +568,7 @@ tape(`valFiller[">,()"]`, function(test) {
 
 tape(`valFiller[">,[]"]`, function(test) {
   const filler = new Partjson({ template: {}, data: [] })
-  const input0 = { errors: [], ignore: () => false }
+  const input0 = { errors: [], ignore: val => val == -1 }
   const context0 = { errors: [] }
   const fxn0 = row => row.val
   const aggrFxn0 = filler.valFiller[">,[]"](fxn0, input0)
@@ -560,7 +576,8 @@ tape(`valFiller[">,[]"]`, function(test) {
   aggrFxn0({ val: [1, 2] }, "key", result0, context0)
   aggrFxn0({ val: [3, 0] }, "key", result0, context0)
   aggrFxn0({ val: [5, 2] }, "key", result0, context0)
-  test.equal(result0.key, 0, `should spread values to find the minimum`)
+  aggrFxn0({ val: [-1] }, "key", result0, context0)
+  test.equal(result0.key, 0, `should spread values to find the minimum non-ignored value`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
   const input1 = { errors: [], ignore: () => false }

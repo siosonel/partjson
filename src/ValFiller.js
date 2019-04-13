@@ -234,6 +234,10 @@ ValFiller.prototype["-,"] = function(fxn, input) {
     }
     const value = fxn(row, context)
     if (input.ignore(value, key, row, context)) return
+    if (!this.isNumeric(value)) {
+      context.errors.push([input, "NON-NUMERIC-DECREMENT", row])
+      return
+    }
     result[key] += -value
   }
 }

@@ -157,9 +157,7 @@ tape("markErrors", function(test) {
     "if missing, should have no impact on valid inputs"
   )
 
-  const filler1 = new Partjson({
-    template: { "@errmode": { context: "{}" } }
-  })
+  const filler1 = new Partjson()
   const result1 = {}
   const err1 = [{ term: "key" }, "ERR-TEST", {}]
   const context1 = { filler: { inputs: [], errors: [] }, errors: [err1] }
@@ -167,7 +165,7 @@ tape("markErrors", function(test) {
   test.deepEqual(
     result1,
     { "@errors": { "{{ ERR-TEST }} key": 1 } },
-    "should mark context errors"
+    "should mark context errors by default"
   )
 
   const filler2 = new Partjson({
@@ -222,7 +220,9 @@ tape("markErrors", function(test) {
   )
 
   const filler4 = new Partjson({
-    "@errmode": { input: "{}" }
+    template: {
+      "@errmode": { input: "{}" }
+    }
   })
   const result4 = {}
   const err4 = ["val", "ERR-TEST", "test"]
@@ -257,7 +257,9 @@ tape("markErrors", function(test) {
   )
 
   const filler5 = new Partjson({
-    "@errmode": { input: "{}" }
+    template: {
+      "@errmode": { input: "{}" }
+    }
   })
   const result5 = {}
   const err5 = ["key", "ERR-TEST", "test"]
@@ -291,6 +293,33 @@ tape("markErrors", function(test) {
     { "{{ ERR-TEST }} key": ["test"] },
     "should track input errors in the result, where the input type is a 'key'"
   )
+  test.equal(
+    filler5.errors.markErrors({}, null),
+    undefined,
+    "should not process on an empty context"
+  )
+
+  const filler6 = new Partjson({
+    template: {
+      "@errmode": { input: "", "root": "[]" },
+      "decr": "-$val"
+    },
+    data: [{val: 1}, {val: 2}, {val: "c"}]
+  })
+  test.deepEqual(
+    filler6.tree,
+    { 
+      decr: -3, 
+      '@errors': {}, 
+      '@errorsAll': { 
+        'NON-NUMERIC-DECREMENT': { 
+          decr: [ { val: 'c' } ] 
+        } 
+      } 
+    },
+    "should optionally not mark input errors"
+  )
+
   test.end()
 })
 
