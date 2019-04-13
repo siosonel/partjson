@@ -236,7 +236,7 @@ tape(`valFiller["[],[]"]`, function(test) {
   const input0 = {
     errors: [],
     templateVal: ["$prop[]", 0],
-    ignore: val => val == "c" 
+    ignore: val => val == "c"
   }
   const context0 = { errors: [] }
   const fxn0 = row => row.prop
@@ -389,7 +389,7 @@ tape(`valFiller["-,"]`, function(test) {
   aggrFxn1({}, "key", result1, context1)
   test.equal(result1.key, 0, `should not increment with an ignored value`)
   test.true(!input1.errors.length && !context1.errors.length, `no errors`)
-  
+
   test.end()
 })
 
@@ -412,7 +412,11 @@ tape(`valFiller["-,[]"]`, function(test) {
   const row0 = {}
   const result0 = {}
   aggrFxn0(row0, "key", result0, context0)
-  test.equal(result0.key, -6, `should increment with all non-ignored constant value`)
+  test.equal(
+    result0.key,
+    -6,
+    `should increment with all non-ignored constant value`
+  )
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
   const input1 = { errors: [], ignore: () => false }
@@ -491,7 +495,11 @@ tape(`valFiller["<,[]"]`, function(test) {
   aggrFxn0({ val: [3, 0] }, "key", result0, context0)
   aggrFxn0({ val: [5, 2] }, "key", result0, context0)
   aggrFxn0({ val: [9] }, "key", result0, context0)
-  test.equal(result0.key, 5, `should spread values to find the maximum non-ignored value`)
+  test.equal(
+    result0.key,
+    5,
+    `should spread values to find the maximum non-ignored value`
+  )
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
   const input1 = { errors: [], ignore: () => false }
@@ -577,7 +585,11 @@ tape(`valFiller[">,[]"]`, function(test) {
   aggrFxn0({ val: [3, 0] }, "key", result0, context0)
   aggrFxn0({ val: [5, 2] }, "key", result0, context0)
   aggrFxn0({ val: [-1] }, "key", result0, context0)
-  test.equal(result0.key, 0, `should spread values to find the minimum non-ignored value`)
+  test.equal(
+    result0.key,
+    0,
+    `should spread values to find the minimum non-ignored value`
+  )
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
 
   const input1 = { errors: [], ignore: () => false }

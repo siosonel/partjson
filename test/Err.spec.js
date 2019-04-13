@@ -301,21 +301,21 @@ tape("markErrors", function(test) {
 
   const filler6 = new Partjson({
     template: {
-      "@errmode": { input: "", "root": "[]" },
-      "decr": "-$val"
+      "@errmode": { input: "", root: "[]" },
+      decr: "-$val"
     },
-    data: [{val: 1}, {val: 2}, {val: "c"}]
+    data: [{ val: 1 }, { val: 2 }, { val: "c" }]
   })
   test.deepEqual(
     filler6.tree,
-    { 
-      decr: -3, 
-      '@errors': {}, 
-      '@errorsAll': { 
-        'NON-NUMERIC-DECREMENT': { 
-          decr: [ { val: 'c' } ] 
-        } 
-      } 
+    {
+      decr: -3,
+      "@errors": {},
+      "@errorsAll": {
+        "NON-NUMERIC-DECREMENT": {
+          decr: [{ val: "c" }]
+        }
+      }
     },
     "should optionally not mark input errors"
   )
