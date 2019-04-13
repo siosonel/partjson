@@ -202,6 +202,10 @@ ValFiller.prototype["+,"] = function(fxn, input) {
     }
     const value = fxn(row, context)
     if (input.ignore(value, key, row, context)) return
+    if (!this.isNumeric(value)) {
+      context.errors.push([input, "NON-NUMERIC-INCREMENT", row])
+      return
+    }
     result[key] += +value
   }
 }
@@ -220,7 +224,11 @@ ValFiller.prototype["+,[]"] = function(fxn, input) {
     }
     for (const value of values) {
       if (input.ignore(value, key, row, context)) continue
-      result[key] += this.isNumeric(value) ? +value : value
+      if (!this.isNumeric(value)) {
+        context.errors.push([input, "NON-NUMERIC-INCREMENT", row])
+        continue
+      }
+      result[key] += +value
     }
   }
 }

@@ -301,7 +301,7 @@ tape("markErrors", function(test) {
 
   const filler6 = new Partjson({
     template: {
-      "@errmode": { input: "", root: "[]" },
+      "@errmode": { input: "", root: "{}" },
       decr: "-$val"
     },
     data: [{ val: 1 }, { val: 2 }, { val: "c" }]
@@ -409,10 +409,10 @@ tape("log", function(test) {
 
   test.deepEqual(
     filler.tree["@errorsAll"],
-    {
-      "UNRECOGNIZED-CONTEXT-@ppparent": { "@ppparent": 1 },
-      "MISSING-EXTERNAL-SUBS": { "=fxn()": 1 }
-    },
+    [
+      ["val", "UNRECOGNIZED-CONTEXT-@ppparent"],
+      ["val", "MISSING-EXTERNAL-SUBS"]
+    ],
     "should optionally attach an errorsAll array to the root"
   )
 
@@ -421,7 +421,7 @@ tape("log", function(test) {
   test.equal(
     Object.keys(filler.tree["@errorsAll"]).length,
     2,
-    "should optionally attach an errorsAll array to the object"
+    "should optionally attach an errorsAll array to the root"
   )
 
   test.end()

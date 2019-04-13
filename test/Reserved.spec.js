@@ -123,7 +123,7 @@ tape(`@after()`, function(test) {
 })
 
 tape(`@dist()`, function(test) {
-  const opts = {
+  const Filler = new Partjson({
     template: {
       results: [],
       counts: {
@@ -132,12 +132,34 @@ tape(`@dist()`, function(test) {
       }
     },
     data: [{ test: 1 }, { test: 2 }, { test: 3 }]
-  }
-  const Filler = new Partjson(opts)
+  })
   test.deepEqual(
     Filler.tree.results,
     [{ total: 6 }],
     "should distribute finalized results into an array"
+  )
+  const context0 = Filler.contexts.get(Filler.tree.counts)
+  context0["@dist"](Filler.tree.results[0])
+  test.deepEqual(
+    Filler.tree.results,
+    [{ total: 6 }],
+    "should not re-distribute a result into the same target"
+  )
+
+  const Filler1 = new Partjson({
+    template: {
+      results: [],
+      counts: {
+        total: "+$test",
+        "@dist()": "@root.results"
+      }
+    },
+    data: [{ test: 1 }, { test: 2 }, { test: 3 }]
+  })
+  test.deepEqual(
+    Filler.tree.results,
+    [{ total: 6 }],
+    "should accept a non-array template for a target"
   )
 
   const Filler2 = new Partjson({

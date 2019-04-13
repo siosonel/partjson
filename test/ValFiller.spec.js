@@ -293,7 +293,7 @@ tape(`valFiller["[],(]"]`, function(test) {
 })
 
 tape(`valFiller["+,"]`, function(test) {
-  const filler = new Partjson({ template: {}, data: [] })
+  const filler = new Partjson()
   const input0 = { errors: [], ignore: () => false }
   const context0 = { errors: [] }
   const fxn0 = () => 1
@@ -313,6 +313,20 @@ tape(`valFiller["+,"]`, function(test) {
   aggrFxn1(row1, "key", result1, context1)
   test.equal(result1.key, row1.prop, `should increment with a data value`)
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
+
+  const input2 = { errors: [], ignore: () => false }
+  const context2 = { errors: [] }
+  const fxn2 = row => row.prop
+  const aggrFxn2 = filler.valFiller["+,"](fxn2, input2)
+  const result2 = {}
+  aggrFxn2({ prop: 1 }, "key", result2, context2)
+  test.equal(result2.key, 1, `should increment with a data value`)
+  aggrFxn2({ prop: "a" }, "key", result2, context2)
+  test.deepEqual(
+    context2.errors,
+    [[input2, "NON-NUMERIC-INCREMENT", { prop: "a" }]],
+    "should not increment with a non-numeric value"
+  )
   test.end()
 })
 
@@ -357,6 +371,21 @@ tape(`valFiller["+,[]"]`, function(test) {
     [["val", "NON-ARRAY-VALS", row1a]],
     "should error on non-array values"
   )
+
+  const input2 = { errors: [], ignore: () => false }
+  const context2 = { errors: [] }
+  const fxn2 = row => row.prop
+  const aggrFxn2 = filler.valFiller["+,[]"](fxn2, input2)
+  const result2 = {}
+  aggrFxn2({ prop: [1] }, "key", result2, context2)
+  test.equal(result2.key, 1, `should increment with a data value`)
+  aggrFxn2({ prop: ["a"] }, "key", result2, context2)
+  test.deepEqual(
+    context2.errors,
+    [[input2, "NON-NUMERIC-INCREMENT", { prop: ["a"] }]],
+    "should not increment with a non-numeric value"
+  )
+
   test.end()
 })
 
@@ -412,9 +441,10 @@ tape(`valFiller["-,[]"]`, function(test) {
   const row0 = {}
   const result0 = {}
   aggrFxn0(row0, "key", result0, context0)
+  aggrFxn0(row0, "key", result0, context0)
   test.equal(
     result0.key,
-    -6,
+    -12,
     `should increment with all non-ignored constant value`
   )
   test.true(!input0.errors.length && !context0.errors.length, `no errors`)
@@ -645,6 +675,14 @@ tape(`valFiller.strFiller`, function(test) {
   const result = {}
   fxn0({ prop: "a" }, "key", result)
   test.equal(result.key, "a", "should return a string filler")
+
+  const input1 = { errors: [] }
+  test.equal(
+    filler.valFiller.strFiller(input1, ignore, "$prop", ".."),
+    undefined,
+    "should not return a function for unknown aggr symbol"
+  )
+  test.equal(input1.errors.length, 0, "no errors")
   test.end()
 })
 

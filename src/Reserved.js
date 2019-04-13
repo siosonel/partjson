@@ -56,19 +56,25 @@ Reserved.prototype["@join"] = function(joins, input, filler) {
 }
 
 Reserved.prototype["@dist"] = function(_subterm, input) {
-  const subterm = Array.isArray(_subterm) ? _subterm[0] : _subterm
-  const subsFxn = this.Pj.converter.subs["@"](this.Pj, subterm)
+  const subterms = Array.isArray(_subterm) ? _subterm : [_subterm]
+  const subsFxns = {}
+  for (const subterm of subterms) {
+    subsFxns[subterm] = this.Pj.converter.subs["@"](this.Pj, subterm)
+  }
   return context => {
     context["@dist"] = result => {
-      const target = subsFxn(null, context)
-      if (!target) {
-        context.errors.push([input, "MISSING-DIST-TARGET", subterm])
-      } else if (Array.isArray(target)) {
-        if (!target.includes(result)) {
-          target.push(result)
+      for (const subterm in subsFxns) {
+        const subsFxn = subsFxns[subterm]
+        const target = subsFxn(null, context)
+        if (!target) {
+          context.errors.push([input, "MISSING-DIST-TARGET", subterm])
+        } else if (Array.isArray(target)) {
+          if (!target.includes(result)) {
+            target.push(result)
+          }
+        } else {
+          context.errors.push([input, "NON-ARRAY-DIST-TARGET", subterm])
         }
-      } else {
-        context.errors.push([input, "NON-ARRAY-DIST-TARGET", subterm])
       }
     }
   }

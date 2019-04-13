@@ -66,7 +66,7 @@ export const subs = {
     } else if (subterm.includes(Filler.delimit)) {
       const nestedProps = subterm.slice(1).split(Filler.delimit)
       if (nestedProps[0] == "") nestedProps.shift()
-      const reducer = (d, k) => (d ? d[k] : null)
+      const reducer = (d, k) => (d ? d[k] : undefined)
       return row => nestedProps.reduce(reducer, row)
     } else {
       const prop = subterm.slice(1)
@@ -75,7 +75,7 @@ export const subs = {
   },
   "=": function(Filler, subterm, input) {
     const nestedProps = subterm.slice(1).split(Filler.delimit)
-    const reducer = (d, k) => (d && k in d ? d[k] : null)
+    const reducer = (d, k) => (d && k in d ? d[k] : undefined)
     const prop = nestedProps.reduce(reducer, Filler.opts["="])
     if (!prop) {
       input.errors.push(["val", "MISSING-EXTERNAL-SUBS"])
@@ -111,8 +111,6 @@ export const subs = {
           ? [Object.values(result), context]
           : d[0] == "@"
           ? [context[d.slice(1)], Filler.contexts.get(context[d.slice(1)])]
-          : !result
-          ? [null, null]
           : [result[d], Filler.contexts.get(result[d])]
       }
       return (row, context) =>
@@ -138,6 +136,8 @@ export const subs = {
     } else {
       const reducer = (d, k) => (d ? d[k] : null)
       const join = Filler.joins.get(alias)
+      console.log(alias)
+      console.log(nestedProps.reduce(reducer, Filler.joins.get(alias)))
       return row => nestedProps.reduce(reducer, Filler.joins.get(alias))
     }
   }

@@ -151,6 +151,14 @@ tape(`subs["$"]`, function(test) {
   )
   test.true(!input1.errors.length, "no errors")
 
+  const input1a = { errors: [] }
+  const fxn1a = conv.subs["$"](Filler, "$prop.missing.missing", input1a)
+  test.equal(
+    fxn1a({ prop: { sub: { sub: "val" } } }),
+    undefined,
+    "should return undefined on a missing nested property value"
+  )
+
   const input2 = { errors: [] }
   const fxn2 = conv.subs["$"](Filler, "$.prop.sub.sub", input1)
   test.equal(
@@ -319,6 +327,16 @@ tape(`subs["&"]`, function(test) {
     "should return a sub-property of a delimited joined data"
   )
   test.true(!input1.errors.length, "no errors")
+
+  const input1a = { errors: [] }
+  const fxn1a = conv.subs["&"](Filler, "&aliasMissing.sub", input1a)
+  test.equal(fxn1a({}), null, "should be null on missing join alias")
+  test.true(!input1a.errors.length, "no errors")
+
+  const input1b = { errors: [] }
+  const fxn1b = conv.subs["&"](Filler, "&alias.sub.nested.missing", input1b)
+  test.equal(fxn1b({}), null, "should be null on missing joined subproperty")
+  test.true(!input1b.errors.length, "no errors")
 
   const input2 = { errors: [] }
   const fxn2 = conv.subs["&"](Filler, "&alias.nested.subsub", input2)

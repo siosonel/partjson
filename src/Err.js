@@ -129,7 +129,7 @@ export default class Err {
     const allErrArr = [...this.allErrSet]
     if (!allErrArr.length) return
     if (this.mode.root) {
-      const mode = JSON.stringify(this.mode.root).slice(0, 2)
+      const mode = this.mode.root
       this.Pj.tree["@errorsAll"] = mode == "[]" ? allErrArr : this.allErrObj
     }
     if (this.mode.console) {
