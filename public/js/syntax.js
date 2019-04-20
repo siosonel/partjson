@@ -187,8 +187,11 @@ demo(
       tokenType: "aggr",
       section: "aggregation",
       id: "collect-into-a-list",
-      title: `<span class="code-snippet">[ ]</span>, the JSON array, will collect values into an array. An 
-			integer option will be interpreted as follows:<br/>
+      title: `<span class="code-snippet">[ ]</span>, the JSON array, will collect values into an array. 
+      The first item in the JSON array will be filled in as part of the template. 
+      The second item, if provided, will be parsed as a processing option.
+      <br/><br/>
+      When the first item is a non-object, the option will be interpreted as follows:<br/>
 			<ul>
 				<li>option = 1 (default): no repeated value or maximum of 1 occurrence</li> 
 				<li>option > 1: limits the maximum number of occurence to the integer option</i>
@@ -200,6 +203,35 @@ demo(
         maxTwoOccurrence: ["$huntblock", 2],
         unlimitedOccurrence: ["$preytype", 0],
         jsSetCopiedAsArray: ["$preytype", "set"]
+      }
+    },
+    {
+      symbol: "[ ]",
+      tokenType: "aggr",
+      section: "aggregation",
+      id: "collect-object-into-a-list",
+      title: `<span class="code-snippet">[{...}, key-option]</span>
+      When the first item is an object in the 
+      <span class="code-snippet">[ ]</span> JSON array, a string option
+      will be shadow filled like an input, and the resulting value will be 
+      used as a unique result key within the array. 
+      <br/><br/>
+      When no key option is provided, a new result object per data row will be 
+      pushed into the array of result objects.`,
+      template: {
+        uniqueRecordsByCat: [
+          {
+            cat: "$catname",
+            total: "+1"
+          },
+          "$catname"
+        ],
+        nonUniqueRecordsByCat: [
+          {
+            cat: "$catname",
+            total: "+1"
+          }
+        ]
       }
     },
     {
@@ -262,7 +294,7 @@ demo(
       title: `A <span class="code-snippet">_#:</span> prefix, 
         where <span class="code-snippet">#</span> is an integer from 0 to 9, 
         will delay the processing of a template input after the last data row 
-        has been looped through and in the order of the integer value.`,
+        has been looped through and in increasing order of the integer value.`,
       template: {
         count: "+1",
         totalPreyMass: "+$preymass",

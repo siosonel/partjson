@@ -3,6 +3,11 @@ export default class ValFiller {
     this.Pj = Pj
   }
 
+  getFxn(input, ignore) {
+    const type = this.getValType(input.templateVal)
+    return this[type + "Filler"](input, ignore, input.templateVal)
+  }
+
   getValType(val) {
     return typeof val == "string"
       ? "str"
@@ -11,11 +16,6 @@ export default class ValFiller {
       : val && typeof val == "object"
       ? "obj"
       : "default"
-  }
-
-  getFxn(input, ignore) {
-    const type = this.getValType(input.templateVal)
-    return this[type + "Filler"](input, ignore, input.templateVal)
   }
 
   strFiller(input, ignore, val, _aggr) {
@@ -121,7 +121,7 @@ ValFiller.prototype[",(]"] = ValFiller.prototype[","]
 ValFiller.prototype["[],"] = function(fxn, input) {
   const seed = this.getArrSeed(input)
   if (!seed) {
-    input.errors.push(["val", "INVALID-OPTION"])
+    input.errors.push(["val", "INVALID-[]-OPTION"])
     return
   }
   return (row, key, result, context) => {
@@ -152,11 +152,46 @@ ValFiller.prototype["[],(]"] = ValFiller.prototype["[],[]"]
 
 ValFiller.prototype["[{}]"] = function(template, input) {
   this.Pj.parseTemplate(template, input.inheritedIgnore, input.lineage)
-  const filler = this.Pj.fillers.get(template)
-  return (row, key, result) => {
-    this.Pj.setResultContext("[]", key, result)
-    const item = this.Pj.setResultContext("{}", result[key].length, result[key])
-    this.Pj.processRow(row, template, item)
+  const option =
+    input.templateVal && input.templateVal.length > 1
+      ? input.templateVal[1]
+      : ""
+  if (!option) {
+    return (row, key, result) => {
+      this.Pj.setResultContext("[]", key, result)
+      const item = this.Pj.setResultContext(
+        "{}",
+        result[key].length,
+        result[key]
+      )
+      this.Pj.processRow(row, template, item)
+    }
+  } else if (typeof option == "string") {
+    //const subInput = this.Pj.fillers.get(template).inputs[option]
+    const valFxn = this.getFxn(
+      { templateVal: option, errors: [] },
+      input.inheritedIgnore
+    )
+    const tracker = new Map()
+    return (row, key, result) => {
+      this.Pj.setResultContext("[]", key, result)
+      const temp = []
+      valFxn(row, 0, temp)
+      const val = temp[0]
+      if (tracker.has(val)) {
+        this.Pj.processRow(row, template, tracker.get(val))
+      } else {
+        const item = this.Pj.setResultContext(
+          "{}",
+          result[key].length,
+          result[key]
+        )
+        tracker.set(val, item)
+        this.Pj.processRow(row, template, item)
+      }
+    }
+  } else {
+    input.errors.push(["val", "INVALID-[{}]-OPTION"])
   }
 }
 

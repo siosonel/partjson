@@ -134,7 +134,13 @@ demo(
       tokenType: "context",
       section: "context",
       id: "values",
-      title: `The <span class="code-snippet">@values</span> term returns the 
+      title: `
+      (1) TO BE DEPRECATED: Use 
+        <a href="syntax.html#collect-object-into-a-list">
+          <span class="code-snippet">[{...}, key-option]</span>
+        </a> instead to collect unique result objects into array.
+      <br/><br/>
+      The <span class="code-snippet">@values</span> term returns the 
       equivalent of Javascript's Object.values(result). This is RECOMMENDED
       over the use of <span class="code-snippet">@dist()</a>.`,
       template: {
@@ -291,7 +297,13 @@ demo(
       tokenType: "post",
       section: "post",
       id: "dist",
-      title: `NOTE: Use <a href="#values"><span class="code-snippet">@values</span></a>
+      title: `NOTES:<br/>
+    (1) TO BE DEPRECATED: Use 
+      <a href="syntax.html#collect-object-into-a-list">
+        <span class="code-snippet">[{...}, key-option]</span>
+      </a> instead to collect unique result objects into array.
+    <br/><br/>
+    (2) Use <a href="#values"><span class="code-snippet">@values</span></a>
     whenever possible, as it is a more readable to specify an
     input source in a template instead of templating a "goto"-like result 
     target such as when <span class="code-snippet">@dist()</span> is used.

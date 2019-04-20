@@ -194,7 +194,7 @@ tape(`valFiller["[],"]`, function(test) {
   )
   test.deepEqual(
     input0a.errors,
-    [["val", "INVALID-OPTION"]],
+    [["val", "INVALID-[]-OPTION"]],
     `should result in an input error on an invalid option`
   )
 
@@ -208,16 +208,6 @@ tape(`valFiller["[],"]`, function(test) {
   const filler2 = new Partjson({ template: template2, data: data2 })
   test.deepEqual(filler2.tree, { test: ["a", "a", "c"] })
 
-  const filler3 = new Partjson({
-    template: {
-      test: ["test", "option"]
-    }
-  })
-  test.deepEqual(
-    filler3.errors.allErrObj,
-    [],
-    "should error on invalid array aggregation option"
-  )
   test.end()
 })
 
@@ -735,20 +725,92 @@ tape(`valFiller.defaultFiller`, function(test) {
 })
 
 tape(`valFiller[{}]`, function(test) {
-  const template = {
-    test: [
-      {
-        $type: "+1"
-      }
-    ]
-  }
-  const data = [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }]
-  const filler = new Partjson({ template, data })
+  const filler = new Partjson({
+    template: {
+      test: [
+        {
+          $type: "+1"
+        }
+      ]
+    },
+    data: [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }]
+  })
   test.deepEqual(
     filler.tree,
     { test: [{ a: 1 }, { a: 1 }, { b: 1 }, { c: 1 }] },
     `should collect objects within an array`
   )
+
+  const filler1 = new Partjson({
+    template: {
+      test: [
+        {
+          name: "$type",
+          total: "+1"
+        },
+        "$type"
+      ]
+    },
+    data: [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }]
+  })
+  test.deepEqual(
+    filler1.tree,
+    {
+      test: [
+        { name: "a", total: 2 },
+        { name: "b", total: 1 },
+        { name: "c", total: 1 }
+      ]
+    },
+    `should collect unique-by-key-value objects within an array`
+  )
+
+  const filler2 = new Partjson({
+    template: {
+      "@join()": {
+        test: "=val()"
+      },
+      test: [
+        {
+          val: "&test.val",
+          total: "+1"
+        },
+        "&test.val"
+      ]
+    },
+    data: [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }],
+    "=": {
+      val(row) {
+        return row.type == "c" ? { val: "c" } : { val: "ab" }
+      }
+    }
+  })
+  test.deepEqual(
+    filler2.tree,
+    {
+      test: [{ val: "ab", total: 3 }, { val: "c", total: 1 }]
+    },
+    `should collect unique-by-joined-value objects objects within an array`
+  )
+
+  const filler4 = new Partjson({
+    template: {
+      test: [
+        {
+          name: "$type",
+          total: "+1"
+        },
+        []
+      ]
+    },
+    data: [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }]
+  })
+  test.deepEqual(
+    [...filler4.errors.allErrSet],
+    [["val", "INVALID-[{}]-OPTION"]],
+    "should error on invalid option for an array-collected of objects"
+  )
+
   test.end()
 })
 
