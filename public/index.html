@@ -203,24 +203,14 @@
             template: {
               name: "root",
               total: "+1",
-              children: [],
-              "@done()": "=removeTemps()",
-              tempType: {
-                $preytype: {
-                  name: "$preytype",
-                  total: "+1",
-                  children: [],
-                  "@dist()": ["@root.children"],
-                  "@done()": "=removeTemps()",
-                  tempSubtype: {
-                    $preysubtype: {
-                      name: "$preysubtype",
-                      total: "+1",
-                      "@dist()": ["@parent.@parent.children"]
-                    }
-                  }
-                }
-              }
+              children: [{
+                name: "$preytype",
+                total: "+1",
+                children: [{
+                  name: "$preysubtype",
+                  total: "+1"
+                }, "$preysubtype"],
+              }, "$preytype"]
             }
           }
         ],

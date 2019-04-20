@@ -310,14 +310,7 @@ function getOpts() {
       logResultsToDevConsole(tree) {
         console.log(tree)
       },
-      wholeNums: [1, 2, 3],
-      removeTemps(result) {
-        for (const key in result) {
-          if (key.startsWith("temp")) {
-            delete result[key]
-          }
-        }
-      }
+      wholeNums: [1, 2, 3]
     },
 
     tsvText: `catname	catsex	owners	ownerblock	huntblock	huntdate	preytype	preysubtype	preymass	nested-json
