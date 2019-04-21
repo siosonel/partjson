@@ -203,14 +203,20 @@
             template: {
               name: "root",
               total: "+1",
-              children: [{
-                name: "$preytype",
-                total: "+1",
-                children: [{
-                  name: "$preysubtype",
-                  total: "+1"
-                }, "$preysubtype"],
-              }, "$preytype"]
+              children: [
+                {
+                  name: "$preytype",
+                  total: "+1",
+                  children: [
+                    {
+                      name: "$preysubtype",
+                      total: "+1"
+                    },
+                    "$preysubtype"
+                  ]
+                },
+                "$preytype"
+              ]
             }
           }
         ],

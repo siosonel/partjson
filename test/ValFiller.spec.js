@@ -772,10 +772,17 @@ tape(`valFiller[{}]`, function(test) {
       },
       test: [
         {
-          val: "&test.val",
-          total: "+1"
+          type: "$type",
+          total: "+1",
+          sub: [
+            {
+              val: "&test.val",
+              total: "+1"
+            },
+            "&test.val"
+          ]
         },
-        "&test.val"
+        "$type"
       ]
     },
     data: [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }],
@@ -788,9 +795,40 @@ tape(`valFiller[{}]`, function(test) {
   test.deepEqual(
     filler2.tree,
     {
-      test: [{ val: "ab", total: 3 }, { val: "c", total: 1 }]
+      test: [
+        {
+          type: "a",
+          total: 2,
+          sub: [
+            {
+              val: "ab",
+              total: 2
+            }
+          ]
+        },
+        {
+          type: "b",
+          total: 1,
+          sub: [
+            {
+              val: "ab",
+              total: 1
+            }
+          ]
+        },
+        {
+          type: "c",
+          total: 1,
+          sub: [
+            {
+              val: "c",
+              total: 1
+            }
+          ]
+        }
+      ]
     },
-    `should collect unique-by-joined-value objects objects within an array`
+    `should collect unique-by-joined-value objects within nested arrays`
   )
 
   const filler4 = new Partjson({

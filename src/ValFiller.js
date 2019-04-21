@@ -167,27 +167,34 @@ ValFiller.prototype["[{}]"] = function(template, input) {
       this.Pj.processRow(row, template, item)
     }
   } else if (typeof option == "string") {
-    //const subInput = this.Pj.fillers.get(template).inputs[option]
-    const valFxn = this.getFxn(
-      { templateVal: option, errors: [] },
-      input.inheritedIgnore
+    const [convFxn, tokens] = this.Pj.converter.default(
+      this.Pj,
+      Object.assign({}, { templateVal: option }),
+      input.inheritedIgnore,
+      option
     )
-    const tracker = new Map()
-    return (row, key, result) => {
+    if (tokens.aggr || tokens.skip || tokens.timing) {
+      input.errors.push(["val", "INVALID-[{}]-KEY-OPTION-TOKEN"])
+      return
+    }
+    const tracker = Object.create(null)
+    return (row, key, result, context) => {
+      if (!(context.branch in tracker)) {
+        tracker[context.branch] = new Map()
+      }
+      const branch = tracker[context.branch]
       this.Pj.setResultContext("[]", key, result)
-      const temp = []
-      valFxn(row, 0, temp)
-      const val = temp[0]
-      if (tracker.has(val)) {
-        this.Pj.processRow(row, template, tracker.get(val))
+      const val = convFxn(row, context)
+      if (branch.has(val)) {
+        this.Pj.processRow(row, template, branch.get(val))
       } else {
         const item = this.Pj.setResultContext(
           "{}",
           result[key].length,
           result[key]
         )
-        tracker.set(val, item)
         this.Pj.processRow(row, template, item)
+        branch.set(val, item)
       }
     }
   } else {
