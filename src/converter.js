@@ -136,8 +136,6 @@ export const subs = {
     } else {
       const reducer = (d, k) => (d ? d[k] : null)
       const join = Filler.joins.get(alias)
-      console.log(alias)
-      console.log(nestedProps.reduce(reducer, Filler.joins.get(alias)))
       return row => nestedProps.reduce(reducer, Filler.joins.get(alias))
     }
   }

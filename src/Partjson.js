@@ -100,7 +100,7 @@ export default class Partjson {
     this.errors.log(this.fillers)
   }
 
-  setResultContext(seed, branch = null, parent = null) {
+  setResultContext(seed, branch = null, parent = null, withTracker = false) {
     const result =
       branch !== null && branch in parent ? parent[branch] : JSON.parse(seed)
     if (this.contexts.has(result)) return result
@@ -109,7 +109,12 @@ export default class Partjson {
       parent,
       self: result,
       root: this.tree ? this.tree : result,
+      joins: this.joins,
       errors: []
+    }
+    if (withTracker) {
+      // for tracking unique-by-value objects in array result
+      context.tracker = new Map()
     }
     this.contexts.set(result, context)
     if (branch !== null) parent[branch] = result
@@ -197,6 +202,7 @@ export default class Partjson {
     context.filler = filler
     if (!filler["@before"](row, context)) return
     if (filler["@join"] && !filler["@join"](row)) return
+
     for (const step of filler.steps) {
       for (const term of step) {
         const input = filler.inputs[term]

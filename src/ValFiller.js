@@ -174,27 +174,19 @@ ValFiller.prototype["[{}]"] = function(template, input) {
       option
     )
     if (tokens.aggr || tokens.skip || tokens.timing) {
-      input.errors.push(["val", "INVALID-[{}]-KEY-OPTION-TOKEN"])
+      input.errors.push(["val", "INVALID-[{}]-OPTION-TOKEN"])
       return
     }
-    const tracker = Object.create(null)
     return (row, key, result, context) => {
-      if (!(context.branch in tracker)) {
-        tracker[context.branch] = new Map()
-      }
-      const branch = tracker[context.branch]
-      this.Pj.setResultContext("[]", key, result)
+      const arr = this.Pj.setResultContext("[]", key, result, true)
+      const tracker = this.Pj.contexts.get(arr).tracker
       const val = convFxn(row, context)
-      if (branch.has(val)) {
-        this.Pj.processRow(row, template, branch.get(val))
+      if (tracker.has(val)) {
+        this.Pj.processRow(row, template, tracker.get(val))
       } else {
-        const item = this.Pj.setResultContext(
-          "{}",
-          result[key].length,
-          result[key]
-        )
+        const item = this.Pj.setResultContext("{}", arr.length, arr, true)
+        tracker.set(val, item)
         this.Pj.processRow(row, template, item)
-        branch.set(val, item)
       }
     }
   } else {

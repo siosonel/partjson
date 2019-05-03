@@ -1,6 +1,6 @@
 {
   "name": "partjson",
-  "version": "0.56.1",
+  "version": "0.56.2",
   "main": "dist/partjson.cjs.js",
   "module": "dist/partjson.esm.js",
   "browser": "dist/partjson.umd.js",

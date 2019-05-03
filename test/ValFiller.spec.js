@@ -777,7 +777,14 @@ tape(`valFiller[{}]`, function(test) {
           sub: [
             {
               val: "&test.val",
-              total: "+1"
+              total: "+1",
+              sub: [
+                {
+                  category: "$category",
+                  total: "+1"
+                },
+                "$category"
+              ]
             },
             "&test.val"
           ]
@@ -785,7 +792,12 @@ tape(`valFiller[{}]`, function(test) {
         "$type"
       ]
     },
-    data: [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }],
+    data: [
+      { type: "a", category: "x" },
+      { type: "a", category: "x" },
+      { type: "b", category: "x" },
+      { type: "c", category: "x" }
+    ],
     "=": {
       val(row) {
         return row.type == "c" ? { val: "c" } : { val: "ab" }
@@ -793,8 +805,8 @@ tape(`valFiller[{}]`, function(test) {
     }
   })
   test.deepEqual(
-    filler2.tree,
-    {
+    JSON.stringify(filler2.tree),
+    JSON.stringify({
       test: [
         {
           type: "a",
@@ -802,7 +814,13 @@ tape(`valFiller[{}]`, function(test) {
           sub: [
             {
               val: "ab",
-              total: 2
+              total: 2,
+              sub: [
+                {
+                  category: "x",
+                  total: 2
+                }
+              ]
             }
           ]
         },
@@ -812,7 +830,13 @@ tape(`valFiller[{}]`, function(test) {
           sub: [
             {
               val: "ab",
-              total: 1
+              total: 1,
+              sub: [
+                {
+                  category: "x",
+                  total: 1
+                }
+              ]
             }
           ]
         },
@@ -822,12 +846,18 @@ tape(`valFiller[{}]`, function(test) {
           sub: [
             {
               val: "c",
-              total: 1
+              total: 1,
+              sub: [
+                {
+                  category: "x",
+                  total: 1
+                }
+              ]
             }
           ]
         }
       ]
-    },
+    }),
     `should collect unique-by-joined-value objects within nested arrays`
   )
 
@@ -846,7 +876,25 @@ tape(`valFiller[{}]`, function(test) {
   test.deepEqual(
     [...filler4.errors.allErrSet],
     [["val", "INVALID-[{}]-OPTION"]],
-    "should error on invalid option for an array-collected of objects"
+    "should error on invalid option for an array collection of objects"
+  )
+
+  const filler5 = new Partjson({
+    template: {
+      test: [
+        {
+          name: "$type",
+          total: "+1"
+        },
+        "+$type()"
+      ]
+    },
+    data: [{ type: "a" }, { type: "a" }, { type: "b" }, { type: "c" }]
+  })
+  test.deepEqual(
+    [...filler5.errors.allErrSet],
+    [["val", "INVALID-[{}]-OPTION-TOKEN"]],
+    "should error on invalid option token for an array collection of objects"
   )
 
   test.end()
