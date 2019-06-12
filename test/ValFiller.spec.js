@@ -805,8 +805,8 @@ tape(`valFiller[{}]`, function(test) {
     }
   })
   test.deepEqual(
-    JSON.stringify(filler2.tree),
-    JSON.stringify({
+    filler2.tree,
+    {
       test: [
         {
           type: "a",
@@ -857,7 +857,7 @@ tape(`valFiller[{}]`, function(test) {
           ]
         }
       ]
-    }),
+    },
     `should collect unique-by-joined-value objects within nested arrays`
   )
 
@@ -895,6 +895,98 @@ tape(`valFiller[{}]`, function(test) {
     [...filler5.errors.allErrSet],
     [["val", "INVALID-[{}]-OPTION-TOKEN"]],
     "should error on invalid option token for an array collection of objects"
+  )
+
+  const filler6 = new Partjson({
+    template: {
+      "@join()": {
+        test: "=val()"
+      },
+      test: [
+        {
+          type: "@key",
+          total: "+1",
+          sub: [
+            {
+              val: "@key",
+              total: "+1",
+              sub: [
+                {
+                  category: "@key",
+                  total: "+1"
+                },
+                "$category[]"
+              ]
+            },
+            "&test.val[]"
+          ]
+        },
+        "$type"
+      ]
+    },
+    data: [
+      { type: "a", category: ["x", "y"] },
+      { type: "a", category: ["x", "z"] },
+      { type: "b", category: ["x"] },
+      { type: "c", category: ["x", "w", "v"] }
+    ],
+    "=": {
+      val(row) {
+        return row.type == "c" ? { val: ["c", "d"] } : { val: ["ab"] }
+      }
+    }
+  })
+  test.deepEqual(
+    filler6.tree,
+    {
+      test: [
+        {
+          type: "a",
+          total: 2,
+          sub: [
+            {
+              val: "ab",
+              total: 2,
+              sub: [
+                { category: "x", total: 2 },
+                { category: "y", total: 1 },
+                { category: "z", total: 1 }
+              ]
+            }
+          ]
+        },
+        {
+          type: "b",
+          total: 1,
+          sub: [{ val: "ab", total: 1, sub: [{ category: "x", total: 1 }] }]
+        },
+        {
+          type: "c",
+          total: 1,
+          sub: [
+            {
+              val: "c",
+              total: 1,
+              sub: [
+                { category: "x", total: 1 },
+                { category: "w", total: 1 },
+                { category: "v", total: 1 }
+              ]
+            },
+            {
+              val: "d",
+              total: 1,
+              sub: [
+                { category: "x", total: 1 },
+                { category: "w", total: 1 },
+                { category: "v", total: 1 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    `should collect unique-by-joined-array-of-values objects within nested array`
   )
 
   test.end()

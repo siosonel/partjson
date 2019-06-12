@@ -100,7 +100,13 @@ export default class Partjson {
     this.errors.log(this.fillers)
   }
 
-  setResultContext(seed, branch = null, parent = null, withTracker = false) {
+  setResultContext(
+    seed,
+    branch = null,
+    parent = null,
+    withTracker = false,
+    key = undefined
+  ) {
     const result =
       branch !== null && branch in parent ? parent[branch] : JSON.parse(seed)
     if (this.contexts.has(result)) return result
@@ -110,7 +116,8 @@ export default class Partjson {
       self: result,
       root: this.tree ? this.tree : result,
       joins: this.joins,
-      errors: []
+      errors: [],
+      key
     }
     if (withTracker) {
       // for tracking unique-by-value objects in array result
@@ -209,7 +216,6 @@ export default class Partjson {
         if (input.keyFxn && input.valFxn) {
           const keys = input.keyFxn(row, context)
           for (const key of keys) {
-            context.key = key
             input.valFxn(row, key, result, context)
           }
         }

@@ -130,6 +130,26 @@ demo(
       }
     },
     {
+      symbol: "@key",
+      tokenType: "context",
+      section: "context",
+      id: "key",
+      title: `
+      The <span class="code-snippet">@key</span> term returns the 
+      converted key-option value in a <span class="code-snippet">[{...}, key-option]</span>
+      input template, if applicable, or undefined if not. Note that the key-option value
+      could be any type, not just a string.`,
+      template: {
+        test: [
+          {
+            id: "@key",
+            count: "+1"
+          },
+          "=splitOwners(]"
+        ]
+      }
+    },
+    {
       symbol: "@values",
       tokenType: "context",
       section: "context",

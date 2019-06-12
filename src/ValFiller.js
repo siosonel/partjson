@@ -180,13 +180,26 @@ ValFiller.prototype["[{}]"] = function(template, input) {
     return (row, key, result, context) => {
       const arr = this.Pj.setResultContext("[]", key, result, true)
       const tracker = this.Pj.contexts.get(arr).tracker
-      const val = convFxn(row, context)
-      if (tracker.has(val)) {
-        this.Pj.processRow(row, template, tracker.get(val))
-      } else {
-        const item = this.Pj.setResultContext("{}", arr.length, arr, true)
-        tracker.set(val, item)
-        this.Pj.processRow(row, template, item)
+      const _vals = convFxn(row, context)
+      const vals = option.slice(-1) == "]" ? _vals : [_vals]
+      if (!Array.isArray(vals)) {
+        context.errors.push([input, "NON-ARRAY-VALS", row])
+        return
+      }
+      for (const val of vals) {
+        if (tracker.has(val)) {
+          this.Pj.processRow(row, template, tracker.get(val))
+        } else {
+          const item = this.Pj.setResultContext(
+            "{}",
+            arr.length,
+            arr,
+            false,
+            val
+          )
+          tracker.set(val, item)
+          this.Pj.processRow(row, template, item)
+        }
       }
     }
   } else {
