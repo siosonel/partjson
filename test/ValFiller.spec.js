@@ -724,7 +724,7 @@ tape(`valFiller.defaultFiller`, function(test) {
   test.end()
 })
 
-tape(`valFiller[{}]`, function(test) {
+tape.only(`valFiller[{}]`, function(test) {
   const filler = new Partjson({
     template: {
       test: [
@@ -932,7 +932,7 @@ tape(`valFiller[{}]`, function(test) {
     ],
     "=": {
       val(row) {
-        return row.type == "c" ? { val: ["c", "d"] } : { val: ["ab"] }
+        return row.type == "c" ? { val: ["r", "s"] } : { val: ["t"] }
       }
     }
   })
@@ -945,7 +945,7 @@ tape(`valFiller[{}]`, function(test) {
           total: 2,
           sub: [
             {
-              val: "ab",
+              val: "t",
               total: 2,
               sub: [
                 { category: "x", total: 2 },
@@ -958,14 +958,14 @@ tape(`valFiller[{}]`, function(test) {
         {
           type: "b",
           total: 1,
-          sub: [{ val: "ab", total: 1, sub: [{ category: "x", total: 1 }] }]
+          sub: [{ val: "t", total: 1, sub: [{ category: "x", total: 1 }] }]
         },
         {
           type: "c",
           total: 1,
           sub: [
             {
-              val: "c",
+              val: "r",
               total: 1,
               sub: [
                 { category: "x", total: 1 },
@@ -974,7 +974,7 @@ tape(`valFiller[{}]`, function(test) {
               ]
             },
             {
-              val: "d",
+              val: "s",
               total: 1,
               sub: [
                 { category: "x", total: 1 },

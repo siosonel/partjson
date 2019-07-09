@@ -206,7 +206,7 @@ demo(
       }
     },
     {
-      symbol: "[ ]",
+      symbol: "[{ }]",
       tokenType: "aggr",
       section: "aggregation",
       id: "collect-object-into-a-list",

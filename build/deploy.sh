@@ -18,7 +18,7 @@ set -e
 
 # default to deploying to ppdev
 if (($# == 0)); then
-	ENV="internal-stage"
+	ENV="public-stage"
 	REV="HEAD"
 	DEPLOYER=$USER
 elif (($# == 1)); then

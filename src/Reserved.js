@@ -38,7 +38,7 @@ Reserved.prototype["@after"] = Reserved.prototype["@before"]
 Reserved.prototype["@done"] = Reserved.prototype["@before"]
 
 Reserved.prototype["@join"] = function(joins, input, filler) {
-  return row => {
+  return (row, context) => {
     let ok = true
     for (const alias in joins) {
       const fxnName = joins[alias].slice(1, -2)
@@ -46,7 +46,7 @@ Reserved.prototype["@join"] = function(joins, input, filler) {
       if (!fxn) {
         input.errors.push(["val", "MISSING-@join-FXN", fxnName])
       } else {
-        const keyVals = fxn(row)
+        const keyVals = fxn(row, context, alias)
         if (keyVals) this.Pj.joins.set(alias, keyVals)
         else ok = false
       }

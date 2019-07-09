@@ -208,7 +208,7 @@ export default class Partjson {
     const filler = this.fillers.get(template)
     context.filler = filler
     if (!filler["@before"](row, context)) return
-    if (filler["@join"] && !filler["@join"](row)) return
+    if (filler["@join"] && !filler["@join"](row, context)) return
 
     for (const step of filler.steps) {
       for (const term of step) {
