@@ -320,8 +320,9 @@ ValFiller.prototype["-,(]"] = ValFiller.prototype["-,[]"]
 
 ValFiller.prototype["<,"] = function(fxn, input) {
   return (row, key, result, context) => {
-    const value = +fxn(row, context)
-    if (input.ignore(value, key, row, context)) return
+    const val = fxn(row, context)
+    if (input.ignore(val, key, row, context)) return
+    const value = +val
     if (!this.isNumeric(value)) {
       context.errors.push([input, "NON-NUMERIC-THAN", row])
       return

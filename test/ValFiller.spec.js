@@ -724,7 +724,7 @@ tape(`valFiller.defaultFiller`, function(test) {
   test.end()
 })
 
-tape.only(`valFiller[{}]`, function(test) {
+tape(`valFiller[{}]`, function(test) {
   const filler = new Partjson({
     template: {
       test: [
