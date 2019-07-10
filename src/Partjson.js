@@ -64,6 +64,7 @@ export default class Partjson {
   }
 
   refresh(opts = {}) {
+    this.times = { start: +new Date() }
     Object.assign(this.opts, opts)
     if (typeof this.opts.template != "string") {
       // ensures that a template object or array
@@ -85,6 +86,7 @@ export default class Partjson {
 
     this.focusTemplate = Object.create(null)
     this.parseTemplate(template, { "@": this.reserved.notDefined })
+    this.times.parse = +new Date() - this.times.start
     if (!Object.keys(this.focusTemplate).length) {
       this.template = template
     } else {
@@ -211,6 +213,7 @@ export default class Partjson {
     for (const context of this.done) {
       context.done(context.self, context)
     }
+    this.times.total = +new Date() - this.times.start
     if (refreshErrors) this.errors.log()
   }
 
