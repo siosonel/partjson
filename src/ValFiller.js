@@ -195,10 +195,14 @@ ValFiller.prototype["[{}]"] = function(template, input) {
             arr.length,
             arr,
             false,
-            val
+            val,
+            row,
+            template
           )
-          tracker.set(val, item)
-          this.Pj.processRow(row, template, item)
+          if (item) {
+            tracker.set(val, item)
+            this.Pj.processRow(row, template, item)
+          }
         }
       }
     }

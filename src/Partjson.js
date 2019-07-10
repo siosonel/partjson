@@ -105,7 +105,9 @@ export default class Partjson {
     branch = null,
     parent = null,
     withTracker = false,
-    key = undefined
+    key = undefined,
+    row = null,
+    template = null
   ) {
     const result =
       branch !== null && branch in parent ? parent[branch] : JSON.parse(seed)
@@ -123,6 +125,15 @@ export default class Partjson {
       // for tracking unique-by-value objects in array result
       context.tracker = new Map()
     }
+
+    // in an array of objects, test if an object will be filled in
+    // by a data row before adding the object to the array
+    if (row && template) {
+      const filler = this.fillers.get(template)
+      if (!filler["@before"](row, context)) return
+      if (filler["@join"] && !filler["@join"](row, context)) return
+    }
+
     this.contexts.set(result, context)
     if (branch !== null) parent[branch] = result
     return result
@@ -235,6 +246,7 @@ export default class Partjson {
         this.postLoopTerms[time].push(context)
       }
     }
+    return true
   }
 
   postLoop(result, context, time = "__:") {
