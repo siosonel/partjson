@@ -77,7 +77,11 @@ tape(`subs["#"]`, function(test) {
     },
     data: [{}, {}]
   })
-  test.deepEqual(Filler.tree, {}, "should cause prefixed inputs to be skipped")
+  test.deepEqual(
+    Filler.tree,
+    {},
+    "should cause # prefixed inputs to be skipped"
+  )
   test.end()
 })
 
@@ -101,6 +105,35 @@ tape(`subs["*"]`, function(test) {
     Filler.tree,
     { yes: "test" },
     "should be the only method that focuses the result on selected inputs"
+  )
+  test.end()
+})
+
+tape(`subs["~"]`, function(test) {
+  const Filler = new Partjson({
+    template: {
+      "~sum": "+$preymass",
+      "~count": "+1",
+      "~values": ["$preymass", 0],
+      "__:stddev": "=stddev()"
+    },
+    "=": {
+      stddev(row, context) {
+        const result = context.self
+        const mean = result.sum / result.count
+        let s = 0
+        for (const v of result.values) {
+          s += Math.pow(v - mean, 2)
+        }
+        return Math.sqrt(s / (result.count - 1))
+      }
+    },
+    data: [{ preymass: 1.75 }, { preymass: 2 }, { preymass: 2.25 }]
+  })
+  test.deepEqual(
+    Filler.tree,
+    { stddev: 0.25 },
+    "should remove ~ prefixed inputs from the results"
   )
   test.end()
 })

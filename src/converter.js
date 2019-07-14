@@ -4,7 +4,7 @@ export default function converter(Filler, input, ignore, val) {
 
   const subconv = subterm + tokens.conv
   input.ignore = subconv in ignore ? ignore[subconv] : ignore["@"]
-  if (tokens.skip) {
+  if (tokens.skip && tokens.skip != "~") {
     subs[tokens.skip](Filler, subterm, input)
     return []
   }
@@ -37,7 +37,7 @@ export function parseTerm(Filler, term) {
       ? term.slice(start + 1)
       : conv
       ? term.slice(start, -2)
-      : time
+      : skip || time
       ? term.slice(start)
       : term
   const subs = Filler.subsSymbols.includes(subterm[0]) ? subterm[0] : ""

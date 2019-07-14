@@ -48,7 +48,7 @@ tape("constructor", function(test) {
     ],
     "should set timing symbols"
   )
-  test.deepEqual(Filler.skipSymbols, ["#", "*"], "should set skip symbols")
+  test.deepEqual(Filler.skipSymbols, ["#", "*", "~"], "should set skip symbols")
   test.deepEqual(Filler.steps, [":__", "", "_:_"], "should set ordered steps")
   test.end()
 })

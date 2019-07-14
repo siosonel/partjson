@@ -310,7 +310,16 @@ function getOpts() {
       logResultsToDevConsole(tree) {
         console.log(tree)
       },
-      wholeNums: [1, 2, 3]
+      wholeNums: [1, 2, 3],
+      stddev(row, context) {
+        const result = context.self
+        const mean = result.sum / result.count
+        let s = 0
+        for (const v of result.values) {
+          s += Math.pow(v - mean, 2)
+        }
+        return Math.sqrt(s / (result.count - 1))
+      }
     },
 
     tsvText: `catname	catsex	owners	ownerblock	huntblock	huntdate	preytype	preysubtype	preymass	nested-json

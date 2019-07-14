@@ -47,7 +47,7 @@ export default class Partjson {
       "_9:"
     ]
     this.timeSymbols = [":__", "_:_", "__:", ...this.timePost]
-    this.skipSymbols = ["#", "*"]
+    this.skipSymbols = ["#", "*", "~"]
     this.steps = [":__", "", "_:_"]
     this.errors = new Err(this)
     this.reserved = new Reserved(this)
@@ -60,6 +60,7 @@ export default class Partjson {
     this.fillers = new Map()
     // contexts will track results object metadata
     this.contexts = new Map()
+    this.temps = new Map()
     this.refresh()
   }
 
@@ -80,6 +81,7 @@ export default class Partjson {
     this.joins.clear()
     this.fillers.clear()
     this.contexts.clear()
+    this.temps.clear()
 
     delete this.tree
     this.tree = this.setResultContext(this.opts.seed)
@@ -213,6 +215,11 @@ export default class Partjson {
     for (const context of this.done) {
       context.done(context.self, context)
     }
+    for (const [result, keys] of this.temps) {
+      for (const key of keys) {
+        delete result[key]
+      }
+    }
     this.times.total = +new Date() - this.times.start
     if (refreshErrors) this.errors.log()
   }
@@ -231,6 +238,12 @@ export default class Partjson {
           const keys = input.keyFxn(row, context)
           for (const key of keys) {
             input.valFxn(row, key, result, context)
+            if (input.keyTokens.skip == "~") {
+              if (!this.temps.has(result)) {
+                this.temps.set(result, new Set())
+              }
+              this.temps.get(result).add(key)
+            }
           }
         }
       }
@@ -289,6 +302,7 @@ export default class Partjson {
         }
       }
     }
+
     if (context && context.filler) {
       this.errors.markErrors(result, context)
     }

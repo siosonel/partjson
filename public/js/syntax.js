@@ -287,12 +287,12 @@ demo(
       }
     },
     {
-      symbol: "_#:",
+      symbol: "_?:",
       tokenType: "time",
       section: "timing",
       id: "numbered-post-loop",
-      title: `A <span class="code-snippet">_#:</span> prefix, 
-        where <span class="code-snippet">#</span> is an integer from 0 to 9, 
+      title: `A <span class="code-snippet">_?:</span> prefix, 
+        where <span class="code-snippet">?</span> is an integer from 0 to 9, 
         will delay the processing of a template input after the last data row 
         has been looped through and in increasing order of the integer value.`,
       template: {
@@ -345,6 +345,20 @@ demo(
           }
         },
         "also-no": "+1"
+      }
+    },
+    {
+      symbol: "~",
+      tokenType: "skip",
+      section: "skip",
+      id: "skip-temp-result",
+      title: `A <span class="code-snippet">~</span> temp prefix will process the input
+      as a temporary result to be deleted after all other data processing has been completed.`,
+      template: {
+        "~sum": "+$preymass",
+        "~count": "+1",
+        "~values": ["$preymass", 0],
+        "__:stddev": "=stddev()"
       }
     }
   ],
