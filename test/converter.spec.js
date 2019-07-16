@@ -135,6 +135,33 @@ tape(`subs["~"]`, function(test) {
     { stddev: 0.25 },
     "should remove ~ prefixed inputs from the results"
   )
+
+  const Filler1 = new Partjson({
+    template: {
+      "~sum": "+$preymass",
+      "~count": "+1",
+      "~_:_values": ["$preymass", 0],
+      "__:stddev": "=stddev()"
+    },
+    "=": {
+      stddev(row, context) {
+        const result = context.self
+        console.log(result)
+        const mean = result.sum / result.count
+        let s = 0
+        for (const v of result.values) {
+          s += Math.pow(v - mean, 2)
+        }
+        return Math.sqrt(s / (result.count - 1))
+      }
+    },
+    data: [{ preymass: 1.75 }, { preymass: 2 }, { preymass: 2.25 }]
+  })
+  test.deepEqual(
+    Filler1.tree,
+    { stddev: 0.25 },
+    "should remove ~ prefixed and timed inputs from the results"
+  )
   test.end()
 })
 

@@ -21,7 +21,7 @@ export default function converter(Filler, input, ignore, val) {
 /*** the heart of the code ***/
 export function parseTerm(Filler, term) {
   const skip = Filler.skipSymbols.includes(term[0]) ? term[0] : ""
-  const colons = term.slice(0, 3)
+  const colons = term.slice(skip.length, skip.length + 3)
   const time = Filler.timeSymbols.includes(colons) ? colons : ""
   const start = skip.length + time.length
   const prefix = term[start]
