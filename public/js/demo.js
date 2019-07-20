@@ -286,6 +286,13 @@ function getOpts() {
       adjustPreyMass(row) {
         return row.preymass * 0.8
       },
+      splitData(row) {
+        const data = []
+        for(const owner of row.owners.split(',')) {
+          data.push({owner, preymass: row.preymass})
+        }
+        return data
+      },
       splitOwners(row) {
         return row.owners.split(",")
       },

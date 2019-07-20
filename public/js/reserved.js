@@ -171,6 +171,28 @@ demo(
       }
     },
     {
+      symbol: "@split()",
+      tokenType: "filters",
+      section: "filters",
+      id: "split",
+      title: `
+    The <span class="code-snippet">@split()</span> term is linked to a user supplied function
+    that splits a data row into arbitrary rows, where each row will be processed to fill the
+    template instead of the original data row. A good use is to simplify cases when there 
+    are a lot of input key splitting functions throughout a template. For example 
+    instead of <span class="code-snippet">"=splitOwners(]"</span> and other nested key 
+    splitters in nested subteplates, the data row would be split first and thus simplify 
+    the input key to <span class="code-snippet">"$owner"</span> and similar.
+    <br/><br/>
+    The user supplied function will be supplied
+    the (<span class="code-snippet">row</span>) as argument and must return an array of objects
+    or an empty array in order to skip farther processing.`,
+      template: {
+        "@split()": "=splitData()",
+        "$owner": "+$preymass"
+      }
+    },
+    {
       symbol: "@before()",
       tokenType: "filters",
       section: "filters",
