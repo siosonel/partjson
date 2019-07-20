@@ -15,7 +15,7 @@ tape("constructor", function(test) {
   )
   test.deepEqual(
     filler.reserved.filters,
-    ["@before()", "@join()", "@ignore()"],
+    ["@split()", "@before()", "@join()", "@ignore()"],
     "should set the reserved filters"
   )
   test.deepEqual(
@@ -44,6 +44,68 @@ tape("notDefined", function(test) {
     false,
     "should be false for any defined terms"
   )
+  test.end()
+})
+
+tape(`@split()`, function(test) {
+  const Filler = new Partjson({
+    template: {
+      "@split()": "=split()",
+      byKey: {
+        "$key0[]": {
+          count: "+1",
+          total: "+$val",
+          sub: {
+            "$key1[]": {
+              count: "+1",
+              total: "+$val"
+            }
+          }
+        }
+      }
+    },
+    "=": {
+      split: row => {
+        return [row.a, row.b, row.c]
+      }
+    },
+    data: [
+      {
+        a: { key0: ["a1", "a2"], key1: ["x", "y"], val: 1 },
+        b: { key0: ["a1"], key1: ["y", "z"], val: 2 },
+        c: { key0: ["a2", "c"], key1: ["z"], val: 4 }
+      }
+    ]
+  })
+
+  test.deepEqual(
+    Filler.tree,
+    {
+      byKey: {
+        a1: {
+          count: 2,
+          total: 3,
+          sub: {
+            x: { count: 1, total: 1 },
+            y: { count: 2, total: 3 },
+            z: { count: 1, total: 2 }
+          }
+        },
+        a2: {
+          count: 2,
+          total: 5,
+          sub: {
+            x: { count: 1, total: 1 },
+            y: { count: 1, total: 1 },
+            z: { count: 1, total: 4 }
+          }
+        },
+        c: { count: 1, total: 4, sub: { z: { count: 1, total: 4 } } }
+      }
+    },
+    "should be called before a data row enters the loop"
+  )
+
   test.end()
 })
 

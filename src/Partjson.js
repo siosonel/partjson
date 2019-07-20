@@ -198,11 +198,19 @@ export default class Partjson {
   }
 
   add(rows, refreshErrors = true) {
+    if (!this.times.start) this.times.start = +new Date()
     if (refreshErrors) this.errors.clear()
     this.joins.clear()
     for (const row of rows) {
-      this.processRow(row, this.template, this.tree)
-      this.joins.clear()
+      if (this.split) {
+        for (const r of this.split(row)) {
+          this.processRow(r, this.template, this.tree)
+          this.joins.clear()
+        }
+      } else {
+        this.processRow(row, this.template, this.tree)
+        this.joins.clear()
+      }
     }
     this.processResult(this.tree)
     for (const time of this.timePost) {
@@ -221,6 +229,7 @@ export default class Partjson {
       }
     }
     this.times.total = +new Date() - this.times.start
+    delete this.times.start
     if (refreshErrors) this.errors.log()
   }
 

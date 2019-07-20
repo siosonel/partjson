@@ -3,7 +3,7 @@ export default class Reserved {
     this.Pj = Pj
     this.opts = ["@delimit", "@errmode"]
     this.contexts = ["@branch", "@parent", "@root", "@self", "@values", "@key"]
-    this.filters = ["@before()", "@join()", "@ignore()"]
+    this.filters = ["@split()", "@before()", "@join()", "@ignore()"]
     this.post = ["@after()", "@dist()", "@end()"]
     this.terms = [...this.opts, ...this.contexts, ...this.filters, ...this.post]
   }
@@ -23,6 +23,15 @@ export default class Reserved {
   notDefined(value) {
     return typeof value === "undefined"
   }
+}
+
+Reserved.prototype["@split"] = function(subterm) {
+  const fxnName = subterm.slice(1, -2)
+  const fxn = this.Pj.opts["="][fxnName]
+  if (!fxn) {
+    throw `missing @split() function ${fxnName}`
+  }
+  this.Pj.split = fxn
 }
 
 Reserved.prototype["@before"] = function(subterm, input) {
