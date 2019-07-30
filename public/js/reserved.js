@@ -158,7 +158,7 @@ demo(
       (1) TO BE DEPRECATED: Use 
         <a href="syntax.html#collect-object-into-a-list">
           <span class="code-snippet">[{...}, key-option]</span>
-        </a> instead to collect unique result objects into array.
+        </a> instead to collect unique result objects into an array.
       <br/><br/>
       The <span class="code-snippet">@values</span> term returns the 
       equivalent of Javascript's Object.values(result). This is RECOMMENDED
@@ -189,7 +189,7 @@ demo(
     or an empty array in order to skip farther processing.`,
       template: {
         "@split()": "=splitData()",
-        "$owner": "+$preymass"
+        $owner: "+$preymass"
       }
     },
     {

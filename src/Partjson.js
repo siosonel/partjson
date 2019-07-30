@@ -119,6 +119,7 @@ export default class Partjson {
     const context = {
       branch, // string name where this result will be mounted to the tree
       parent,
+      context: this.contexts.get(parent),
       self: result,
       root: this.tree ? this.tree : result,
       joins: this.joins,

@@ -288,8 +288,8 @@ function getOpts() {
       },
       splitData(row) {
         const data = []
-        for(const owner of row.owners.split(',')) {
-          data.push({owner, preymass: row.preymass})
+        for (const owner of row.owners.split(",")) {
+          data.push({ owner, preymass: row.preymass })
         }
         return data
       },
