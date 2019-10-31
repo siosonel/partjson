@@ -146,7 +146,7 @@ tape(`subs["~"]`, function(test) {
     "=": {
       stddev(row, context) {
         const result = context.self
-        console.log(result)
+        //console.log(result)
         const mean = result.sum / result.count
         let s = 0
         for (const v of result.values) {

@@ -4,3 +4,4 @@ dist/*
 tmpbuild/*
 .nyc_output/*
 coverage/*
+data/

@@ -38,5 +38,17 @@ export default [
 				ecma: 6
 			})
 		]
+	},
+
+	{
+		input: 'src/cli.js',
+		output: [
+			{ file: pkg.bin, format: 'cjs' }
+		],
+		plugins: [
+			terser({
+				ecma: 6
+			})
+		]
 	}
 ];
