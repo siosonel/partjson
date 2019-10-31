@@ -54,7 +54,7 @@ const template = process.argv[2].startsWith('{')
 	: readFileSync(process.argv[2], {encoding:'utf8'}).trim()
 
 const externals = process.argv[3]
-	? require(path.join("../", process.argv[3])).externals
+	? require(path.join(path.resolve('.'), process.argv[3])).externals
 	: {}
 
 const pj = new Partjson({
