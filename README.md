@@ -6,14 +6,14 @@ Reshape data rows into partitioned summary values and collections, using a JSON-
 
 ## Documentation and Demonstration
 
-https://pecan-test.stjude.org/partjson
+https://github.com/siosonel/partjson
 
 ## Getting started
 
 Clone this repository and install its dependencies:
 
 ```bash
-git clone ssh://git@cmpb-devops.stjude.org:5002/esioson/partjson.git
+git clone git@github.com:siosonel/partjson.git
 cd partjson
 npm install
 # set git-ignored patterns 

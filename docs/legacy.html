@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Partjson</title>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="" />
+    <style>
+      body {
+        font-family: arial, helvetica, sans serif;
+        height: 100vh;
+      }
+
+      h1,
+      h3 {
+        margin: 0.25rem;
+        text-align: center;
+      }
+
+      .jsondiv {
+        display: inline-block;
+        height: 90vh;
+        width: 45%;
+        margin: 10px;
+      }
+
+      .inputlabel {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      .inputtext {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="width:100%; height:100%; margin-bottom: 20px;">
+      <h1>Partjson</h1>
+      <div style="text-align: center">
+        <div class="jsondiv">
+          <h3 class="inputlabel" onclick="run()">
+            Template
+          </h3>
+          <textarea id="template" class="inputtext"> </textarea>
+        </div>
+        <div class="jsondiv">
+          <h3 class="inputlabel" onclick="run()">
+            Result
+          </h3>
+          <textarea id="results" class="inputtext" disabled="true"> </textarea>
+        </div>
+      </div>
+      <textarea id="tsv" style="width:100%; height:40%">
+catname	catsex	owners	ownerblock	huntblock	huntdate	preytype	preysubtype	preymass
+Jerry	male	Bob	A1	B1	2019-01-02 19:25	bird	robin	0.596
+Jerry	male	Bob	A1	B4	2019-01-04 20:45	mammal	rat	0.601
+Jerry	male	Bob,Jane	A1	C3	2019-01-07 06:45	mammal	squirel	0.8
+Princess	female	Alice,Joe	C2	C3	2019-01-05 09:45	fish	minnow	0.1
+Princess	female	Alice,Mike	C2	C3	2019-01-07 09:45	fish	catfish	1.6
+Princess	female	Alice,Mike	C2	C3	2019-01-09 09:45	amphibian	frog	0.7
+</textarea
+      >
+    </div>
+    <script src="./js/legacy.js" charset="utf-8"></script>
+    <script src="./dist/partjson.umd.js" charset="utf-8"></script>
+    <script>
+      window.onload = run
+
+      const dom = {
+        template: document.getElementById("template"),
+        tsv: document.getElementById("tsv"),
+        results: document.getElementById("results")
+      }
+
+      let tracker
+
+      function run() {
+        if (!dom.template.innerHTML.trim()) {
+          dom.template.innerHTML = JSON.stringify(template0, null, "    ")
+        }
+
+        const template = JSON.parse(
+          dom.template.value
+            .trim()
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+        )
+
+        const data = parseTsv(dom.tsv.innerHTML.trim())
+
+        if (tracker) {
+          tracker.refresh({
+            template,
+            data
+          })
+        } else {
+          tracker = new Partjson({
+            template,
+            data,
+            fxns: {
+              roundedPreyMass: d =>
+                isNumeric(d.preymass) ? d.preymass.toPrecision(2) : null,
+              locations: d => [d.ownerblock, d.huntblock],
+              numMammalsBefore: (row, context) => {
+                const bp = context.root.byPreyType
+                return bp && bp.mammal && bp.mammal.total ? bp.mammal.total : 0
+              },
+              numMammalsAfter: (row, context) => {
+                const bp = context.root.byPreyType
+                return bp && bp.mammal && bp.mammal.total ? bp.mammal.total : 0
+              },
+              after: d => (d.rowAfter = "after process"),
+              locMetadata: () => {},
+              logFishCount: (row, context) => {
+                const bp = context ? context.root.byPreyType : null
+                console.log([
+                  "logFishCount",
+                  bp && bp.fish && bp.fish.total ? bp.fish.total : 0
+                ])
+                return true
+              },
+              blockNames(row) {
+                return row.ownerblock[0] == "C"
+                  ? { name: "Friendly Neighborhood", population: 630 }
+                  : { name: "Sesame Street", population: 950 }
+              },
+              splitOwners(row) {
+                return typeof row.owners == "string"
+                  ? row.owners.split(",")
+                  : row.owners
+              },
+              nested: {
+                numMammalsBefore: (row, context) => {
+                  const bp = context.root.byPreyType
+                  return bp && bp.mammal && bp.mammal.total
+                    ? bp.mammal.total
+                    : 0
+                }
+              }
+            },
+            ignored: [null]
+          })
+        }
+        console.log([+new Date()])
+        console.log(tracker)
+        //console.log(tracker.refKeys)
+        //console.log(tracker.tree) //.byPreyType.mammal.rekeyed)
+        dom.results.innerHTML = JSON.stringify(tracker.tree, null, "    ")
+        //console.log(tracker.refKeys)
+      }
+
+      function parseTsv(tsv) {
+        const data = []
+        const lines = tsv.trim().split("\n")
+        const header = lines[0].trim().split("\t")
+        const tsvParseErrors = []
+        lines.forEach((line, i) => {
+          if (i === 0 || !line) return
+          const d = line
+            .trim()
+            .split("\t")
+            .map(_v => {
+              const v = _v.trim()
+              return isNumeric(v) ? +v : v
+            })
+          if (!d.length) {
+            tsvParseErrors.push(`Missing line #${i}.`)
+            return
+          }
+          const c = Object.create(null)
+          c["line #"] = i
+          header.map((key, j) => (c[key] = d[j]))
+          c.nested = { random: { id: Math.random().toFixed(3) } }
+          c.owners = c.owners.split(",")
+          c.testObj = {}
+          data.push(c)
+        })
+        if (tsvParseErrors.length) {
+          console.log("Error parsing tsv: ", tsvParseErrors)
+        }
+        // console.log(data)
+        return data
+      }
+
+      function isNumeric(d) {
+        return !isNaN(parseFloat(d)) && isFinite(d) && d !== ""
+      }
+    </script>
+  </body>
+</html>
