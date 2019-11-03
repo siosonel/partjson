@@ -1,8 +1,6 @@
 # Partjson
 
-Partition rows of streaming data into a well-defined
-tree structure of aggregated values and collections,
-using a JSON-based template.
+Reshape data rows into partitioned summary values and collections, using a JSON-based template.
 
 ## Documentation and Demonstration
 
