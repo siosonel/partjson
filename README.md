@@ -2,6 +2,8 @@
 
 Reshape data rows into partitioned summary values and collections, using a JSON-based template.
 
+[![Build Status](https://travis-ci.com/siosonel/partjson.svg?branch=master)](https://travis-ci.com/siosonel/partjson)
+
 ## Documentation and Demonstration
 
 https://pecan-test.stjude.org/partjson
