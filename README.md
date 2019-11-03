@@ -6,7 +6,7 @@ Reshape data rows into partitioned summary values and collections, using a JSON-
 
 ## Documentation and Demonstration
 
-https://github.com/siosonel/partjson
+https://siosonel.github.io/partjson/
 
 ## Getting started
 

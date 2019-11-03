@@ -6,6 +6,7 @@
   "module": "dist/partjson.esm.js",
   "browser": "dist/partjson.umd.js",
   "dependencies": {},
+  "description": "Teshape data rows into partitioned summary values and collections, using a JSON-based template",
   "devDependencies": {
     "nyc": "^13.3.0",
     "prettier": "1.16.4",
@@ -22,10 +23,15 @@
     "prettify": "prettier --write --no-semi \"{src,test,public}/**/*.{js,html,css}\" && tape test/*.spec.js",
     "prepare": "rollup -c",
     "nyc": "nyc tape test/*.spec.js",
-    "report": "nyc --reporter=html --reporter=text npm test"
+    "report": "nyc --reporter=html --reporter=text npm test",
+    "sync-docs": "rm -rf docs && cp -r public docs && rm -r docs/dist && mkdir docs/dist && cp dist/partjson.umd.js docs/dist/"
   },
   "files": [
     "dist"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/siosonel/partjson"
+  }
 }
