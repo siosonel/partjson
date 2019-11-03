@@ -30,6 +30,7 @@
     "dist"
   ],
   "license": "MIT",
+  "homepage": "https://siosonel.github.io/partjson/",
   "repository": {
     "type": "git",
     "url": "https://github.com/siosonel/partjson"
