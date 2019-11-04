@@ -4,6 +4,8 @@ Reshape data rows into partitioned summary values and collections, using a JSON-
 
 [![Build Status](https://travis-ci.com/siosonel/partjson.svg?branch=master)](https://travis-ci.com/siosonel/partjson)
 
+[![npm version](https://badge.fury.io/js/partjson.svg)](https://www.npmjs.com/package/partjson)
+
 ## Documentation and Demonstration
 
 https://siosonel.github.io/partjson/
