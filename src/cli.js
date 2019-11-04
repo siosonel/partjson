@@ -11,8 +11,9 @@ const path = require("path")
  *  Usage
  *  $TSV | partjson $template [$externals.js] [> $output.json]
  *  where
+ *
  *  $TSV
- *  - tab (if detected) or comma separated data string with header
+ *  - tab- (if detected in header line) or comma-separated data string with header
  *
  *  partjson -OR- src/cli.js
  *  - the command

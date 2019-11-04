@@ -6,10 +6,10 @@
   "module": "dist/partjson.esm.js",
   "browser": "dist/partjson.umd.js",
   "dependencies": {},
-  "description": "Teshape data rows into partitioned summary values and collections, using a JSON-based template",
+  "description": "Reshape data rows into partitioned summary values and collections, using a JSON-based template",
   "devDependencies": {
-    "nyc": "^13.3.0",
-    "prettier": "1.16.4",
+    "nyc": "^14.1.1",
+    "prettier": "^1.18.2",
     "rollup": "^1.26.3",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-resolve": "^3.0.0",
@@ -19,11 +19,11 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "test": "tape test/*.spec.js",
+    "test": "tape test/*.spec.js test/notnyc/*.spec.js",
     "prettify": "prettier --write --no-semi \"{src,test,public}/**/*.{js,html,css}\" && tape test/*.spec.js",
     "prepare": "rollup -c",
     "nyc": "nyc tape test/*.spec.js",
-    "report": "nyc --reporter=html --reporter=text npm test",
+    "report": "nyc --reporter=html --reporter=text tape test/*.spec.js",
     "sync-docs": "rm -rf docs && cp -r public docs && rm -r docs/dist && mkdir docs/dist && cp dist/partjson.umd.js docs/dist/"
   },
   "files": [
